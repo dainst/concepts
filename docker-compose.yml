@@ -1,0 +1,90 @@
+services:
+#  concepts-frontend:
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    container_name: concepts-frontend
+#    ports:
+#      - "4200:4200"
+#    volumes:
+#      - ./frontend:/app
+#      - ./common:/common
+#    environment:
+#      - API_URL=http://backend:3000
+
+#  concepts-backend:
+#    build:
+#      context: ./backend
+#      dockerfile: Dockerfile
+#    container_name: concepts-backend
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - ./backend:/app
+#      - /app/node_modules
+#      - ./common:/common
+#    environment:
+#      - NODE_ENV=development
+#      - DATABASE_HOST=db
+#      - DATABASE_PORT=5432
+#      - DATABASE_USER=postgres
+#      - DATABASE_PASSWORD=postgres
+#      - DATABASE_NAME=app_db
+#    depends_on:
+#      - concepts-database
+
+#  traefik:
+#    image: traefik:v3.6
+#    restart: always
+#    ports:
+#      - "${HTTP_PORT}:80"
+#    volumes:
+#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:26.4
+#    restart: always
+#    depends_on:
+#      keycloak-db:
+#        condition: service_healthy
+#    command: [
+#      'start',
+#      '--proxy-headers', 'xforwarded',
+#      '--http-enabled', 'true',
+#      '--import-realm'
+#    ]
+#    environment:
+#      KC_DB: postgres
+#      KC_DB_URL: jdbc:postgresql://keycloak-db/${POSTGRES_DB}
+#      KC_DB_USERNAME: ${POSTGRES_USER}
+#      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+#      KC_HOSTNAME: keycloak.${SERVER_NAME}
+#      KC_HEALTH_ENABLED: 'true'
+#      KC_METRICS_ENABLED: 'true'
+#      KC_BOOTSTRAP_ADMIN_USERNAME: ${ADMIN_NAME}
+#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+#      KEYCLOAK_EXTRA_ARGS_PREPENDED: "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
+#    env_file:
+#      - config/keycloak/import/monitoring-realm.config
+#    volumes:
+#      - "./config/keycloak/export:/opt/keycloak/data/export"
+#      - "./config/keycloak/import/monitoring-realm.json:/opt/keycloak/data/import/monitoring-realm.json"
+#      - "./config/keycloak/themes/iqb:/opt/keycloak/themes/iqb"
+#    networks:
+#      - application-network
+
+  concepts-database:
+    image: postgis/postgis:18-master
+    container_name: concepts-database
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_db
+    volumes:
+      - concepts-database:/var/lib/postgresq
+
+volumes:
+  concepts-database:
