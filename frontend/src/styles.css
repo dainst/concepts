@@ -1,1 +1,35 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  --dark-blue: #004c98;
+  --idai-blue: #557ebb;
+  --light-grey: #d3d3cf;
+  --grey: #a9a8a4;
+  --dark-grey: #605e59;
+
+  --dark-blue-fg: white;
+
+  --home-header-background: linear-gradient(to right, rgba(106, 164, 184, 0.95) 0%, rgba(71, 123, 199, 0.66) 95%);
+  --home-header-height: 60px;
+  --system-header-height: 60px;
+  --system-header-background: var(--dark-blue);
+
+  --bs-primary: var(--light-grey);
+  --bs-secondary: var(--grey);
+  --bs-success: #198754;
+  --bs-danger: #dc3545;
+  --bs-warning: #ffc107;
+  --bs-info: #0dcaf0;
+  --bs-light: #f8f9fa;
+  --bs-dark: #212529;
+}
+
+.navbar {
+  --bs-navbar-color: var(--dark-blue-fg);
+  --bs-navbar-active-color: var(--light-grey);
+}
+
+
+body {
+  padding-top: calc(var(--home-header-height) + var(--system-header-height));
+}
