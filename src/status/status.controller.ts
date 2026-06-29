@@ -1,15 +1,16 @@
 import {Controller, Get} from '@nestjs/common';
-import type {Status} from 'common/interfaces/default';
-import {DbService} from './db/db.service';
+import {Status} from 'common/interfaces/default';
+import {DbService} from '../db/db.service';
 
-@Controller()
-export class AppController {
+@Controller('status')
+export class StatusController {
   constructor(
     private readonly db: DbService
-  ) {}
+  ) {
+  }
 
   @Get()
-  async get(): Promise<Status> {
+  getStatus(): Status {
     const db = this.db.getStatus();
     return {
       app: 'concepts-backend',
