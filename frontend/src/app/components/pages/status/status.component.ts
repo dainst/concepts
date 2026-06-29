@@ -15,9 +15,9 @@ export class StatusComponent implements OnInit {
   ) { }
 
   readonly status = signal<Status>({
-    app: 'concepts',
+    app: 'concepts-frontend',
     db: {
-      status: 'unknown',
+      status: null,
       version: ''
     },
     version: '0.0.0'

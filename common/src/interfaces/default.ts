@@ -3,10 +3,12 @@ export interface Msg {
 }
 
 export interface Status {
-  readonly app: string,
-  readonly version: string,
-  readonly db: {
-    readonly version: string;
-    readonly status: 'on' | 'off' | 'unknown';
-  }
+  readonly app: string;
+  readonly version: string;
+  readonly db: DBStatus;
+}
+
+export interface DBStatus {
+  readonly version: string | null;
+  readonly status: 'online' | 'offline' | null;
 }
