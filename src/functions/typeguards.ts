@@ -8,12 +8,12 @@ export const isConceptRow = (thing: unknown): thing is ConceptRow =>
 
 export const isRelationRow = (thing: unknown): thing is RelationRow =>
   (typeof thing === 'object') && (thing != null)
-  && ('subjectId' in thing) && (typeof thing.subjectId == 'string')
-  && ('subjectType' in thing) && (typeof thing.subjectType == 'string')
-  && ('predicateId' in thing) && (typeof thing.predicateId == 'string')
-  && ('predicateType' in thing) && (typeof thing.predicateType == 'string')
-  && ('objectId' in thing) && (typeof thing.objectId == 'string')
-  && ('objectType' in thing) && (typeof thing.objectType == 'string');
+  && ('subject_id' in thing) && (typeof thing.subject_id == 'string')
+  && ('subject_type' in thing) && (typeof thing.subject_type == 'string')
+  && ('predicate_id' in thing) && (typeof thing.predicate_id == 'string')
+  && ('predicate_type' in thing) && (typeof thing.predicate_type == 'string')
+  && ('object_id' in thing) && (typeof thing.object_id == 'string')
+  && ('object_type' in thing) && (typeof thing.object_type == 'string');
 
 export const isLabelType = (thing: unknown): thing is LabelType =>
   (typeof thing === 'string') && (labelTypes as readonly string[]).includes(thing);
@@ -21,9 +21,10 @@ export const isLabelType = (thing: unknown): thing is LabelType =>
 export const isLabelRow = (thing: unknown): thing is LabelRow =>
   (typeof thing === 'object') && (thing != null)
   && ('id' in thing) && (typeof thing.id == 'number')
-  && ('conceptId' in thing) && (typeof thing.conceptId == 'string')
-  && ('conceptType' in thing) && (typeof thing.conceptType == 'string')
-  && ('labelType' in thing) && isLabelType(thing.labelType)
+  && ('concept_id' in thing) && (typeof thing.concept_id == 'string')
+  && ('concept_type' in thing) && (typeof thing.concept_type == 'string')
+  && ('type' in thing) && isLabelType(thing.type)
   && ('language' in thing) && (typeof thing.language == 'string')
   && ('transliteration' in thing) && (typeof thing.transliteration == 'string')
-  && ('isPreferred' in thing) && (typeof thing.isPreferred == 'boolean');
+  && ('is_preferred' in thing) && (typeof thing.is_preferred == 'boolean');
+

@@ -77,11 +77,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getConcept(): Promise<Concept> {
-    const res = await this.query('select * from concepts limit 1;', []);
+    const res = await this.query("select * from concepts where id = '2052587' limit 1;", []);
     if (!res.rowCount) throw new Error("No result"); // TODO error handling
     const conceptRow = res.rows[0];
     const res2 = await this.query(
-      'select * from relations where subjectid = $1 and subjecttype = $2;', // TODO more effective, less queries
+      'select * from relations where subject_id = $1 and subject_type = $2;', // TODO more effective, less queries
       [
         conceptRow.id,
         conceptRow.type
@@ -93,23 +93,25 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       .map(convertRow.relation);
 
     const res3 = await this.query(
-      'select * from labels where conceptid = $1 and concepttype = $2;', // TODO more effective, less queries
+      'select * from labels where concept_id = $1 and concept_type = $2;', // TODO more effective, less queries
       [
         conceptRow.id,
         conceptRow.type
       ]
     );
-    console.log(res3);
+
+    console.log(res3.rows.length);
+
     const labels = res3
       .rows
       .filter(isLabelRow) // !!
       .map(convertRow.label);
-    console.log(labels);
 
     const preferredLabels = getPreferredLabels(labels, {
       preferredLanguage: 'deu',
       preferTransliteration: false
     });
+    console.log(labels);
 
     return {
       id: {

@@ -5,24 +5,24 @@ export const convertRow = {
   relation: (row: RelationRow): Relation => ({
     subject: {
       id: {
-        id: row.subjectId,
-        type: row.subjectType,
+        id: row.subject_id,
+        type: row.subject_type,
       },
       title: 'TODO',
       description: 'TODO'
     },
     object: {
       id: {
-        id: row.objectId,
-        type: row.objectType,
+        id: row.object_id,
+        type: row.object_type,
       },
       title: 'TODO',
       description: 'TODO'
     },
     predicate: {
       id: {
-        id: row.predicateId,
-        type: row.predicateType,
+        id: row.predicate_id,
+        type: row.predicate_type,
       },
       title: 'TODO',
       description: 'TODO'
@@ -32,6 +32,6 @@ export const convertRow = {
     label: row.label,
     language: row.language,
     transliteration: row.transliteration,
-    type: row.labelType
+    type: row.type
   })
 };

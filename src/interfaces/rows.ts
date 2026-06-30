@@ -6,21 +6,21 @@ export interface ConceptRow {
 }
 
 export interface RelationRow {
-  readonly subjectId: string;
-  readonly subjectType: string;
-  readonly predicateId: string;
-  readonly predicateType: string;
-  readonly objectId: string;
-  readonly objectType: string;
+  readonly subject_id: string;
+  readonly subject_type: string;
+  readonly predicate_id: string;
+  readonly predicate_type: string;
+  readonly object_id: string;
+  readonly object_type: string;
 }
 
 export interface LabelRow {
   readonly id: number;
-  readonly conceptId: string;
-  readonly conceptType: string;
-  readonly labelType: LabelType;
+  readonly concept_id: string;
+  readonly concept_type: string;
+  readonly type: LabelType;
   readonly label: string;
   readonly language: string;
   readonly transliteration: string;
-  readonly isPreferred: boolean;
+  readonly is_preferred: boolean;
 }
