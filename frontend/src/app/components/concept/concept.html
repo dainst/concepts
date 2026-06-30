@@ -1,0 +1,14 @@
+@if(concept.isLoading()) {
+  Lade...
+}
+
+@if(concept.error()) {
+  Fehler!
+  <pre>{{concept.error() | json}}</pre>
+}
+
+@if(!concept.error()) {
+  <pre>{{ concept.value() | json }}</pre>
+}
+
+
