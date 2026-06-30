@@ -2,9 +2,11 @@ import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
 import {Concept} from 'common/interfaces/concept';
-import {isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../functions/typeguards';
+import {isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../functions/rows.typeguards';
 import {convertRow} from '../functions/convert-row';
 import {getPreferredLabels} from '../functions/label';
+import {ConceptSelector} from '../interfaces/select';
+import {isById} from '../functions/selector.typeguards';
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
@@ -76,8 +78,15 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return this.status;
   }
 
-  async getConcept(): Promise<Concept> {
-    const res = await this.query("select * from concepts where id = '2052587' limit 1;", []);
+  async getConcept(selector: ConceptSelector): Promise<Concept> {
+    console.log("!!!", selector)
+    let query= [];
+    if (isById(selector)) query.push(`id = "${selector.id}" and type = "${selector.type}"`);
+    const where = query
+      .map(e => `(${e})`)
+      .join(' and ');
+    console.log("???",  where)
+    const res = await this.query("select * from concepts where ${where} limit 1;", []);
     if (!res.rowCount) throw new Error("No result"); // TODO error handling
     const conceptRow = res.rows[0];
     const id = [

@@ -9,8 +9,8 @@ export class ConceptController {
   ) {
   }
 
-  @Get()
-  async get(): Promise<Concept> {
-    return await this.db.getConcept();
+  @Get('/:type/:id')
+  async get(type: string, id: string): Promise<Concept> {
+    return await this.db.getConcept({type, id});
   }
 }
