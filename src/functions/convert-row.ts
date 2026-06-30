@@ -1,5 +1,5 @@
-import {Label, Relation} from 'common/interfaces/concept';
-import {LabelRow, RelationRow} from '../interfaces/rows';
+import {GeographicalExtend, Label, Relation} from 'common/interfaces/concept';
+import {GeographicalExtendsRow, LabelRow, RelationRow} from '../interfaces/rows';
 
 export const convertRow = {
   relation: (row: RelationRow): Relation => ({
@@ -33,5 +33,11 @@ export const convertRow = {
     language: row.language,
     transliteration: row.transliteration,
     type: row.type
+  }),
+  geographicalExtend: (row: GeographicalExtendsRow): GeographicalExtend => ({
+    center: row.center,
+    shape: row.shape,
+    certainty: parseFloat(row.certainty),
+    precision: parseFloat(row.precision)
   })
 };

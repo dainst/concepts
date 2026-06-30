@@ -24,3 +24,13 @@ export interface LabelRow {
   readonly transliteration: string;
   readonly is_preferred: boolean;
 }
+
+export interface GeographicalExtendsRow {
+  readonly id: number;
+  readonly concept_id: string;
+  readonly concept_type: string;
+  readonly center: string;
+  readonly shape: string;
+  readonly certainty: string;
+  readonly precision: string;
+}

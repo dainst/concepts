@@ -3,7 +3,6 @@ import {Settings} from 'common/interfaces/settings';
 
 
 export const getPreferredLabel = (labels: Label[], type: LabelType, settings: Settings): string => {
-  console.log('getPreferredLabel', type, labels);
   return getPreferredTransliteration(
     labels.find(l => l.type === type && l.language === settings.preferredLanguage)
     ?? labels.find(l => l.type === type)
