@@ -79,14 +79,13 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getConcept(selector: ConceptSelector): Promise<Concept> {
-    console.log("!!!", selector)
     let query= [];
-    if (isById(selector)) query.push(`id = "${selector.id}" and type = "${selector.type}"`);
+    if (isById(selector)) query.push(`id = '${selector.id}' and type = '${selector.type}'`);
     const where = query
       .map(e => `(${e})`)
       .join(' and ');
-    console.log("???",  where)
-    const res = await this.query("select * from concepts where ${where} limit 1;", []);
+    console.log(where);
+    const res = await this.query(`select * from concepts where ${where} limit 1;`, []);
     if (!res.rowCount) throw new Error("No result"); // TODO error handling
     const conceptRow = res.rows[0];
     const id = [

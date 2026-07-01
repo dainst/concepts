@@ -1,4 +1,4 @@
-import {Controller, Get} from '@nestjs/common';
+import {Controller, Get, Param} from '@nestjs/common';
 import {Concept} from 'common/interfaces/concept';
 import {DbService} from '../db/db.service';
 
@@ -9,8 +9,11 @@ export class ConceptController {
   ) {
   }
 
-  @Get('/:type/:id')
-  async get(type: string, id: string): Promise<Concept> {
+  @Get(':type/:id')
+  async get(
+    @Param('type') type: string,
+    @Param('id') id: string
+  ): Promise<Concept> {
     return await this.db.getConcept({type, id});
   }
 }
