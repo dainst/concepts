@@ -1,0 +1,14 @@
+#concept-menu {
+  padding: 5px;
+}
+
+.btn {
+  height: 150px;
+  overflow: hidden;
+}
+
+.menu-label {
+  display: inline-block;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+}

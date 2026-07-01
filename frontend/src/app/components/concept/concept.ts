@@ -1,15 +1,21 @@
-import {Component, inject, Signal} from '@angular/core';
+import {Component, computed, inject, signal, Signal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 import {Backend} from '../../services/backend';
-import {JsonPipe} from '@angular/common';
+import {JsonPipe, NgComponentOutlet} from '@angular/common';
 import {ConceptId} from 'concepts-common/src/interfaces/concept';
+import {ConceptMenuEntry} from '../../interfaces/ui';
+import {ConceptMenu} from '../concept-menu/concept-menu';
+import {ConceptViewRaw} from '../concept-view-raw/concept-view-raw';
+import {ConceptViewExample} from '../concept-view-example/concept-view-example';
 
 @Component({
   selector: 'app-concept',
   imports: [
-    JsonPipe
+    JsonPipe,
+    ConceptMenu,
+    NgComponentOutlet
   ],
   templateUrl: './concept.html',
   styleUrl: './concept.css',
@@ -17,6 +23,28 @@ import {ConceptId} from 'concepts-common/src/interfaces/concept';
 export class Concept {
   private readonly route = inject(ActivatedRoute);
   private readonly bs = inject(Backend);
+
+  readonly menu = signal<ConceptMenuEntry[]>([
+    {
+      id: 'raw',
+      label: 'Raw',
+      icon: 'bi bi-speedometer2',
+      component: ConceptViewRaw
+    },
+    {
+      id: 'example',
+      label: 'Example',
+      icon: 'bi bi-people',
+      component: ConceptViewExample
+    },
+  ]);
+  readonly currentViewId = signal<string>('raw');
+  readonly currentView: Signal<ConceptMenuEntry> =
+    computed(() => (this.menu().find(e => e.id === this.currentViewId()) ?? this.menu()[0]));
+
+  menuChanged(newId: string) {
+    this.currentViewId.set(newId);
+  }
 
   readonly concept = rxResource({
     params: () => this.params(),

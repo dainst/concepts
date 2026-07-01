@@ -8,7 +8,27 @@
 }
 
 @if(!concept.error()) {
-  <pre>{{ concept.value() | json }}</pre>
+  <div class="d-flex" id="concept">
+      <aside class="flex-shrink-0">
+        <app-concept-views
+          [items]="menu()"
+          [selectedId]="currentViewId()"
+          (selectedChange)="menuChanged($event)">
+        </app-concept-views>
+      </aside>
+
+      <main class="flex-fill overflow-auto">
+        <div class="row">
+          <section class="col-12 col-md-6">
+            <ng-container [ngComponentOutlet]="currentView().component"></ng-container>
+          </section>
+
+          <section class="col-12 col-md-6">
+            <pre>{{ concept.value() | json }}</pre>
+          </section>
+        </div>
+      </main>
+  </div>
 }
 
 

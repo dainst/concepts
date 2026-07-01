@@ -1,0 +1,31 @@
+#concept {
+  height: 100%;
+  display: block;
+  position: relative;
+}
+
+aside {
+  overflow: hidden;
+  border-right: 1px solid grey;
+}
+
+section {
+  padding: 25px;
+}
+
+section:first-child {
+  border-right: 1px solid grey;
+}
+
+#concept-menu button {
+  height: 150px;
+  overflow: hidden;
+  background: rgba(255,0,255,0.2);
+}
+
+#concept-menu button .menu-label {
+  display: inline-block;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  background: rgba(255,255,0,0.2);
+}

@@ -1,0 +1,17 @@
+<div id="concept-menu" class="btn-group-vertical">
+  @for (item of items(); track item.id) {
+    <button
+      type="button"
+      class="btn btn-primary"
+      [class.active]="isSelected(item.id)"
+      [disabled]="item.disabled"
+      (click)="select(item)"
+    >
+      @if (item.icon) {
+        <i class="{{ item.icon }} me-2"></i>
+      }
+      <span class="menu-label">{{ item.label }}</span>
+    </button>
+  }
+</div>
+
