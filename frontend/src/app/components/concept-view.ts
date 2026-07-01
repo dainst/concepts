@@ -1,7 +1,8 @@
 import { Directive, input } from '@angular/core';
-import {Concept} from './concept/concept';
+import {Concept} from 'concepts-common/src/interfaces/concept';
+
 
 @Directive()
 export abstract class ConceptViewComponent {
-  title = input.required<Concept>();
+  concept = input.required<Concept>();
 }

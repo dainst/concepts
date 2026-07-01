@@ -7,7 +7,7 @@
   <pre>{{concept.error() | json}}</pre>
 }
 
-@if(!concept.error()) {
+@if(concept.value(); as conceptValue) {
   <div class="d-flex" id="concept">
       <aside class="flex-shrink-0">
         <app-concept-views
@@ -20,11 +20,11 @@
       <main class="flex-fill overflow-auto">
         <div class="row">
           <section class="col-12 col-md-6">
-            <ng-container [ngComponentOutlet]="currentView().component"></ng-container>
+            <ng-container *ngComponentOutlet="currentView().component; inputs: {concept: conceptValue}"></ng-container>
           </section>
 
           <section class="col-12 col-md-6">
-            <pre>{{ concept.value() | json }}</pre>
+            <app-concept-abstract [concept]="conceptValue"/>
           </section>
         </div>
       </main>

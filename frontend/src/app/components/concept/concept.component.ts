@@ -9,22 +9,31 @@ import {ConceptMenuEntry} from '../../interfaces/ui';
 import {ConceptMenu} from '../concept-menu/concept-menu';
 import {ConceptViewRaw} from '../concept-view-raw/concept-view-raw';
 import {ConceptViewExample} from '../concept-view-example/concept-view-example';
+import {ConceptAbstract} from '../concept-abstract/concept-abstract';
+import {ConceptViewMap} from '../concept-view-map/concept-view-map';
 
 @Component({
   selector: 'app-concept',
   imports: [
     JsonPipe,
     ConceptMenu,
-    NgComponentOutlet
+    NgComponentOutlet,
+    ConceptAbstract
   ],
-  templateUrl: './concept.html',
-  styleUrl: './concept.css',
+  templateUrl: './concept.component.html',
+  styleUrl: './concept.component.css',
 })
-export class Concept {
+export class ConceptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly bs = inject(Backend);
 
   readonly menu = signal<ConceptMenuEntry[]>([
+    {
+      id: 'map',
+      label: 'Map',
+      icon: 'bi bi-map',
+      component: ConceptViewMap
+    },
     {
       id: 'raw',
       label: 'Raw',
