@@ -1,15 +1,29 @@
-<h1>Result for "{{q()}}"</h1>
-@if (results.isLoading()) {
+@if (result.isLoading()) {
+  <h1>Search for "{{searchQuery().selector.q ?? ''}}"</h1>
   <p>Results are loading</p>
 }
-@if (results.error()) {
-  <p>Error: {{results.error()}}</p>
+
+@if (result.error()) {
+  <h1>Search for "{{searchQuery().selector.q ?? ''}}"</h1>
+  <p>Error: {{result.error()}}</p>
 }
-@for (result of results.value(); track result.id.id + result.id.type) {
-  <a href="concept/{{result.id.type}}/{{result.id.id}}">
-    <div>
-      <h2>{{result.title}}</h2>
-      <p>{{result.description}}</p>
-    </div>
-  </a>
+
+@if (result.value(); as result) {
+  <h1>{{result.count}} results for "{{result.selector.q ?? ''}}"</h1>
+  @for (result of result.results; track result.id.id + result.id.type) {
+    <a href="concept/{{result.id.type}}/{{result.id.id}}">
+      <div>
+        <h2>{{result.title}}</h2>
+        <p>{{result.description}}</p>
+      </div>
+    </a>
+  }
+  <div class="footer">
+    <button (click)="navigate('first')">|←</button>
+    <button (click)="navigate('prev')">←</button>
+    <div>{{pageNr()}}</div>
+    <button (click)="navigate('next')">→</button>
+    <button (click)="navigate('last')">→|</button>
+  </div>
+  <div>limit: {{result.limit}} | offset: {{result.offset}}</div>
 }

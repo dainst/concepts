@@ -1,8 +1,9 @@
 import {Service, inject} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Observable, retry, timer} from 'rxjs';
-import {Concept, ConceptAbstract} from 'concepts-common/src/interfaces/concept';
-import {ConceptSelector} from 'concepts-common/src/interfaces/select';
+import {Concept} from 'concepts-common/src/interfaces/concept';
+import {SearchQuery, SearchResult} from 'concepts-common/src/interfaces/search';
+import {searchToHttpParams} from '../functions/query-params';
 
 @Service()
 export class Backend {
@@ -26,12 +27,8 @@ export class Backend {
       );
   }
 
-  search(selector: ConceptSelector): Observable<ConceptAbstract[]> {
-    const params = Object.entries(selector)
-      .filter(([k, v]) => ['string', 'number', 'boolean'].includes(typeof v))
-      .reduce(((params, entry) => params.set(...entry)), new HttpParams());
-    console.log(params)
-    return this.http.get<ConceptAbstract[]>(this.api + `search`, {params})
+  search(searchQuery: SearchQuery): Observable<SearchResult> {
+    return this.http.get<SearchResult>(this.api + `search`, {params: searchToHttpParams(searchQuery)})
       .pipe(
         retry({
           count: Infinity, // TODO change this in PROD
