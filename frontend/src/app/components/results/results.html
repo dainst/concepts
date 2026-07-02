@@ -1,0 +1,15 @@
+<h1>Result for "{{q()}}"</h1>
+@if (results.isLoading()) {
+  <p>Results are loading</p>
+}
+@if (results.error()) {
+  <p>Error: {{results.error()}}</p>
+}
+@for (result of results.value(); track result.id.id + result.id.type) {
+  <a href="concept/{{result.id.type}}/{{result.id.id}}">
+    <div>
+      <h2>{{result.title}}</h2>
+      <p>{{result.description}}</p>
+    </div>
+  </a>
+}
