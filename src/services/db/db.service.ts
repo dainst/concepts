@@ -2,11 +2,12 @@ import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
 import {Concept} from 'common/interfaces/concept';
-import {isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../functions/rows.typeguards';
-import {convertRow} from '../functions/convert-row';
-import {getPreferredLabels} from '../functions/label';
-import {ConceptSelector} from '../interfaces/select';
-import {isById} from '../functions/selector.typeguards';
+import {isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../../functions/rows.typeguards';
+import {convertRow} from '../../functions/convert-row';
+import {getPreferredLabels} from '../../functions/label';
+import {ConceptSelector} from '../../interfaces/select';
+import {isById} from '../../functions/selector.typeguards';
+import {Settings} from 'common/interfaces/settings';
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
@@ -79,12 +80,17 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getConcept(selector: ConceptSelector): Promise<Concept> {
+    const settings: Settings = {
+      preferredLanguage: 'deu',
+      preferTransliteration: false,
+      geoExportFormat: 'GeoJSON',
+    }; // TODO extend by get parameters
+
     let query= [];
     if (isById(selector)) query.push(`id = '${selector.id}' and type = '${selector.type}'`);
     const where = query
       .map(e => `(${e})`)
       .join(' and ');
-    console.log(where);
     const res = await this.query(`select * from concepts where ${where} limit 1;`, []);
     if (!res.rowCount) throw new Error("No result"); // TODO error handling
     const conceptRow = res.rows[0];
@@ -92,11 +98,22 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       conceptRow.id,
       conceptRow.type
     ];
+    const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
 
     // TODO be more effective, use less queries
     const resRels = await this.query('select * from relations where subject_id = $1 and subject_type = $2;', id);
     const resLabl = await this.query('select * from labels where concept_id = $1 and concept_type = $2;', id);
-    const resGeog = await this.query('select * from geographical_extends where concept_id = $1 and concept_type = $2;', id);
+    const resGeog = await this.query(
+      `select
+        *,
+        ${geoFn}(center) as center,
+        ${geoFn}(shape) as shape
+      from
+        geographical_extends
+      where
+        concept_id = $1 and concept_type = $2;`,
+      id
+    );
 
     const relations = resRels
       .rows
@@ -111,10 +128,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       .filter(isGeographicalExtendsRow)
       .map(convertRow.geographicalExtend);
 
-    const preferredLabels = getPreferredLabels(labels, {
-      preferredLanguage: 'deu',
-      preferTransliteration: false
-    });
+    const preferredLabels = getPreferredLabels(labels, settings);
 
     return {
       id: {

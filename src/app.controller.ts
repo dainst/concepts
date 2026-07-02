@@ -1,6 +1,6 @@
 import {Controller, Get} from '@nestjs/common';
 import type {Status} from 'common/interfaces/default';
-import {DbService} from './db/db.service';
+import {DbService} from './services/db/db.service';
 
 @Controller()
 export class AppController {

@@ -1,6 +1,6 @@
 import {Controller, Get, Param} from '@nestjs/common';
 import {Concept} from 'common/interfaces/concept';
-import {DbService} from '../db/db.service';
+import {DbService} from '../../services/db/db.service';
 
 @Controller('concept')
 export class ConceptController {
