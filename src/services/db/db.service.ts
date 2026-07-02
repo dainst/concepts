@@ -1,7 +1,7 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
-import {Concept, ConceptAbstract, ConceptId} from 'common/interfaces/concept';
+import {Concept, ConceptAbstract} from 'common/interfaces/concept';
 import {isConceptRow, isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../../functions/rows.typeguards';
 import {convertRow} from '../../functions/convert-row';
 import {getPreferredLabels} from '../../functions/label';
@@ -9,13 +9,13 @@ import {ConceptSelector} from 'common/interfaces/select';
 import {isById, isByQ} from '../../functions/selector.typeguards';
 import {Settings} from 'common/interfaces/settings';
 import {ConceptRow} from '../../interfaces/rows';
+import {SearchQuery, SearchResult} from 'common/interfaces/search';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
   preferTransliteration: false,
   geoExportFormat: 'GeoJSON',
 }; // TODO extend by get parameters
-
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
@@ -85,19 +85,18 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return this.status;
   }
 
-  private async queryConcepts(selector: ConceptSelector): Promise<ConceptRow[]> {
+  private async queryConcepts(searchQuery: SearchQuery): Promise<ConceptRow[]> {
     let conditions= [];
 
-    if (isById(selector)) conditions.push(`id = '${selector.id}' and type = '${selector.type}'`);
-    if (isByQ(selector)) conditions.push('1 = 1'); // TODO implement
+    if (isById(searchQuery.selector)) conditions.push(`id = '${searchQuery.selector.id}' and type = '${searchQuery.selector.type}'`);
+    if (isByQ(searchQuery.selector)) conditions.push('1 = 1'); // TODO implement
 
-    console.log(conditions);
     const where =
       (conditions.length ? 'where ' : '')
       + conditions
         .map(e => `(${e})`)
         .join(' and ');
-    const query = `select * from concepts ${where} limit 10;`;
+    const query = `select * from concepts ${where} limit ${searchQuery.limit ?? 10} offset ${searchQuery.offset ?? 0};`;
     console.log(query);
 
     const res = await this.query(query, []);
@@ -119,14 +118,30 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  async getConceptAbstracts(selector: ConceptSelector): Promise<ConceptAbstract[]> {
-    const conceptRows = await this.queryConcepts(selector);
+  async search(query: SearchQuery): Promise<SearchResult> {
+    const results = await this.getConceptAbstracts(query);
+    const count = await this.getSearchResultCount(query.selector);
+    return {
+      ...query,
+      results,
+      count,
+      warnings: []
+    };
+  }
+
+  async getSearchResultCount(selector: ConceptSelector): Promise<number> {
+    // TODO implement (with cache!)
+    return 1000000;
+  }
+
+  async getConceptAbstracts(query: SearchQuery): Promise<ConceptAbstract[]> {
+    const conceptRows = await this.queryConcepts(query);
     return Promise.all(conceptRows.map(this.queryConceptAbstract.bind(this)));
   }
 
   async getConcept(selector: ConceptSelector): Promise<Concept> {
-    const conceptRows = await this.queryConcepts(selector);
-    if (conceptRows.length !== 1) throw new Error(`wrong resuilt number: ${0}`);  // TODO error handling
+    const conceptRows = await this.queryConcepts({selector, limit:1, offset: 0});
+    if (conceptRows.length !== 1) throw new Error(`wrong result number: ${0}`);  // TODO error handling
     const id = conceptRows[0];
     const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
 
