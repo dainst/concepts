@@ -47,7 +47,7 @@ export class ConceptComponent {
       component: ConceptViewExample
     },
   ]);
-  readonly currentViewId = signal<string>('raw');
+  readonly currentViewId = signal<string>('map');
   readonly currentView: Signal<ConceptMenuEntry> =
     computed(() => (this.menu().find(e => e.id === this.currentViewId()) ?? this.menu()[0]));
 
