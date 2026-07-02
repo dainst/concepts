@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "strict": true,
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "incremental": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "target": "ES2023",
+    "paths": {
+      "common/*": [
+        "../common/src/*"
+      ]
+    },
+    "types": ["jest", "node"]
+  },
+  "exclude": ["node_modules", "dist", "**/*spec.ts"]
+}
