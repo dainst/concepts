@@ -1,13 +1,21 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
-import {Concept} from 'common/interfaces/concept';
-import {isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../../functions/rows.typeguards';
+import {Concept, ConceptAbstract, ConceptId} from 'common/interfaces/concept';
+import {isConceptRow, isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../../functions/rows.typeguards';
 import {convertRow} from '../../functions/convert-row';
 import {getPreferredLabels} from '../../functions/label';
-import {ConceptSelector} from '../../interfaces/select';
-import {isById} from '../../functions/selector.typeguards';
+import {ConceptSelector} from 'common/interfaces/select';
+import {isById, isByQ} from '../../functions/selector.typeguards';
 import {Settings} from 'common/interfaces/settings';
+import {ConceptRow} from '../../interfaces/rows';
+
+const settings: Settings = {
+  preferredLanguage: 'deu',
+  preferTransliteration: false,
+  geoExportFormat: 'GeoJSON',
+}; // TODO extend by get parameters
+
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
@@ -62,9 +70,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
     try {
       await client.query('BEGIN');
-
       const result = await callback(client);
-
       await client.query('COMMIT');
       return result;
     } catch (e) {
@@ -79,30 +85,54 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return this.status;
   }
 
-  async getConcept(selector: ConceptSelector): Promise<Concept> {
-    const settings: Settings = {
-      preferredLanguage: 'deu',
-      preferTransliteration: false,
-      geoExportFormat: 'GeoJSON',
-    }; // TODO extend by get parameters
+  private async queryConcepts(selector: ConceptSelector): Promise<ConceptRow[]> {
+    let conditions= [];
 
-    let query= [];
-    if (isById(selector)) query.push(`id = '${selector.id}' and type = '${selector.type}'`);
-    const where = query
-      .map(e => `(${e})`)
-      .join(' and ');
-    const res = await this.query(`select * from concepts where ${where} limit 1;`, []);
-    if (!res.rowCount) throw new Error("No result"); // TODO error handling
-    const conceptRow = res.rows[0];
-    const id = [
-      conceptRow.id,
-      conceptRow.type
-    ];
+    if (isById(selector)) conditions.push(`id = '${selector.id}' and type = '${selector.type}'`);
+    if (isByQ(selector)) conditions.push('1 = 1'); // TODO implement
+
+    console.log(conditions);
+    const where =
+      (conditions.length ? 'where ' : '')
+      + conditions
+        .map(e => `(${e})`)
+        .join(' and ');
+    const query = `select * from concepts ${where} limit 10;`;
+    console.log(query);
+
+    const res = await this.query(query, []);
+    return res.rows
+      .filter(isConceptRow) // TODO should we raise error here maybe?
+      .map(convertRow.concept);
+  }
+
+  private async queryConceptAbstract(id: ConceptRow): Promise<ConceptAbstract> {
+    const resLabl = await this.query('select * from labels where concept_id = $1 and concept_type = $2;', [id.id, id.type]);
+    const labels = resLabl
+      .rows
+      .filter(isLabelRow)
+      .map(convertRow.label);
+    const preferredLabels = getPreferredLabels(labels, settings);
+    return {
+      id,
+      ...preferredLabels
+    };
+  }
+
+  async getConceptAbstracts(selector: ConceptSelector): Promise<ConceptAbstract[]> {
+    const conceptRows = await this.queryConcepts(selector);
+    return Promise.all(conceptRows.map(this.queryConceptAbstract.bind(this)));
+  }
+
+  async getConcept(selector: ConceptSelector): Promise<Concept> {
+    const conceptRows = await this.queryConcepts(selector);
+    if (conceptRows.length !== 1) throw new Error(`wrong resuilt number: ${0}`);  // TODO error handling
+    const id = conceptRows[0];
     const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
 
     // TODO be more effective, use less queries
-    const resRels = await this.query('select * from relations where subject_id = $1 and subject_type = $2;', id);
-    const resLabl = await this.query('select * from labels where concept_id = $1 and concept_type = $2;', id);
+    const resRels = await this.query('select * from relations where subject_id = $1 and subject_type = $2;', [id.id, id.type]);
+    const resLabl = await this.query('select * from labels where concept_id = $1 and concept_type = $2;', [id.id, id.type]);
     const resGeog = await this.query(
       `select
         *,
@@ -112,7 +142,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         geographical_extends
       where
         concept_id = $1 and concept_type = $2;`,
-      id
+      [id.id, id.type]
     );
 
     const relations = resRels
@@ -131,10 +161,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     const preferredLabels = getPreferredLabels(labels, settings);
 
     return {
-      id: {
-        id: conceptRow.id,
-        type: conceptRow.type
-      },
+      id,
       ...preferredLabels,
       relations,
       labels,

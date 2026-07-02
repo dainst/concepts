@@ -1,7 +1,11 @@
-import {GeographicalExtend, Label, Relation} from 'common/interfaces/concept';
-import {GeographicalExtendsRow, LabelRow, RelationRow} from '../interfaces/rows';
+import {ConceptId, GeographicalExtend, Label, Relation} from 'common/interfaces/concept';
+import {ConceptRow, GeographicalExtendsRow, LabelRow, RelationRow} from '../interfaces/rows';
 
 export const convertRow = {
+  concept: (row: ConceptRow): ConceptId => ({
+    id: row.id,
+    type: row.type
+  }),
   relation: (row: RelationRow): Relation => ({
     subject: {
       id: {
