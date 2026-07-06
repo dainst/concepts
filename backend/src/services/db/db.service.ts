@@ -163,7 +163,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   async getConcept(selector: ConceptSelector): Promise<Concept> {
     const conceptRows = await this.queryConcepts({selector, limit:1, offset: 0});
     if (conceptRows.length !== 1) throw new Error(`wrong result number: ${0}`);  // TODO error handling
-    const id = conceptRows[0];
+    const id = {
+      id: conceptRows[0].id,
+      type: conceptRows[0].type
+    };
     const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
 
     // TODO be more effective, use less queries
@@ -183,7 +186,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     const relations = resRels
       .rows
       .filter(isRelationRow)
-      .map(convertRow.relation);
+      .map(convertRow.relationAbstract);
     const geographicalExtends = resGeog
       .rows
       .filter(isGeographicalExtendsRow)
