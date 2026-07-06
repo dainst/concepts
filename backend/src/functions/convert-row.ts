@@ -1,5 +1,5 @@
 import {ConceptId, GeographicalExtend, Label, Relation} from 'common/interfaces/concept';
-import {ConceptRow, GeographicalExtendsRow, LabelRow, RelationRow} from '../interfaces/rows';
+import {ConceptRow, GeographicalExtendsRow, LabelRow, LabelRowAgg, RelationRow} from '../interfaces/rows';
 
 export const convertRow = {
   concept: (row: ConceptRow): ConceptId => ({
@@ -32,7 +32,7 @@ export const convertRow = {
       description: 'TODO'
     }
   }),
-  label: (row: LabelRow): Label => ({
+  label: (row: LabelRow | LabelRowAgg): Label => ({
     label: row.label,
     language: row.language,
     transliteration: row.transliteration,

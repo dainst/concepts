@@ -1,15 +1,21 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
-import {Pool, PoolClient} from 'pg';
+import {Pool, PoolClient, QueryResult} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
 import {Concept, ConceptAbstract} from 'common/interfaces/concept';
-import {isConceptRow, isGeographicalExtendsRow, isLabelRow, isRelationRow} from '../../functions/rows.typeguards';
+import {
+  isGeographicalExtendsRow,
+  isLabelledConceptRow,
+  isLabelRow,
+  isRelationRow
+} from '../../functions/rows.typeguards';
 import {convertRow} from '../../functions/convert-row';
 import {getPreferredLabels} from '../../functions/label';
 import {ConceptSelector} from 'common/interfaces/select';
 import {isById, isByQ} from '../../functions/selector.typeguards';
 import {Settings} from 'common/interfaces/settings';
-import {ConceptRow} from '../../interfaces/rows';
+import {ConceptRow, LabelledConceptRow} from '../../interfaces/rows';
 import {SearchQuery, SearchResult} from 'common/interfaces/search';
+import {CacheService} from '../cache/cache.service';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -25,14 +31,16 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     version: null
   };
 
-  constructor() {
-      this.pool = new Pool({
-        user: 'app_user',
-        password: 'secret_password',
-        host: 'localhost',
-        port: 5432,
-        database: 'app_db',
-      }); // TODO from env
+  constructor(
+    private readonly cache: CacheService
+  ) {
+    this.pool = new Pool({
+      user: 'app_user',
+      password: 'secret_password',
+      host: 'localhost',
+      port: 5432,
+      database: 'app_db',
+    }); // TODO from env
   }
 
   async onModuleInit() {
@@ -59,8 +67,17 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     await this.pool.end();
   }
 
-  async query(sql: string, params?: any[]) {
-    return this.pool.query(sql, params);
+  async query(sql: string, params: any[] = [], useCache = false): Promise<QueryResult> {
+    console.log(sql);
+
+    if (!useCache) return this.pool.query(sql, params);
+
+    const cached = this.cache.get(sql + params?.join());
+    if (cached.result) console.log(`from cache ${cached.hash}, ${cached.cacheCount}`);
+    if (cached.result) return cached.result;
+    const res =  await this.pool.query(sql, params);
+    this.cache.store(sql + params?.join(), res, cached.hash);
+    return res;
   }
 
   async transaction<T>(
@@ -85,41 +102,22 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return this.status;
   }
 
-  private async queryConcepts(searchQuery: SearchQuery): Promise<ConceptRow[]> {
-    let conditions= [];
-
-    if (isById(searchQuery.selector)) conditions.push(`id = '${searchQuery.selector.id}' and type = '${searchQuery.selector.type}'`);
-    if (isByQ(searchQuery.selector)) conditions.push('1 = 1'); // TODO implement
-
-    const where =
-      (conditions.length ? 'where ' : '')
-      + conditions
-        .map(e => `(${e})`)
-        .join(' and ');
-    const query = `select * from concepts ${where} limit ${searchQuery.limit ?? 10} offset ${searchQuery.offset ?? 0};`;
-    console.log(query);
-
+  private async queryConcepts(searchQuery: SearchQuery): Promise<LabelledConceptRow[]> {
+    const query = this.buildQuery(searchQuery);
     const res = await this.query(query, []);
     return res.rows
-      .filter(isConceptRow) // TODO should we raise error here maybe?
-      .map(convertRow.concept);
-  }
-
-  private async queryConceptAbstract(id: ConceptRow): Promise<ConceptAbstract> {
-    const resLabl = await this.query('select * from labels where concept_id = $1 and concept_type = $2;', [id.id, id.type]);
-    const labels = resLabl
-      .rows
-      .filter(isLabelRow)
-      .map(convertRow.label);
-    const preferredLabels = getPreferredLabels(labels, settings);
-    return {
-      id,
-      ...preferredLabels
-    };
+      .filter(isLabelledConceptRow); // TODO should we raise error here maybe?
   }
 
   async search(query: SearchQuery): Promise<SearchResult> {
-    const results = await this.getConceptAbstracts(query);
+    const results: ConceptAbstract[] = (await this.queryConcepts(query))
+      .map(concept => ({
+        id: {
+          id: concept.id,
+          type: concept.type,
+        },
+        ...getPreferredLabels(concept.labels, settings)
+      }));
     const count = await this.getSearchResultCount(query.selector);
     return {
       ...query,
@@ -130,13 +128,36 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getSearchResultCount(selector: ConceptSelector): Promise<number> {
-    // TODO implement (with cache!)
-    return 1000000;
+    const sql = `select count(*) as count from (select concept_id, concept_type from labels ${this.buildWhere(selector)} group by concept_id, concept_type)`;
+    return (await this.query(sql, [], true)).rows[0].count;
   }
 
-  async getConceptAbstracts(query: SearchQuery): Promise<ConceptAbstract[]> {
-    const conceptRows = await this.queryConcepts(query);
-    return Promise.all(conceptRows.map(this.queryConceptAbstract.bind(this)));
+  private buildWhere(selector: ConceptSelector): string {
+    let conditions= [];
+    if (isById(selector)) conditions.push(`concept_id = '${selector.id}' and concept_type = '${selector.type}'`);
+    if (isByQ(selector)) conditions.push(`label like '%${selector.q}%'`);
+    return (conditions.length ? 'where ' : '')
+      + conditions
+        .map(e => `(${e})`)
+        .join(' and ');
+  }
+
+  private buildQuery(searchQuery: SearchQuery): string {
+    return `
+      select
+        labels.concept_id as id,
+        labels.concept_type as type,
+        json_agg(json_build_object(
+          'type', labels.type,
+          'label', labels.label,
+          'language', labels.language,
+          'transliteration', labels.transliteration,
+          'is_preferred', labels.is_preferred
+        )) as labels
+      from labels
+      ${this.buildWhere(searchQuery.selector)}
+      group by concept_id, concept_type
+      limit ${searchQuery.limit ?? 10} offset ${searchQuery.offset ?? 0}`;
   }
 
   async getConcept(selector: ConceptSelector): Promise<Concept> {
@@ -147,7 +168,6 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
     // TODO be more effective, use less queries
     const resRels = await this.query('select * from relations where subject_id = $1 and subject_type = $2;', [id.id, id.type]);
-    const resLabl = await this.query('select * from labels where concept_id = $1 and concept_type = $2;', [id.id, id.type]);
     const resGeog = await this.query(
       `select
         *,
@@ -164,15 +184,12 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       .rows
       .filter(isRelationRow)
       .map(convertRow.relation);
-    const labels = resLabl
-      .rows
-      .filter(isLabelRow)
-      .map(convertRow.label);
     const geographicalExtends = resGeog
       .rows
       .filter(isGeographicalExtendsRow)
       .map(convertRow.geographicalExtend);
 
+    const labels = conceptRows[0].labels;
     const preferredLabels = getPreferredLabels(labels, settings);
 
     return {

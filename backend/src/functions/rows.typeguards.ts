@@ -1,4 +1,11 @@
-import {ConceptRow, GeographicalExtendsRow, LabelRow, RelationRow} from '../interfaces/rows';
+import {
+  ConceptRow,
+  GeographicalExtendsRow,
+  LabelledConceptRow,
+  LabelRow,
+  LabelRowAgg,
+  RelationRow
+} from '../interfaces/rows';
 import {LabelType, labelTypes} from 'common/interfaces/concept';
 
 export const isConceptRow = (thing: unknown): thing is ConceptRow =>
@@ -18,15 +25,18 @@ export const isRelationRow = (thing: unknown): thing is RelationRow =>
 export const isLabelType = (thing: unknown): thing is LabelType =>
   (typeof thing === 'string') && (labelTypes as readonly string[]).includes(thing);
 
-export const isLabelRow = (thing: unknown): thing is LabelRow =>
+export const isLabelRowAgg = (thing: unknown): thing is LabelRowAgg =>
   (typeof thing === 'object') && (thing != null)
-  && ('id' in thing) && (typeof thing.id == 'number')
-  && ('concept_id' in thing) && (typeof thing.concept_id == 'string')
-  && ('concept_type' in thing) && (typeof thing.concept_type == 'string')
   && ('type' in thing) && isLabelType(thing.type)
   && ('language' in thing) && (typeof thing.language == 'string')
   && ('transliteration' in thing) && (typeof thing.transliteration == 'string')
   && ('is_preferred' in thing) && (typeof thing.is_preferred == 'boolean');
+
+export const isLabelRow = (thing: unknown): thing is LabelRow =>
+  isLabelRowAgg(thing)
+  && ('id' in thing) && (typeof thing.id == 'number')
+  && ('concept_id' in thing) && (typeof thing.concept_id == 'string')
+  && ('concept_type' in thing) && (typeof thing.concept_type == 'string');
 
 export const isGeographicalExtendsRow  = (thing: unknown): thing is GeographicalExtendsRow =>
   (typeof thing === 'object') && (thing != null)
@@ -37,3 +47,7 @@ export const isGeographicalExtendsRow  = (thing: unknown): thing is Geographical
   && ('shape' in thing) && (typeof thing.shape == 'string' || thing.shape == null)
   && ('certainty' in thing) && (typeof thing.certainty == 'string')
   && ('precision' in thing) && (typeof thing.precision == 'string');
+
+export const isLabelledConceptRow = (thing: unknown): thing is LabelledConceptRow =>
+  isConceptRow(thing)
+  && ('labels' in thing) && (Array.isArray(thing.labels)) && (thing.labels.every(isLabelRowAgg));
