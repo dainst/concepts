@@ -135,7 +135,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private buildWhere(selector: ConceptSelector): string {
     let conditions= [];
     if (isById(selector)) conditions.push(`concept_id = '${selector.id}' and concept_type = '${selector.type}'`);
-    if (isByQ(selector)) conditions.push(`label like '%${selector.q}%'`);
+    if (isByQ(selector)) conditions.push(`label ilike '%${selector.q}%'`);
     return (conditions.length ? 'where ' : '')
       + conditions
         .map(e => `(${e})`)
