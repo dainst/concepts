@@ -21,8 +21,18 @@ export interface ConceptAbstract extends PreferredLabels {
 
 export interface Concept extends ConceptAbstract {
   readonly labels: Label[];
-  readonly relations: RelationAbstract[];
+  readonly relations: RelationAbstractSets;
   readonly geographicalExtends: GeographicalExtend[];
+}
+
+export interface RelationAbstractSet {
+  readonly relation: ConceptAbstract;
+  readonly objects: ConceptAbstract[];
+}
+
+export interface RelationAbstractSets {
+  readonly to: RelationAbstractSet[];
+  readonly from: RelationAbstractSet[];
 }
 
 export interface Label {

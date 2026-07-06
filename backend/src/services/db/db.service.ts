@@ -1,7 +1,7 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient, QueryResult} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
-import {Concept, ConceptAbstract} from 'common/interfaces/concept';
+import {Concept, ConceptAbstract, RelationAbstractSet, RelationAbstractSets} from 'common/interfaces/concept';
 import {
   isGeographicalExtendsRow,
   isLabelledConceptRow,
@@ -13,7 +13,7 @@ import {getPreferredLabels} from '../../functions/label';
 import {ConceptSelector} from 'common/interfaces/select';
 import {isById, isByQ} from '../../functions/selector.typeguards';
 import {Settings} from 'common/interfaces/settings';
-import {ConceptRow, LabelledConceptRow} from '../../interfaces/rows';
+import {ConceptRow, LabelledConceptRow, RelationRow} from '../../interfaces/rows';
 import {SearchQuery, SearchResult} from 'common/interfaces/search';
 import {CacheService} from '../cache/cache.service';
 
@@ -186,7 +186,34 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     const relations = resRels
       .rows
       .filter(isRelationRow)
-      .map(convertRow.relationAbstract);
+      .reduce((rass: RelationAbstractSets, row: RelationRow) => {
+        let rasIndex = rass.to
+          .findIndex(r => (r.relation.id.id === row.predicate_id && r.relation.id.type === row.predicate_type));
+        if (rasIndex === -1) {
+          rasIndex = rass.to.push({
+            relation: {
+              id: {
+                id: row.predicate_id,
+                type: row.predicate_type,
+              },
+              title: `TODO: ${row.predicate_id}`
+            },
+            objects: []
+          }) - 1;
+        }
+        console.log(rass.to);
+        console.log(rasIndex);
+        rass.to[rasIndex].objects.push({
+          id: {
+            id: row.object_id,
+            type: row.object_type
+          },
+          title: `TODO: ${row.object_id}`
+        });
+        return rass
+      },
+      {from: [], to: []}
+    );
     const geographicalExtends = resGeog
       .rows
       .filter(isGeographicalExtendsRow)
