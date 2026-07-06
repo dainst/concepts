@@ -5,7 +5,7 @@
 
 @if (result.error()) {
   <h1>Search for "{{searchQuery().selector.q ?? ''}}"</h1>
-  <p>Error: {{result.error()}}</p>
+  <p>Error: {{result.error() | json}}</p>
 }
 
 @if (result.value(); as result) {

@@ -5,11 +5,15 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Backend} from '../../services/backend';
 import {SearchQuery, SearchResult} from 'concepts-common/src/interfaces/search';
 import {flatten} from '../../functions/object';
+import {JsonPipe} from '@angular/common';
 
 @Component({
   selector: 'app-search',
   templateUrl: './results.html',
   styleUrl: './results.css',
+  imports: [
+    JsonPipe
+  ]
 })
 export class Results {
   private readonly router = inject(Router);
