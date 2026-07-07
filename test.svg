@@ -1,0 +1,15 @@
+<svg width="-15" height="-15" class="timeline">
+  <svg width="-15" height="-45">
+    <g id="bar-path-dummyPeriod" class="bar level1 group1">
+      <path d="M-7.634512845370819 20 L-7.634512845370819 0 L-15 0 L-15 20Z"></path>
+      <text class="text" id="bar-text-" x="-11.317256422685409" y="15">ss</text>
+    </g>
+    <g id="bar-path-dummyPeriod2" class="bar level1 group1">
+      <path d="M-7.634512845370819 20 L-7.634512845370819 0 L-15 0 L-15 20Z"></path>
+      <text class="text" id="bar-text-" x="-11.317256422685409" y="15">ee</text>
+    </g>
+  </svg>
+  <svg y="-45" width="-15" class="axis" fill="none" font-size="10" font-family="sans-serif" text-anchor="middle">
+    <path class="domain" stroke="currentColor" d="M0.5,10V0.5H-14.5V10">ww</path>
+  </svg>
+</svg>

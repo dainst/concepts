@@ -1,0 +1,537 @@
+.timeline-view-btns {
+  position: absolute;
+  top: 340px;
+  left: 24px;
+}
+
+.timeline-facets .panel .list-group, .timeline-facets .panel .panel-body {
+  height: 200px;
+  overflow-y: auto;
+}
+
+.timeline:not(.inactive) {
+  cursor: move;
+}
+.timeline.inactive {
+  cursor: default;
+}
+.timeline g.bar path.selected {
+  stroke: black;
+  stroke-width: 1px;
+}
+.timeline g.bar:not(.inactive) {
+  cursor: pointer;
+}
+.timeline g.bar.inactive.level1 {
+  fill: rgba(106.75, 106.75, 106.75, 0.7);
+}
+.timeline g.bar.inactive.level2 {
+  fill: rgba(85.5, 85.5, 85.5, 0.7);
+}
+.timeline g.bar.inactive.level3 {
+  fill: rgba(64.25, 64.25, 64.25, 0.7);
+}
+.timeline g.bar.inactive.level4 {
+  fill: rgba(43, 43, 43, 0.7);
+}
+.timeline g.bar.inactive.level5 {
+  fill: rgba(21.75, 21.75, 21.75, 0.7);
+}
+.timeline g.bar.inactive.level6 {
+  fill: rgba(0.5, 0.5, 0.5, 0.7);
+}
+.timeline g.bar.group1 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group1.hover {
+  fill: hsl(60, 60%, 0%);
+}
+.timeline g.bar.group1.level1 {
+  fill: rgba(170, 170, 42.5, 0.7);
+}
+.timeline g.bar.group1.level1.hover {
+  fill: hsl(60, 60%, 41.6666666667%);
+}
+.timeline g.bar.group1.level2 {
+  fill: rgba(136, 136, 34, 0.7);
+}
+.timeline g.bar.group1.level2.hover {
+  fill: hsl(60, 60%, 33.3333333333%);
+}
+.timeline g.bar.group1.level3 {
+  fill: rgba(102, 102, 25.5, 0.7);
+}
+.timeline g.bar.group1.level3.hover {
+  fill: hsl(60, 60%, 25%);
+}
+.timeline g.bar.group1.level4 {
+  fill: rgba(68, 68, 17, 0.7);
+}
+.timeline g.bar.group1.level4.hover {
+  fill: hsl(60, 60%, 16.6666666667%);
+}
+.timeline g.bar.group1.level5 {
+  fill: rgba(34, 34, 8.5, 0.7);
+}
+.timeline g.bar.group1.level5.hover {
+  fill: hsl(60, 60%, 8.3333333333%);
+}
+.timeline g.bar.group1.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group1.level6.hover {
+  fill: hsl(60, 60%, 0%);
+}
+.timeline g.bar.group2 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group2.hover {
+  fill: hsl(96, 60%, 0%);
+}
+.timeline g.bar.group2.level1 {
+  fill: rgba(93.5, 170, 42.5, 0.7);
+}
+.timeline g.bar.group2.level1.hover {
+  fill: hsl(96, 60%, 41.6666666667%);
+}
+.timeline g.bar.group2.level2 {
+  fill: rgba(74.8, 136, 34, 0.7);
+}
+.timeline g.bar.group2.level2.hover {
+  fill: hsl(96, 60%, 33.3333333333%);
+}
+.timeline g.bar.group2.level3 {
+  fill: rgba(56.1, 102, 25.5, 0.7);
+}
+.timeline g.bar.group2.level3.hover {
+  fill: hsl(96, 60%, 25%);
+}
+.timeline g.bar.group2.level4 {
+  fill: rgba(37.4, 68, 17, 0.7);
+}
+.timeline g.bar.group2.level4.hover {
+  fill: hsl(96, 60%, 16.6666666667%);
+}
+.timeline g.bar.group2.level5 {
+  fill: rgba(18.7, 34, 8.5, 0.7);
+}
+.timeline g.bar.group2.level5.hover {
+  fill: hsl(96, 60%, 8.3333333333%);
+}
+.timeline g.bar.group2.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group2.level6.hover {
+  fill: hsl(96, 60%, 0%);
+}
+.timeline g.bar.group3 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group3.hover {
+  fill: hsl(132, 60%, 0%);
+}
+.timeline g.bar.group3.level1 {
+  fill: rgba(42.5, 170, 68, 0.7);
+}
+.timeline g.bar.group3.level1.hover {
+  fill: hsl(132, 60%, 41.6666666667%);
+}
+.timeline g.bar.group3.level2 {
+  fill: rgba(34, 136, 54.4, 0.7);
+}
+.timeline g.bar.group3.level2.hover {
+  fill: hsl(132, 60%, 33.3333333333%);
+}
+.timeline g.bar.group3.level3 {
+  fill: rgba(25.5, 102, 40.8, 0.7);
+}
+.timeline g.bar.group3.level3.hover {
+  fill: hsl(132, 60%, 25%);
+}
+.timeline g.bar.group3.level4 {
+  fill: rgba(17, 68, 27.2, 0.7);
+}
+.timeline g.bar.group3.level4.hover {
+  fill: hsl(132, 60%, 16.6666666667%);
+}
+.timeline g.bar.group3.level5 {
+  fill: rgba(8.5, 34, 13.6, 0.7);
+}
+.timeline g.bar.group3.level5.hover {
+  fill: hsl(132, 60%, 8.3333333333%);
+}
+.timeline g.bar.group3.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group3.level6.hover {
+  fill: hsl(132, 60%, 0%);
+}
+.timeline g.bar.group4 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group4.hover {
+  fill: hsl(168, 60%, 0%);
+}
+.timeline g.bar.group4.level1 {
+  fill: rgba(42.5, 170, 144.5, 0.7);
+}
+.timeline g.bar.group4.level1.hover {
+  fill: hsl(168, 60%, 41.6666666667%);
+}
+.timeline g.bar.group4.level2 {
+  fill: rgba(34, 136, 115.6, 0.7);
+}
+.timeline g.bar.group4.level2.hover {
+  fill: hsl(168, 60%, 33.3333333333%);
+}
+.timeline g.bar.group4.level3 {
+  fill: rgba(25.5, 102, 86.7, 0.7);
+}
+.timeline g.bar.group4.level3.hover {
+  fill: hsl(168, 60%, 25%);
+}
+.timeline g.bar.group4.level4 {
+  fill: rgba(17, 68, 57.8, 0.7);
+}
+.timeline g.bar.group4.level4.hover {
+  fill: hsl(168, 60%, 16.6666666667%);
+}
+.timeline g.bar.group4.level5 {
+  fill: rgba(8.5, 34, 28.9, 0.7);
+}
+.timeline g.bar.group4.level5.hover {
+  fill: hsl(168, 60%, 8.3333333333%);
+}
+.timeline g.bar.group4.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group4.level6.hover {
+  fill: hsl(168, 60%, 0%);
+}
+.timeline g.bar.group5 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group5.hover {
+  fill: hsl(204, 60%, 0%);
+}
+.timeline g.bar.group5.level1 {
+  fill: rgba(42.5, 119, 170, 0.7);
+}
+.timeline g.bar.group5.level1.hover {
+  fill: hsl(204, 60%, 41.6666666667%);
+}
+.timeline g.bar.group5.level2 {
+  fill: rgba(34, 95.2, 136, 0.7);
+}
+.timeline g.bar.group5.level2.hover {
+  fill: hsl(204, 60%, 33.3333333333%);
+}
+.timeline g.bar.group5.level3 {
+  fill: rgba(25.5, 71.4, 102, 0.7);
+}
+.timeline g.bar.group5.level3.hover {
+  fill: hsl(204, 60%, 25%);
+}
+.timeline g.bar.group5.level4 {
+  fill: rgba(17, 47.6, 68, 0.7);
+}
+.timeline g.bar.group5.level4.hover {
+  fill: hsl(204, 60%, 16.6666666667%);
+}
+.timeline g.bar.group5.level5 {
+  fill: rgba(8.5, 23.8, 34, 0.7);
+}
+.timeline g.bar.group5.level5.hover {
+  fill: hsl(204, 60%, 8.3333333333%);
+}
+.timeline g.bar.group5.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group5.level6.hover {
+  fill: hsl(204, 60%, 0%);
+}
+.timeline g.bar.group6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group6.hover {
+  fill: hsl(240, 60%, 0%);
+}
+.timeline g.bar.group6.level1 {
+  fill: rgba(42.5, 42.5, 170, 0.7);
+}
+.timeline g.bar.group6.level1.hover {
+  fill: hsl(240, 60%, 41.6666666667%);
+}
+.timeline g.bar.group6.level2 {
+  fill: rgba(34, 34, 136, 0.7);
+}
+.timeline g.bar.group6.level2.hover {
+  fill: hsl(240, 60%, 33.3333333333%);
+}
+.timeline g.bar.group6.level3 {
+  fill: rgba(25.5, 25.5, 102, 0.7);
+}
+.timeline g.bar.group6.level3.hover {
+  fill: hsl(240, 60%, 25%);
+}
+.timeline g.bar.group6.level4 {
+  fill: rgba(17, 17, 68, 0.7);
+}
+.timeline g.bar.group6.level4.hover {
+  fill: hsl(240, 60%, 16.6666666667%);
+}
+.timeline g.bar.group6.level5 {
+  fill: rgba(8.5, 8.5, 34, 0.7);
+}
+.timeline g.bar.group6.level5.hover {
+  fill: hsl(240, 60%, 8.3333333333%);
+}
+.timeline g.bar.group6.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group6.level6.hover {
+  fill: hsl(240, 60%, 0%);
+}
+.timeline g.bar.group7 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group7.hover {
+  fill: hsl(276, 60%, 0%);
+}
+.timeline g.bar.group7.level1 {
+  fill: rgba(119, 42.5, 170, 0.7);
+}
+.timeline g.bar.group7.level1.hover {
+  fill: hsl(276, 60%, 41.6666666667%);
+}
+.timeline g.bar.group7.level2 {
+  fill: rgba(95.2, 34, 136, 0.7);
+}
+.timeline g.bar.group7.level2.hover {
+  fill: hsl(276, 60%, 33.3333333333%);
+}
+.timeline g.bar.group7.level3 {
+  fill: rgba(71.4, 25.5, 102, 0.7);
+}
+.timeline g.bar.group7.level3.hover {
+  fill: hsl(276, 60%, 25%);
+}
+.timeline g.bar.group7.level4 {
+  fill: rgba(47.6, 17, 68, 0.7);
+}
+.timeline g.bar.group7.level4.hover {
+  fill: hsl(276, 60%, 16.6666666667%);
+}
+.timeline g.bar.group7.level5 {
+  fill: rgba(23.8, 8.5, 34, 0.7);
+}
+.timeline g.bar.group7.level5.hover {
+  fill: hsl(276, 60%, 8.3333333333%);
+}
+.timeline g.bar.group7.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group7.level6.hover {
+  fill: hsl(276, 60%, 0%);
+}
+.timeline g.bar.group8 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group8.hover {
+  fill: hsl(312, 60%, 0%);
+}
+.timeline g.bar.group8.level1 {
+  fill: rgba(170, 42.5, 144.5, 0.7);
+}
+.timeline g.bar.group8.level1.hover {
+  fill: hsl(312, 60%, 41.6666666667%);
+}
+.timeline g.bar.group8.level2 {
+  fill: rgba(136, 34, 115.6, 0.7);
+}
+.timeline g.bar.group8.level2.hover {
+  fill: hsl(312, 60%, 33.3333333333%);
+}
+.timeline g.bar.group8.level3 {
+  fill: rgba(102, 25.5, 86.7, 0.7);
+}
+.timeline g.bar.group8.level3.hover {
+  fill: hsl(312, 60%, 25%);
+}
+.timeline g.bar.group8.level4 {
+  fill: rgba(68, 17, 57.8, 0.7);
+}
+.timeline g.bar.group8.level4.hover {
+  fill: hsl(312, 60%, 16.6666666667%);
+}
+.timeline g.bar.group8.level5 {
+  fill: rgba(34, 8.5, 28.9, 0.7);
+}
+.timeline g.bar.group8.level5.hover {
+  fill: hsl(312, 60%, 8.3333333333%);
+}
+.timeline g.bar.group8.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group8.level6.hover {
+  fill: hsl(312, 60%, 0%);
+}
+.timeline g.bar.group9 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group9.hover {
+  fill: hsl(348, 60%, 0%);
+}
+.timeline g.bar.group9.level1 {
+  fill: rgba(170, 42.5, 68, 0.7);
+}
+.timeline g.bar.group9.level1.hover {
+  fill: hsl(348, 60%, 41.6666666667%);
+}
+.timeline g.bar.group9.level2 {
+  fill: rgba(136, 34, 54.4, 0.7);
+}
+.timeline g.bar.group9.level2.hover {
+  fill: hsl(348, 60%, 33.3333333333%);
+}
+.timeline g.bar.group9.level3 {
+  fill: rgba(102, 25.5, 40.8, 0.7);
+}
+.timeline g.bar.group9.level3.hover {
+  fill: hsl(348, 60%, 25%);
+}
+.timeline g.bar.group9.level4 {
+  fill: rgba(68, 17, 27.2, 0.7);
+}
+.timeline g.bar.group9.level4.hover {
+  fill: hsl(348, 60%, 16.6666666667%);
+}
+.timeline g.bar.group9.level5 {
+  fill: rgba(34, 8.5, 13.6, 0.7);
+}
+.timeline g.bar.group9.level5.hover {
+  fill: hsl(348, 60%, 8.3333333333%);
+}
+.timeline g.bar.group9.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group9.level6.hover {
+  fill: hsl(348, 60%, 0%);
+}
+.timeline g.bar.group10 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group10.hover {
+  fill: hsl(24, 60%, 0%);
+}
+.timeline g.bar.group10.level1 {
+  fill: rgba(170, 93.5, 42.5, 0.7);
+}
+.timeline g.bar.group10.level1.hover {
+  fill: hsl(24, 60%, 41.6666666667%);
+}
+.timeline g.bar.group10.level2 {
+  fill: rgba(136, 74.8, 34, 0.7);
+}
+.timeline g.bar.group10.level2.hover {
+  fill: hsl(24, 60%, 33.3333333333%);
+}
+.timeline g.bar.group10.level3 {
+  fill: rgba(102, 56.1, 25.5, 0.7);
+}
+.timeline g.bar.group10.level3.hover {
+  fill: hsl(24, 60%, 25%);
+}
+.timeline g.bar.group10.level4 {
+  fill: rgba(68, 37.4, 17, 0.7);
+}
+.timeline g.bar.group10.level4.hover {
+  fill: hsl(24, 60%, 16.6666666667%);
+}
+.timeline g.bar.group10.level5 {
+  fill: rgba(34, 18.7, 8.5, 0.7);
+}
+.timeline g.bar.group10.level5.hover {
+  fill: hsl(24, 60%, 8.3333333333%);
+}
+.timeline g.bar.group10.level6 {
+  fill: rgba(0, 0, 0, 0.7);
+}
+.timeline g.bar.group10.level6.hover {
+  fill: hsl(24, 60%, 0%);
+}
+.timeline .text {
+  font-size: 14px;
+  text-anchor: middle;
+  fill: white;
+  font-weight: 200;
+  user-select: none;
+}
+.timeline .text:not(.inactive) {
+  cursor: pointer;
+}
+.timeline .axis path {
+  stroke: black;
+  stroke-width: 2px;
+  fill: none;
+}
+.timeline .axis line {
+  stroke: black;
+  stroke-width: 1px;
+  fill: none;
+}
+.timeline .axis text {
+  font-family: "Open Sans", sans-serif;
+  font-size: 11px;
+  user-select: none;
+}
+
+.timeline-tooltip {
+  border: 1px solid;
+  padding: 2px 6px;
+  background-color: white;
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+}
+
+.inactiveHint {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  height: 100px;
+  padding-top: 90px;
+  padding-right: 40px;
+  font-size: 20px;
+  z-index: 3;
+  user-select: none;
+}
+
+.timeline-zoom-buttons {
+  position: absolute;
+}
+.timeline-zoom-buttons .btn {
+  font-size: 22px;
+  padding: 0 10px;
+}
+.timeline-zoom-buttons .btn:focus,
+.timeline-zoom-buttons .btn:active {
+  outline: none;
+}
+
+.timeline-container-small {
+  height: 300px;
+}
+.timeline-container-small .timeline-zoom-buttons {
+  top: 9px;
+  left: 24px;
+}
+
+.timeline-container-big {
+  height: calc(100vh - 340px);
+  margin-bottom: -110px;
+}
+.timeline-container-big .timeline-zoom-buttons {
+  top: 390px;
+  left: 24px;
+}

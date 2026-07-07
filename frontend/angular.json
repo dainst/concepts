@@ -27,7 +27,8 @@
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/leaflet/dist/leaflet.css",
-              "src/styles.css"
+              "src/styles.css",
+              "src/app/components/timeline/timeline-global.css"
             ],
             "polyfills": ["@angular/localize/init"]
           },
