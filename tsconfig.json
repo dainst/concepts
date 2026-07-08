@@ -18,7 +18,8 @@
         "../common/src/*"
       ]
     },
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "allowSyntheticDefaultImports": true
   },
   "exclude": ["node_modules", "dist", "**/*spec.ts"]
 }

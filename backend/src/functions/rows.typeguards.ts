@@ -7,6 +7,7 @@ import {
   RelationRow
 } from '../interfaces/rows';
 import {LabelType, labelTypes} from 'common/interfaces/concept';
+import {isLabelType} from 'common/functions/labels.typeguards';
 
 export const isConceptRow = (thing: unknown): thing is ConceptRow =>
   (typeof thing === 'object') && (thing != null)
@@ -21,9 +22,6 @@ export const isRelationRow = (thing: unknown): thing is RelationRow =>
   && ('predicate_type' in thing) && (typeof thing.predicate_type == 'string')
   && ('object_id' in thing) && (typeof thing.object_id == 'string')
   && ('object_type' in thing) && (typeof thing.object_type == 'string');
-
-export const isLabelType = (thing: unknown): thing is LabelType =>
-  (typeof thing === 'string') && (labelTypes as readonly string[]).includes(thing);
 
 export const isLabelRowAgg = (thing: unknown): thing is LabelRowAgg =>
   (typeof thing === 'object') && (thing != null)

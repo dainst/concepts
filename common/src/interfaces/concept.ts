@@ -19,10 +19,20 @@ export interface ConceptAbstract extends PreferredLabels {
   readonly id: ConceptId;
 }
 
-export interface Concept extends ConceptAbstract {
+export interface BareConcept extends ConceptAbstract {
   readonly labels: Label[];
   readonly relations: RelationAbstractSets;
+}
+
+export interface GeographicalConcept extends BareConcept {
   readonly geographicalExtends: GeographicalExtend[];
+}
+
+export interface TemporalConcept extends BareConcept {
+  readonly temporalExtends: TemporalExtend[];
+}
+
+export interface Concept extends GeographicalConcept, TemporalConcept {
 }
 
 export interface RelationAbstractSet {
@@ -42,9 +52,16 @@ export interface Label {
   readonly transliteration: string;
 }
 
-export interface RelationAbstract {
-  readonly object: ConceptAbstract;
-  readonly predicate: ConceptAbstract;
+export interface TemporalBound {
+  readonly precision: number;
+  readonly certainty: number;
+  readonly min: number;
+  readonly max: number;
+}
+
+export interface TemporalExtend {
+  readonly start: TemporalBound;
+  readonly end: TemporalBound;
 }
 
 export interface GeographicalExtend {

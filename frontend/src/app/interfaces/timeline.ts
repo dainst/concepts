@@ -13,6 +13,13 @@ export interface Period {
   colorGroup: number;
   level: number;
   textVisible?: boolean;
+  periodGroup: PeriodGroup; // ?
+  groupRow: any; // !
+}
+
+export interface PeriodRow {
+  from: number;
+  to: number;
 }
 
 export interface PeriodGroup {
@@ -21,6 +28,7 @@ export interface PeriodGroup {
   periodsCount: number;
   from: number;
   to: number;
+  startRow: number;
 }
 
 export type PeriodsMap = {[id: string]: Period};

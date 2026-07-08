@@ -1,60 +1,10 @@
-import {AfterViewInit, Component, ElementRef, input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, effect, ElementRef, input, ViewChild} from '@angular/core';
 
 import * as d3 from 'd3';
 import {Period, PeriodsMap, TimeLineData, XDomain} from '../../interfaces/timeline';
-
-
-const dummyPeriod = {
-  id: "dummyPeriod",
-  number: 0,
-  name: "Dummy",
-  from: 0,
-  earliestFrom: 0,
-  to: 2026,
-  latestTo: 2026,
-  successor: undefined,
-  parent: undefined,
-  children: [],
-  row: 0,
-  level: 0,
-  colorGroup: 6
-};
-const dummyPeriod2 = {
-  id: "dummyPeriod2",
-  number: 0,
-  name: "Dummy",
-  from: -150,
-  earliestFrom: -1050,
-  to: 150,
-  latestTo: 150,
-  successor: undefined,
-  parent: undefined,
-  children: [],
-  row: 1,
-  level: 0,
-  colorGroup: 5
-};
-const dummyPeriod3 = {
-  id: "dummyPeriod3",
-  number: 0,
-  name: "Dummy",
-  from: -2050,
-  earliestFrom: -2050,
-  to: -1500,
-  latestTo: -150,
-  successor: "dummyPeriod2",
-  parent: undefined,
-  children: [],
-  row: 1,
-  level: 0,
-  colorGroup: 6
-};
-
-const timelineData: TimeLineData = {
-  periods: [dummyPeriod, dummyPeriod2, dummyPeriod3],
-  periodsMap: {dummyPeriod, dummyPeriod2, dummyPeriod3},
-  xDomain: [-2100, 2100]
-};
+import {periodsToTimelineData} from '../../functions/timeline';
+import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
+import {dummyData} from './dummy-data';
 
 
 @Component({
@@ -69,7 +19,11 @@ export class Timeline implements AfterViewInit {
   readonly selectedPeriodId = input<string | undefined>();
   readonly axisTicks = input<number | undefined>();
   readonly inactive = input<boolean>(false);
-  // private readonly periods = input<boolean>(false);
+  readonly concepts = input<TemporalConcept[]>(dummyData);
+
+  readonly e = effect(() => {
+    this.timelineData = periodsToTimelineData(this.concepts());
+  });
 
   private readonly margin = 15;
   private readonly maxZoomYears = 5;
@@ -79,20 +33,24 @@ export class Timeline implements AfterViewInit {
   private readonly buttonZoomFactor = 0.5;
 
   private timeline: d3.Selection<SVGSVGElement, Period, HTMLElement, Period>|undefined = undefined;
-  private canvas: d3.Selection<SVGSVGElement, Period, HTMLElement, Period>|undefined = undefined;
+  private canvas: d3.Selection<SVGGElement, Period, HTMLElement, Period>|undefined = undefined;
   private axis:  d3.Axis<d3.NumberValue>|undefined = undefined;
-  private axisElement: d3.Selection<SVGSVGElement, Period, HTMLElement, Period>|undefined = undefined;
-  private bars: d3.Selection<d3.EnterElement, Period, SVGSVGElement, Period>|undefined = undefined;
-  private barPaths: d3.Selection<SVGPathElement, Period, SVGSVGElement, Period>|undefined = undefined;
-  private barTexts: d3.Selection<SVGTextElement, Period, SVGSVGElement, Period>|undefined = undefined;
+  private axisElement: d3.Selection<SVGGElement, Period, HTMLElement, Period>|undefined = undefined;
+  private bars: d3.Selection<d3.EnterElement, Period, SVGGElement, Period>|undefined = undefined;
+  private barPaths: d3.Selection<SVGPathElement, Period, SVGGElement, Period>|undefined = undefined;
+  private barTexts: d3.Selection<SVGTextElement, Period, SVGGElement, Period>|undefined = undefined;
   private tooltip: d3.Selection<HTMLDivElement, Period, HTMLElement, Period>|undefined = undefined;
   private zoom: d3.ZoomBehavior<SVGSVGElement, Period>|undefined = undefined;
   private drag: d3.DragBehavior<SVGSVGElement, Period, Node>|undefined = undefined;
   private x: d3.ScaleLinear<number, number, never>|undefined = undefined;
   private y: d3.ScaleLinear<number, number, never>|undefined = undefined;
-  //
-  // private readonly timelineData;
-  //
+
+  private timelineData: TimeLineData = {
+    xDomain: [-2100, 2100],
+    periods: [],
+    periodsMap: {}
+  };
+
   private totalXDomain: XDomain = [NaN, NaN];
   private startXDomain: XDomain = [NaN, NaN];
   private startYDomain: XDomain = [NaN, NaN];
@@ -113,9 +71,8 @@ export class Timeline implements AfterViewInit {
       .domain([0, this.barHeight * 20])
       .range([0, height - 30]);
 
-    this.totalXDomain = timelineData.xDomain;
-
-    this.setStartDomains(timelineData.periodsMap);
+    this.totalXDomain = this.timelineData.xDomain;
+    this.setStartDomains(this.timelineData.periodsMap);
 
     this.x = d3.scaleLinear()
       .domain(this.startXDomain)
@@ -131,23 +88,22 @@ export class Timeline implements AfterViewInit {
 
     if (this.inactive()) this.timeline.classed('inactive', true);
 
-    this.canvas = this.timeline.append('svg')
+    this.canvas = this.timeline.append('g')
       .attr('width', width)
       .attr('height', height - 30);
 
     this.axis = d3.axisBottom(this.x)
-      .ticks(this.axisTicks)
+      .ticks(this.axisTicks() ?? 10)
       .tickSize(10);
 
     this.axisElement = this.timeline
-      .append('svg')
-      .attr('y', height - 30)
-      .attr('width', width)
+      .append('g')
+      // .attr('y', height - 30)
+      // .attr('width', width)
+      .attr('transform', `translate(0, ${height - 30})`)
       .classed('axis', true)
       .call(this.axis);
-    console.log("axis node", this.axisElement.node());
-    console.log("ticks", this.axisElement.selectAll(".tick").size());
-    console.log("html", this.axisElement.node()?.innerHTML);
+
 
     if (!this.inactive()) {
       const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
@@ -183,7 +139,7 @@ export class Timeline implements AfterViewInit {
         .classed('timeline-tooltip', true);
     }
 
-    this.bars = this.canvas.selectAll('g').data(timelineData.periods).enter();
+    this.bars = this.canvas.selectAll('g').data(this.timelineData.periods).enter();
     this.barPaths = this.bars.append('g')
       .attr('id', d=> 'bar-path-' + d.id)
       .attr('class', d => {
@@ -351,7 +307,10 @@ export class Timeline implements AfterViewInit {
     console.log(`SHOW PERIOD`, period);
   };
 
-  private formatTickText(text: string): string {
+  private formatTickText(text: string | number): string {
+    if (typeof text !== 'string') return String(text);
+
+    // TODO do we need this at all?
     text = text.split('.').join('$');
     text = text.split(',').join('.');
     text = text.split('$').join(',');
@@ -363,7 +322,7 @@ export class Timeline implements AfterViewInit {
     return text;
   };
 
-  private addHoverBehavior(selection: d3.Selection<SVGPathElement, Period, SVGSVGElement, Period>): void {
+  private addHoverBehavior(selection: d3.Selection<SVGPathElement, Period, SVGGElement, Period>): void {
     selection.on('mouseover', (period: Period) => {
       d3.select('#bar-path-' + period.id).classed('hover', true);
       if (period !== this.hoverPeriod) {
