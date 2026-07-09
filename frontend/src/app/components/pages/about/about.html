@@ -1,6 +1,12 @@
 Test the timline:
-<timeline [concepts]="data()" [selectedPeriodId]="selected()" />
+<timeline
+  [concepts]="data()"
+  [selectedPeriodId]="selected()"
+  [axisTicks]="axisTicks()"
+/>
 <button (click)="pumpData()">Pump Dummy Data</button>
 <button (click)="select()">Select last one</button>
+<button (click)="select(2)">Select another</button>
+<button (click)="increaseAxisTicks()">axisTicks</button>
 <p>Selected {{this.selected()}}</p>
 <p>Pumped data {{this.data().length}}</p>

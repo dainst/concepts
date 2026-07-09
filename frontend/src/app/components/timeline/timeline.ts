@@ -54,7 +54,7 @@ export class Timeline implements AfterViewInit {
 
   constructor() {
     effect(() => {
-      console.log('effect!')
+
       const tld = this.timelineData();
       const spid = this.selectedPeriodId();
       if (!this.initialized) {
@@ -64,6 +64,11 @@ export class Timeline implements AfterViewInit {
       this.updateDomains(tld, spid);
       this.draw(tld);
       this.selectPeriod(spid);
+    });
+    effect(() => {
+      console.log('effect!', this.axisTicks())
+      if (!this.initialized) return;
+      this.updateAxisTicks(this.axisTicks());
     });
   }
 
@@ -146,8 +151,6 @@ export class Timeline implements AfterViewInit {
   }
 
   private updateDomains(timelineData: TimeLineData, selectedPeriodId: string | undefined) {
-    console.log('updateDomains')
-
     const width = this.getWidth();
 
     this.totalXDomain = timelineData.xDomain;
@@ -167,15 +170,17 @@ export class Timeline implements AfterViewInit {
     this.y!.domain(this.startYDomain); // TODO is ! a good choice here?
   }
 
-  private draw(timelineData: TimeLineData) {
-    this.timeline!.classed('inactive', this.inactive());
-
+  private updateAxisTicks(axisTicks: number | undefined) {
     this.axis = d3.axisBottom(this.x!)
-      .ticks(this.axisTicks() ?? 10)
+      .ticks(axisTicks ?? 10)
       .tickSize(10);
 
     this.axisElement!
       .call(this.axis);
+  }
+
+  private draw(timelineData: TimeLineData) {
+    this.timeline!.classed('inactive', this.inactive());
 
     this.canvas!.selectAll("*").remove();
     this.bars = this.canvas!.selectAll('g')
@@ -200,8 +205,6 @@ export class Timeline implements AfterViewInit {
       this.addHoverBehavior(this.barPaths);
     }
 
-
-
     this.barTexts = this.canvas!.selectAll<SVGTextElement, Period>('g')
       .append('text')
       .classed('text', true)
@@ -223,6 +226,7 @@ export class Timeline implements AfterViewInit {
       .scaleExtent([minZoom, maxZoom]);
 
     this.updateBars();
+    this.updateAxisTicks(this.axisTicks());
     d3.select(window).on('resize', () => this.resize());
   }
 

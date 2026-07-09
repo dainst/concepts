@@ -24,6 +24,7 @@ export class About implements OnInit {
   }
   protected data = signal<TemporalConcept[]>([]);
   protected selected = signal<string | undefined>(undefined);
+  protected axisTicks = signal<number>(10);
 
   private gen = dummyConceptGenerator();
 
@@ -34,12 +35,17 @@ export class About implements OnInit {
     ]);
   }
 
-  protected select() {
+  protected select(what: number = 1) {
     if (!this.data().length) {
       this.selected.set(undefined);
       return;
     }
-    const last = this.data()[this.data().length - 1];
+    const last = this.data()[this.data().length - what];
     this.selected.set(`${last.id.id}-${last.id.type}`);
   };
+
+
+  protected increaseAxisTicks() {
+    this.axisTicks.set(this.axisTicks() + 1);
+  }
 }
