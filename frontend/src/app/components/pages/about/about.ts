@@ -25,6 +25,7 @@ export class About implements OnInit {
   protected data = signal<TemporalConcept[]>([]);
   protected selected = signal<string | undefined>(undefined);
   protected axisTicks = signal<number>(10);
+  protected inactive = signal<boolean>(false);
 
   private gen = dummyConceptGenerator();
 
@@ -47,5 +48,9 @@ export class About implements OnInit {
 
   protected increaseAxisTicks() {
     this.axisTicks.set(this.axisTicks() + 1);
+  }
+
+  protected toggleInactive() {
+    this.inactive.set(!this.inactive());
   }
 }

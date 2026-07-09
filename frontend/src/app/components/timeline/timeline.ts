@@ -54,9 +54,10 @@ export class Timeline implements AfterViewInit {
 
   constructor() {
     effect(() => {
-
       const tld = this.timelineData();
       const spid = this.selectedPeriodId();
+      const inactive = this.inactive();
+      console.log(inactive);
       if (!this.initialized) {
         console.log('noit ini');
         return;
@@ -105,39 +106,38 @@ export class Timeline implements AfterViewInit {
       .attr('transform', `translate(0, ${height - 30})`)
       .classed('axis', true)
 
-    if (!this.inactive()) {
+    this.zoom = d3.zoom<SVGSVGElement, Period>()
+      .on('zoom', event => {
+        if (this.inactive()) return;
+        if (!this.axis) throw new Error("noAxis!");
+        if (!this.axisElement) throw new Error("no axisElement!");
+        this.x = event.transform.rescaleX(this.baseX);
+        this.axis.scale(this.x!);
+        this.axisElement.call(this.axis);
+        this.updateBars();
+      });
 
-      this.zoom = d3.zoom<SVGSVGElement, Period>()
-        .on('zoom', event => {
-          if (!this.axis) throw new Error("noAxis!");
-          if (!this.axisElement) throw new Error("no axisElement!");
-          this.x = event.transform.rescaleX(this.baseX);
-          this.axis.scale(this.x!);
-          this.axisElement.call(this.axis);
-          this.updateBars();
-        });
+    this.drag = d3.drag<SVGSVGElement, Period, Node>()
+      .on('drag', event => {
+        if (this.inactive()) return;
+        if (!this.y) throw new Error("noY!");
+        if (!this.axis) throw new Error("noAxis!");
+        if (!this.axisElement) throw new Error("no axisElement!");
+        const domain = this.y.domain();
+        domain[0] -= event.dy;
+        domain[1] -= event.dy;
+        this.y.domain(domain);
+        this.axisElement.call(this.axis);
+        this.updateBars();
+      });
 
-      this.drag = d3.drag<SVGSVGElement, Period, Node>()
-        .on('drag', event => {
-          if (!this.y) throw new Error("noY!");
-          if (!this.axis) throw new Error("noAxis!");
-          if (!this.axisElement) throw new Error("no axisElement!");
-          const domain = this.y.domain();
-          domain[0] -= event.dy;
-          domain[1] -= event.dy;
-          this.y.domain(domain);
-          this.axisElement.call(this.axis);
-          this.updateBars();
-        });
+    this.timeline!
+      .call(this.zoom)
+      .call(this.drag);
 
-      this.timeline!
-        .call(this.zoom)
-        .call(this.drag);
-
-      this.tooltip = d3.select<HTMLDivElement, Period>('body')
-        .append('div')
-        .classed('timeline-tooltip', true);
-    }
+    this.tooltip = d3.select<HTMLDivElement, Period>('body')
+      .append('div')
+      .classed('timeline-tooltip', true);
 
     this.initialized = true;
   };
@@ -219,8 +219,6 @@ export class Timeline implements AfterViewInit {
 
     const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
     const maxZoom = (this.startXDomain[1] - this.startXDomain[0]) / this.maxZoomYears;
-
-    console.log({minZoom, maxZoom, startXDomain: this.startXDomain, totalXDomain: this.totalXDomain})
 
     this.zoom!
       .scaleExtent([minZoom, maxZoom]);
@@ -468,6 +466,10 @@ export class Timeline implements AfterViewInit {
       .transition()
       .duration(350)
       .call(this.zoom.transform, targetTransform);
+  }
+
+  private updateActivityStatus(inactive: boolean | undefined): void{
+
   }
 }
 

@@ -3,10 +3,12 @@ Test the timline:
   [concepts]="data()"
   [selectedPeriodId]="selected()"
   [axisTicks]="axisTicks()"
+  [inactive]="inactive()"
 />
 <button (click)="pumpData()">Pump Dummy Data</button>
 <button (click)="select()">Select last one</button>
 <button (click)="select(2)">Select another</button>
 <button (click)="increaseAxisTicks()">axisTicks</button>
+<button (click)="toggleInactive()">inactive</button>
 <p>Selected {{this.selected()}}</p>
 <p>Pumped data {{this.data().length}}</p>
