@@ -17,6 +17,10 @@ export class About implements OnInit {
         console.log('pump it')
         this.pumpData();
       },100)
+    setTimeout(() => {
+      console.log('pump it even more')
+      this.pumpData();
+    },1000)
   }
   protected data = signal<TemporalConcept[]>([]);
   protected selected = signal<string | undefined>(undefined);

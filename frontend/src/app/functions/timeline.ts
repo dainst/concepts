@@ -14,13 +14,13 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
 
   // TODO is it a good idea to reduce id object to a string?
   const idAsString = (id: ConceptAbstract): string =>
-    `${id.id.type}/${id.id.type}`;
+    `${id.id.id}/${id.id.type}`;
 
   const createPeriod = (concept: TemporalConcept, number: number): Period | undefined => {
     if (!concept.temporalExtends.length) return undefined;
     let timespan = concept.temporalExtends[0]; // TODO what if there are more?
     return {
-      id: `${concept.id.type}/${concept.id.id}`, // TODO tmp
+      id: idAsString(concept), // TODO tmp
       number,
       name: concept.title || `concept ${concept.id.type}/${concept.id.id}`,
       from: (timespan.start.max - timespan.start.min) / 2 + timespan.start.min,
@@ -72,7 +72,6 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
   }
 
   const assignPeriodsToGroups = (periods: Period[], periodsMap: PeriodsMap): PeriodGroup[] => {
-    console.log(periods)
     periods.sort((a, b) => {
       if (a.children && a.children.indexOf(b.id) > -1) return -1;
       if (b.children && b.children.indexOf(a.id) > -1) return 1;
@@ -89,10 +88,8 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
     for (let i in periods) {
       if (periods[i].periodGroup.number === -1) {
         const rootPeriod = getRootPeriod(periods[i], periodsMap);
-        console.log({groupNumberCounter})
         addToGroup(rootPeriod, periodsMap, createGroup(groupNumberCounter++), 0, 0, periodGroups);
         if (periodGroups.indexOf(rootPeriod.periodGroup) === -1) {
-          console.log('→→→ ', rootPeriod)
           periodGroups.push(rootPeriod.periodGroup);
         }
       }
@@ -114,7 +111,6 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
   }
 
   const createGroup = (groupNumber: number): PeriodGroup => {
-    console.log('createGroup', groupNumber)
     return {
       startRow: 0,
       number: groupNumber,

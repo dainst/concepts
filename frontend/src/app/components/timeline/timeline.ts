@@ -61,31 +61,18 @@ export class Timeline implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    console.log('ngAfterViewInit')
     this.initialize();
   }
 
   private initialize(): void {
     console.log('initialize!');
-    this.initialized = true;
-  };
 
-  private draw(timelineData: TimeLineData) {
-
-    const width = this.getWidth();
     const height = this.getHeight();
+    const width = this.getWidth();
 
     this.y = d3.scaleLinear()
       .domain([0, this.barHeight * 20])
       .range([0, height - 30]);
-
-    this.totalXDomain = timelineData.xDomain;
-    this.setStartDomains(timelineData.periodsMap);
-
-    this.x = d3.scaleLinear()
-      .domain(this.startXDomain)
-      .range([0, width]);
-    this.y.domain(this.startYDomain);
 
     this.timeline = d3
       .select<SVGSVGElement, Period>('#timeline')
@@ -94,15 +81,9 @@ export class Timeline implements AfterViewInit {
       .attr('height', height)
       .classed('timeline', true);
 
-    if (this.inactive()) this.timeline.classed('inactive', true);
-
-    this.canvas = this.timeline.append('g')
+    this.canvas = this.timeline!.append('g')
       .attr('width', width)
       .attr('height', height - 30);
-
-    this.axis = d3.axisBottom(this.x)
-      .ticks(this.axisTicks() ?? 10)
-      .tickSize(10);
 
     this.axisElement = this.timeline
       .append('g')
@@ -110,8 +91,6 @@ export class Timeline implements AfterViewInit {
       // .attr('width', width)
       .attr('transform', `translate(0, ${height - 30})`)
       .classed('axis', true)
-      .call(this.axis);
-
 
     if (!this.inactive()) {
       const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
@@ -138,7 +117,7 @@ export class Timeline implements AfterViewInit {
           this.updateBars();
         });
 
-      this.timeline
+      this.timeline!
         .call(this.zoom)
         .call(this.drag);
 
@@ -147,7 +126,37 @@ export class Timeline implements AfterViewInit {
         .classed('timeline-tooltip', true);
     }
 
-    this.bars = this.canvas.selectAll('g').data(timelineData.periods).enter();
+    this.initialized = true;
+  };
+
+  private draw(timelineData: TimeLineData) {
+
+    const width = this.getWidth();
+    const height = this.getHeight();
+
+    this.totalXDomain = timelineData.xDomain;
+    this.setStartDomains(timelineData.periodsMap);
+
+    this.x = d3.scaleLinear()
+      .domain(this.startXDomain)
+      .range([0, width]);
+
+    this.y!.domain(this.startYDomain); // TODO is ! a good choice here?
+
+    if (this.inactive()) this.timeline!.classed('inactive', true);
+
+    this.axis = d3.axisBottom(this.x)
+      .ticks(this.axisTicks() ?? 10)
+      .tickSize(10);
+
+    this.axisElement!
+      .call(this.axis);
+
+    this.canvas!.selectAll("*").remove();
+    this.bars = this.canvas!.selectAll('g')
+      .data(timelineData.periods)
+      .enter(); // TODO use join
+
     this.barPaths = this.bars.append('g')
       .attr('id', d=> 'bar-path-' + d.id)
       .attr('class', d => {
@@ -172,7 +181,7 @@ export class Timeline implements AfterViewInit {
         .classed('selected', true);
     }
 
-    this.barTexts = this.canvas.selectAll<SVGTextElement, Period>('g')
+    this.barTexts = this.canvas!.selectAll<SVGTextElement, Period>('g')
       .append('text')
       .classed('text', true)
       .attr('id', d => 'bar-text-') // paf removed tmp + d.id
@@ -186,7 +195,6 @@ export class Timeline implements AfterViewInit {
 
     this.updateBars();
     d3.select(window).on('resize', () => this.resize());
-
   }
 
   private resize() {
