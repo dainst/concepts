@@ -14,11 +14,9 @@ import {dummyConceptGenerator} from '../../timeline/dummy-data';
 export class About implements OnInit {
   ngOnInit(): void {
       setTimeout(() => {
-        console.log('pump it')
         this.pumpData();
       },100)
     setTimeout(() => {
-      console.log('pump it even more')
       this.pumpData();
     },1000)
   }

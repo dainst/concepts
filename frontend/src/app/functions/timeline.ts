@@ -270,9 +270,6 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
 
   determinePeriodRows(periodsToDisplay, periodsMap);
 
-  console.log('ptd', periodsToDisplay);
-  console.log('groups', periodsToDisplay.map(p => p.periodGroup.number))
-
   return {
     periods: periodsToDisplay,
     periodsMap: periodsMap,

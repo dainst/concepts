@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild} from '@angular/core';
 
 import * as d3 from 'd3';
-import {Period, PeriodsMap, TimeLineData, XDomain} from '../../interfaces/timeline';
+import {Period, TimeLineData, XDomain} from '../../interfaces/timeline';
 import {conceptsToTimelineData} from '../../functions/timeline';
 import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
 import {dummyData} from './dummy-data';
@@ -57,17 +57,12 @@ export class Timeline implements AfterViewInit {
       const tld = this.timelineData();
       const spid = this.selectedPeriodId();
       const inactive = this.inactive();
-      console.log(inactive);
-      if (!this.initialized) {
-        console.log('noit ini');
-        return;
-      }
+      if (!this.initialized) return;
       this.updateDomains(tld, spid);
       this.draw(tld);
       this.selectPeriod(spid);
     });
     effect(() => {
-      console.log('effect!', this.axisTicks())
       if (!this.initialized) return;
       this.updateAxisTicks(this.axisTicks());
     });
@@ -78,8 +73,6 @@ export class Timeline implements AfterViewInit {
   }
 
   private initialize(): void {
-    console.log('initialize!');
-
     const height = this.getHeight();
     const width = this.getWidth();
 
@@ -466,10 +459,6 @@ export class Timeline implements AfterViewInit {
       .transition()
       .duration(350)
       .call(this.zoom.transform, targetTransform);
-  }
-
-  private updateActivityStatus(inactive: boolean | undefined): void{
-
   }
 }
 

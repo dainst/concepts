@@ -1,10 +1,12 @@
 Test the timline:
-<timeline
-  [concepts]="data()"
-  [selectedPeriodId]="selected()"
-  [axisTicks]="axisTicks()"
-  [inactive]="inactive()"
-/>
+<div style="height: 80%; width: 100%; background: grey">
+  <timeline
+    [concepts]="data()"
+    [selectedPeriodId]="selected()"
+    [axisTicks]="axisTicks()"
+    [inactive]="inactive()"
+  />
+</div>
 <button (click)="pumpData()">Pump Dummy Data</button>
 <button (click)="select()">Select last one</button>
 <button (click)="select(2)">Select another</button>
