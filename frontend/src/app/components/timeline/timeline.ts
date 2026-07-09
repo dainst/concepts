@@ -50,14 +50,20 @@ export class Timeline implements AfterViewInit {
 
   private hoverPeriod: Period|undefined = undefined;
 
+  private readonly timelineData = computed(() => conceptsToTimelineData(this.concepts()));
+
   constructor() {
     effect(() => {
-      const timelineData = conceptsToTimelineData(this.concepts());
+      console.log('effect!')
+      const tld = this.timelineData();
+      const spid = this.selectedPeriodId();
       if (!this.initialized) {
         console.log('noit ini');
         return;
       }
-      this.draw(timelineData);
+      this.updateDomains(tld, spid);
+      this.draw(tld);
+      this.selectPeriod(spid);
     });
   }
 
@@ -119,7 +125,6 @@ export class Timeline implements AfterViewInit {
           this.updateBars();
         });
 
-
       this.timeline!
         .call(this.zoom)
         .call(this.drag);
@@ -132,11 +137,26 @@ export class Timeline implements AfterViewInit {
     this.initialized = true;
   };
 
-  private draw(timelineData: TimeLineData) {
+  private selectPeriod(selectedPeriodId: string | undefined): void {
+    if (selectedPeriodId) {
+      this.barPaths!
+        .filter(d => d.id === selectedPeriodId)
+        .classed('selected', true);
+    }
+  }
+
+  private updateDomains(timelineData: TimeLineData, selectedPeriodId: string | undefined) {
+    console.log('updateDomains')
+
     const width = this.getWidth();
 
     this.totalXDomain = timelineData.xDomain;
-    this.setStartDomains(timelineData.periodsMap);
+
+    if (selectedPeriodId && timelineData.periodsMap[selectedPeriodId]) {
+      this.setStartDomainsToSelection(timelineData.periodsMap[selectedPeriodId]);
+    } else {
+      this.setStandardStartDomains();
+    }
 
     this.baseX!
       .domain(this.startXDomain)
@@ -145,10 +165,12 @@ export class Timeline implements AfterViewInit {
     this.x = this.baseX!.copy();
 
     this.y!.domain(this.startYDomain); // TODO is ! a good choice here?
+  }
 
-    if (this.inactive()) this.timeline!.classed('inactive', true);
+  private draw(timelineData: TimeLineData) {
+    this.timeline!.classed('inactive', this.inactive());
 
-    this.axis = d3.axisBottom(this.x)
+    this.axis = d3.axisBottom(this.x!)
       .ticks(this.axisTicks() ?? 10)
       .tickSize(10);
 
@@ -178,11 +200,7 @@ export class Timeline implements AfterViewInit {
       this.addHoverBehavior(this.barPaths);
     }
 
-    if (this.selectedPeriodId) {
-      this.barPaths
-        .filter(d => d.id === this.selectedPeriodId())
-        .classed('selected', true);
-    }
+
 
     this.barTexts = this.canvas!.selectAll<SVGTextElement, Period>('g')
       .append('text')
@@ -380,14 +398,6 @@ export class Timeline implements AfterViewInit {
       });
   };
 
-  private setStartDomains(periodsMap: PeriodsMap): void {
-    const selectedPeriodId = this.selectedPeriodId();
-    if (selectedPeriodId && periodsMap[selectedPeriodId])
-      this.setStartDomainsToSelection(periodsMap[selectedPeriodId]);
-    else
-      this.setStandardStartDomains();
-  };
-
   private setStartDomainsToSelection(selectedPeriod: Period): void {
     const span = (selectedPeriod.latestTo || selectedPeriod.to) - (selectedPeriod.earliestFrom || selectedPeriod.from);
     const offset = (span < this.maxZoomYears) ? (this.maxZoomYears - span) / 2 : span / 2;
@@ -404,7 +414,7 @@ export class Timeline implements AfterViewInit {
     this.startYDomain = [yPos - this.barHeight * 10, yPos + this.barHeight * 10];
   };
 
-  setStandardStartDomains(): void {
+  private setStandardStartDomains(): void {
     this.startXDomain[0] = this.totalXDomain[0];
     this.startXDomain[1] = this.totalXDomain[1];
     if (this.startXDomain[0] < this.minStartYear)

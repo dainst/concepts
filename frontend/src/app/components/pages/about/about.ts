@@ -40,6 +40,6 @@ export class About implements OnInit {
       return;
     }
     const last = this.data()[this.data().length - 1];
-    this.selected.set(last.id.type + '/' + last.id.id);
+    this.selected.set(`${last.id.id}-${last.id.type}`);
   };
 }
