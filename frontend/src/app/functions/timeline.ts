@@ -24,9 +24,9 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
       number,
       name: concept.title || `concept ${concept.id.type}/${concept.id.id}`,
       from: (timespan.start.max - timespan.start.min) / 2 + timespan.start.min,
-      earliestFrom: timespan.start.min,
+      earliestFrom: undefined, // timespan.start.min,
       to: (timespan.end.max - timespan.end.min) / 2 + timespan.end.min,
-      latestTo: timespan.end.max,
+      latestTo: undefined, //  timespan.end.max,
       successor: first(getRelated(concept, 'isFollowedBy').map(idAsString)), // TODO what if there are more?
       parent: first(getRelated(concept, 'isPartOf').map(idAsString)), // TODO what if there are more?
       children: getRelated(concept, 'hasPart').map(idAsString),

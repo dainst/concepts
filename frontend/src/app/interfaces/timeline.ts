@@ -3,9 +3,9 @@ export interface Period {
   number: number; // TODO do we need this?
   name: string;
   from: number;
-  earliestFrom: number;
+  earliestFrom: number | undefined;
   to: number;
-  latestTo: number;
+  latestTo: number | undefined;
   successor: string | undefined;
   parent: string | undefined,
   children: string[],
