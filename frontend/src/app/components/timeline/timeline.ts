@@ -38,6 +38,7 @@ export class Timeline implements AfterViewInit {
   private tooltip: d3.Selection<HTMLDivElement, Period, HTMLElement, Period>|undefined = undefined;
   private zoom: d3.ZoomBehavior<SVGSVGElement, Period>|undefined = undefined;
   private drag: d3.DragBehavior<SVGSVGElement, Period, Node>|undefined = undefined;
+  private baseX: d3.ScaleLinear<number, number, never>|undefined = undefined;
   private x: d3.ScaleLinear<number, number, never>|undefined = undefined;
   private y: d3.ScaleLinear<number, number, never>|undefined = undefined;
 
@@ -74,6 +75,9 @@ export class Timeline implements AfterViewInit {
       .domain([0, this.barHeight * 20])
       .range([0, height - 30]);
 
+    this.baseX = d3.scaleLinear();
+    this.x = this.baseX.copy();
+
     this.timeline = d3
       .select<SVGSVGElement, Period>('#timeline')
       .append('svg')
@@ -91,13 +95,14 @@ export class Timeline implements AfterViewInit {
       .classed('axis', true)
 
     if (!this.inactive()) {
-      const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
-      const maxZoom = (this.startXDomain[1] - this.startXDomain[0]) / this.maxZoomYears;
 
       this.zoom = d3.zoom<SVGSVGElement, Period>()
-        .scaleExtent([minZoom, maxZoom])
-        .on('zoom', () => {
-          if (this.axis && this.axisElement) this.axisElement.call(this.axis);
+        .on('zoom', event => {
+          if (!this.axis) throw new Error("noAxis!");
+          if (!this.axisElement) throw new Error("no axisElement!");
+          this.x = event.transform.rescaleX(this.baseX);
+          this.axis.scale(this.x!);
+          this.axisElement.call(this.axis);
           this.updateBars();
         });
 
@@ -105,7 +110,7 @@ export class Timeline implements AfterViewInit {
         .on('drag', event => {
           if (!this.y) throw new Error("noY!");
           if (!this.axis) throw new Error("noAxis!");
-          if (!this.axisElement) throw new Error("no axisElement!"); // paf
+          if (!this.axisElement) throw new Error("no axisElement!");
           const domain = this.y.domain();
           domain[0] -= event.dy;
           domain[1] -= event.dy;
@@ -113,6 +118,7 @@ export class Timeline implements AfterViewInit {
           this.axisElement.call(this.axis);
           this.updateBars();
         });
+
 
       this.timeline!
         .call(this.zoom)
@@ -132,9 +138,11 @@ export class Timeline implements AfterViewInit {
     this.totalXDomain = timelineData.xDomain;
     this.setStartDomains(timelineData.periodsMap);
 
-    this.x = d3.scaleLinear()
+    this.baseX!
       .domain(this.startXDomain)
       .range([0, width]);
+
+    this.x = this.baseX!.copy();
 
     this.y!.domain(this.startYDomain); // TODO is ! a good choice here?
 
@@ -188,6 +196,14 @@ export class Timeline implements AfterViewInit {
       this.addHoverBehavior(this.barTexts);
     }
 
+    const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
+    const maxZoom = (this.startXDomain[1] - this.startXDomain[0]) / this.maxZoomYears;
+
+    console.log({minZoom, maxZoom, startXDomain: this.startXDomain, totalXDomain: this.totalXDomain})
+
+    this.zoom!
+      .scaleExtent([minZoom, maxZoom]);
+
     this.updateBars();
     d3.select(window).on('resize', () => this.resize());
   }
@@ -231,13 +247,15 @@ export class Timeline implements AfterViewInit {
 
   private updateBars() {
     if (!this.barPaths) throw new Error('no barPaths');
+    if (!this.barTexts) throw new Error('no barTexts');
+
     this.barPaths.attr('d', data => this.computeBarPaths(data));
 
-    if (!this.barTexts) throw new Error('no barTexts');
-    this.barTexts.attr('x', data => {
-      if (!this.x) throw new Error("noX!");
-      return this.x(data.from) + (this.getBarWidth(data)) / 2
-    })
+    this.barTexts
+      .attr('x', data => {
+        if (!this.x) throw new Error("noX!");
+        return this.x(data.from) + (this.getBarWidth(data)) / 2
+      })
       .attr('y', data => {
         if (!this.y) throw new Error("noY!");
         return this.y(data.row) + data.row * (this.barHeight + 5) + this.barHeight / 2 + 5
@@ -336,7 +354,6 @@ export class Timeline implements AfterViewInit {
   private addHoverBehavior<T extends SVGPathElement|SVGTextElement>(selection: d3.Selection<T, Period, SVGGElement, Period>): void {
     selection
       .on('mouseover', (event: MouseEvent, period: Period) => {
-        console.log('mouseover', period)
         d3.select('#bar-path-' + period.id).classed('hover', true);
         if (period !== this.hoverPeriod) {
           d3.select('#bar-path-' + period.id).raise();
@@ -349,7 +366,6 @@ export class Timeline implements AfterViewInit {
         return this.tooltip.style('visibility', 'visible');
       })
       .on('mousemove', (event: MouseEvent, period: Period) => {
-        console.log('mousemove')
         if (!this.tooltip) throw new Error('no this.tooltip');
         this.tooltip.style('top', (event.pageY - 10) + 'px');
         const tooltipWidth = this.tooltip.node()?.getBoundingClientRect().width ?? 0;
