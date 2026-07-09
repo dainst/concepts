@@ -14,7 +14,7 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
 
   // TODO is it a good idea to reduce id object to a string?
   const idAsString = (id: ConceptAbstract): string =>
-    `${id.id.id}/${id.id.type}`;
+    `${id.id.id}-${id.id.type}`;
 
   const createPeriod = (concept: TemporalConcept, number: number): Period | undefined => {
     if (!concept.temporalExtends.length) return undefined;

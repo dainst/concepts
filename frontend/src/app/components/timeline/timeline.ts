@@ -87,8 +87,6 @@ export class Timeline implements AfterViewInit {
 
     this.axisElement = this.timeline
       .append('g')
-      // .attr('y', height - 30)
-      // .attr('width', width)
       .attr('transform', `translate(0, ${height - 30})`)
       .classed('axis', true)
 
@@ -97,7 +95,6 @@ export class Timeline implements AfterViewInit {
       const maxZoom = (this.startXDomain[1] - this.startXDomain[0]) / this.maxZoomYears;
 
       this.zoom = d3.zoom<SVGSVGElement, Period>()
-        // .x(x) paf
         .scaleExtent([minZoom, maxZoom])
         .on('zoom', () => {
           if (this.axis && this.axisElement) this.axisElement.call(this.axis);
@@ -106,8 +103,8 @@ export class Timeline implements AfterViewInit {
 
       this.drag = d3.drag<SVGSVGElement, Period, Node>()
         .on('drag', event => {
-          if (!this.y) throw new Error("noY!"); // paf
-          if (!this.axis) throw new Error("noAxis!"); // paf
+          if (!this.y) throw new Error("noY!");
+          if (!this.axis) throw new Error("noAxis!");
           if (!this.axisElement) throw new Error("no axisElement!"); // paf
           const domain = this.y.domain();
           domain[0] -= event.dy;
@@ -130,9 +127,7 @@ export class Timeline implements AfterViewInit {
   };
 
   private draw(timelineData: TimeLineData) {
-
     const width = this.getWidth();
-    const height = this.getHeight();
 
     this.totalXDomain = timelineData.xDomain;
     this.setStartDomains(timelineData.periodsMap);
@@ -184,13 +179,13 @@ export class Timeline implements AfterViewInit {
     this.barTexts = this.canvas!.selectAll<SVGTextElement, Period>('g')
       .append('text')
       .classed('text', true)
-      .attr('id', d => 'bar-text-') // paf removed tmp + d.id
+      .attr('id', d => 'bar-text-'+ d.id)
       .on('click', () => this.showPeriod);
 
     if (this.inactive()) {
       this.barTexts.classed('inactive', true);
     } else {
-      // this.addHoverBehavior(this.barTexts);
+      this.addHoverBehavior(this.barTexts);
     }
 
     this.updateBars();
@@ -240,11 +235,11 @@ export class Timeline implements AfterViewInit {
 
     if (!this.barTexts) throw new Error('no barTexts');
     this.barTexts.attr('x', data => {
-      if (!this.x) throw new Error("noX!"); // paf
+      if (!this.x) throw new Error("noX!");
       return this.x(data.from) + (this.getBarWidth(data)) / 2
     })
       .attr('y', data => {
-        if (!this.y) throw new Error("noY!"); // paf
+        if (!this.y) throw new Error("noY!");
         return this.y(data.row) + data.row * (this.barHeight + 5) + this.barHeight / 2 + 5
       })
       .text(data => {
@@ -272,7 +267,7 @@ export class Timeline implements AfterViewInit {
   };
 
   private computeLeftEndPathDefinition(data: Period, topY: number, bottomY: number, edgeRadius: number): string {
-    if (!this.x) throw new Error("noX!"); // paf
+    if (!this.x) throw new Error("noX!");
     if (data.earliestFrom) {
       return 'M'
         + (this.x(data.earliestFrom) + ((this.x(data.from) - this.x(data.earliestFrom)) / 10)) + ' ' + bottomY + ' '
@@ -289,7 +284,7 @@ export class Timeline implements AfterViewInit {
   };
 
   private computeRightEndPathDefinition(data: Period, topY: number, bottomY: number, edgeRadius: number): string {
-    if (!this.x) throw new Error("noX!"); // paf
+    if (!this.x) throw new Error("noX!");
     if (data.latestTo || edgeRadius === 0) {
       return 'L' + this.x(data.latestTo || data.to) + ' ' + topY + ' '
         + 'L' + this.x(data.to) + ' ' + bottomY;
@@ -302,12 +297,12 @@ export class Timeline implements AfterViewInit {
   };
 
   private getPathYPosition(data: Period): number {
-    if (!this.y) throw new Error("noY!"); // paf
+    if (!this.y) throw new Error("noY!");
     return this.y(data.row) + data.row * (this.barHeight + 5);
   };
 
   private getBarWidth(data: Period): number {
-    if (!this.x) throw new Error("noX!"); // paf
+    if (!this.x) throw new Error("noX!");
     return this.x(data.to) - this.x(data.from);
   };
 
@@ -338,30 +333,32 @@ export class Timeline implements AfterViewInit {
     return text;
   };
 
-  private addHoverBehavior(selection: d3.Selection<SVGPathElement, Period, SVGGElement, Period>): void {
-    selection.on('mouseover', (period: Period) => {
-      d3.select('#bar-path-' + period.id).classed('hover', true);
-      if (period !== this.hoverPeriod) {
-        d3.select('#bar-path-' + period.id).raise();
-        d3.select('#bar-text-' + period.id).raise();
-        this.hoverPeriod = period;
-      }
-      if (period.textVisible) return;
-      if (!this.tooltip) throw new Error('no this.tooltip'); // paf
-      this.tooltip.text(period.name);
-      return this.tooltip.style('visibility', 'visible');
-    })
-      .on('mousemove', event => {
-        if (!this.tooltip) throw new Error('no this.tooltip'); // paf
-
+  private addHoverBehavior<T extends SVGPathElement|SVGTextElement>(selection: d3.Selection<T, Period, SVGGElement, Period>): void {
+    selection
+      .on('mouseover', (event: MouseEvent, period: Period) => {
+        console.log('mouseover', period)
+        d3.select('#bar-path-' + period.id).classed('hover', true);
+        if (period !== this.hoverPeriod) {
+          d3.select('#bar-path-' + period.id).raise();
+          d3.select('#bar-text-' + period.id).raise();
+          this.hoverPeriod = period;
+        }
+        if (period.textVisible) return;
+        if (!this.tooltip) throw new Error('no this.tooltip');
+        this.tooltip.text(period.name);
+        return this.tooltip.style('visibility', 'visible');
+      })
+      .on('mousemove', (event: MouseEvent, period: Period) => {
+        console.log('mousemove')
+        if (!this.tooltip) throw new Error('no this.tooltip');
         this.tooltip.style('top', (event.pageY - 10) + 'px');
-        const tooltipWidth = 250; // paf removed this tmp this.tooltip.node().getBoundingClientRect().width;
+        const tooltipWidth = this.tooltip.node()?.getBoundingClientRect().width ?? 0;
         return tooltipWidth < this.getWidth() - event.pageX
           ? this.tooltip.style('left', (event.pageX + 10) + 'px')
           : this.tooltip.style('left', (event.pageX - tooltipWidth - 10) + 'px');
       })
-      .on('mouseout', period => {
-        if (!this.tooltip) throw new Error('no this.tooltip'); // paf
+      .on('mouseout', (event: MouseEvent, period: Period) => {
+        if (!this.tooltip) throw new Error('no this.tooltip');
         d3.select('#bar-path-' + period.id).classed('hover', false);
         return this.tooltip.style('visibility', 'hidden');
       });
