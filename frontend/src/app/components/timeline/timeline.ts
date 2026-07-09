@@ -1,8 +1,8 @@
-import {AfterViewInit, Component, effect, ElementRef, input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild} from '@angular/core';
 
 import * as d3 from 'd3';
 import {Period, PeriodsMap, TimeLineData, XDomain} from '../../interfaces/timeline';
-import {periodsToTimelineData} from '../../functions/timeline';
+import {conceptsToTimelineData} from '../../functions/timeline';
 import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
 import {dummyData} from './dummy-data';
 
@@ -20,10 +20,6 @@ export class Timeline implements AfterViewInit {
   readonly axisTicks = input<number | undefined>();
   readonly inactive = input<boolean>(false);
   readonly concepts = input<TemporalConcept[]>(dummyData);
-
-  readonly e = effect(() => {
-    this.timelineData = periodsToTimelineData(this.concepts());
-  });
 
   private readonly margin = 15;
   private readonly maxZoomYears = 5;
@@ -45,12 +41,6 @@ export class Timeline implements AfterViewInit {
   private x: d3.ScaleLinear<number, number, never>|undefined = undefined;
   private y: d3.ScaleLinear<number, number, never>|undefined = undefined;
 
-  private timelineData: TimeLineData = {
-    xDomain: [-2100, 2100],
-    periods: [],
-    periodsMap: {}
-  };
-
   private totalXDomain: XDomain = [NaN, NaN];
   private startXDomain: XDomain = [NaN, NaN];
   private startYDomain: XDomain = [NaN, NaN];
@@ -59,11 +49,29 @@ export class Timeline implements AfterViewInit {
 
   private hoverPeriod: Period|undefined = undefined;
 
+  constructor() {
+    effect(() => {
+      const timelineData = conceptsToTimelineData(this.concepts());
+      if (!this.initialized) {
+        console.log('noit ini');
+        return;
+      }
+      this.draw(timelineData);
+    });
+  }
+
   ngAfterViewInit(): void {
+    console.log('ngAfterViewInit')
     this.initialize();
   }
 
   private initialize(): void {
+    console.log('initialize!');
+    this.initialized = true;
+  };
+
+  private draw(timelineData: TimeLineData) {
+
     const width = this.getWidth();
     const height = this.getHeight();
 
@@ -71,8 +79,8 @@ export class Timeline implements AfterViewInit {
       .domain([0, this.barHeight * 20])
       .range([0, height - 30]);
 
-    this.totalXDomain = this.timelineData.xDomain;
-    this.setStartDomains(this.timelineData.periodsMap);
+    this.totalXDomain = timelineData.xDomain;
+    this.setStartDomains(timelineData.periodsMap);
 
     this.x = d3.scaleLinear()
       .domain(this.startXDomain)
@@ -139,7 +147,7 @@ export class Timeline implements AfterViewInit {
         .classed('timeline-tooltip', true);
     }
 
-    this.bars = this.canvas.selectAll('g').data(this.timelineData.periods).enter();
+    this.bars = this.canvas.selectAll('g').data(timelineData.periods).enter();
     this.barPaths = this.bars.append('g')
       .attr('id', d=> 'bar-path-' + d.id)
       .attr('class', d => {
@@ -178,8 +186,8 @@ export class Timeline implements AfterViewInit {
 
     this.updateBars();
     d3.select(window).on('resize', () => this.resize());
-    this.initialized = true;
-  };
+
+  }
 
   private resize() {
     if (!this.initialized) return;

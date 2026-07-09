@@ -1,7 +1,7 @@
 import {Period, PeriodGroup, PeriodsMap, TimeLineData, XDomain} from '../interfaces/timeline';
-import {BareConcept, ConceptAbstract, ConceptId, TemporalConcept} from 'concepts-common/src/interfaces/concept';
+import {BareConcept, ConceptAbstract, TemporalConcept} from 'concepts-common/src/interfaces/concept';
 
-export const periodsToTimelineData = (concepts: TemporalConcept[]): TimeLineData => {
+export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineData => {
 
   const getRelated = (concept: BareConcept, rId: string): ConceptAbstract[] =>
      (concept.relations?.to ?? [])
@@ -30,13 +30,13 @@ export const periodsToTimelineData = (concepts: TemporalConcept[]): TimeLineData
       successor: first(getRelated(concept, 'isFollowedBy').map(idAsString)), // TODO what if there are more?
       parent: first(getRelated(concept, 'isPartOf').map(idAsString)), // TODO what if there are more?
       children: getRelated(concept, 'hasPart').map(idAsString),
-      row: -1,
+      row: 1,
       colorGroup: 0,
       level: 0,
       textVisible: false,
       groupRow: undefined,
       periodGroup: {
-        number: 0,
+        number: -1,
         rows: [],
         periodsCount: 0,
         from: 0,
@@ -72,6 +72,7 @@ export const periodsToTimelineData = (concepts: TemporalConcept[]): TimeLineData
   }
 
   const assignPeriodsToGroups = (periods: Period[], periodsMap: PeriodsMap): PeriodGroup[] => {
+    console.log(periods)
     periods.sort((a, b) => {
       if (a.children && a.children.indexOf(b.id) > -1) return -1;
       if (b.children && b.children.indexOf(a.id) > -1) return 1;
@@ -85,13 +86,15 @@ export const periodsToTimelineData = (concepts: TemporalConcept[]): TimeLineData
 
     const periodGroups: PeriodGroup[] = [];
     let groupNumberCounter = 0;
-
     for (let i in periods) {
-      if (!periods[i].periodGroup) {
+      if (periods[i].periodGroup.number === -1) {
         const rootPeriod = getRootPeriod(periods[i], periodsMap);
+        console.log({groupNumberCounter})
         addToGroup(rootPeriod, periodsMap, createGroup(groupNumberCounter++), 0, 0, periodGroups);
-        if (periodGroups.indexOf(rootPeriod.periodGroup) === -1)
+        if (periodGroups.indexOf(rootPeriod.periodGroup) === -1) {
+          console.log('→→→ ', rootPeriod)
           periodGroups.push(rootPeriod.periodGroup);
+        }
       }
     }
 
@@ -111,6 +114,7 @@ export const periodsToTimelineData = (concepts: TemporalConcept[]): TimeLineData
   }
 
   const createGroup = (groupNumber: number): PeriodGroup => {
+    console.log('createGroup', groupNumber)
     return {
       startRow: 0,
       number: groupNumber,
@@ -122,7 +126,7 @@ export const periodsToTimelineData = (concepts: TemporalConcept[]): TimeLineData
   }
 
   const addToGroup = (period: Period, periodsMap: PeriodsMap, group: PeriodGroup, row: number, hierarchyLevel: number, periodGroups: PeriodGroup[]) => {
-    if (period.periodGroup) return;
+    if (period.periodGroup.number !== -1) return;
 
     setPeriodGroup(period, group, row, hierarchyLevel);
 
@@ -270,7 +274,8 @@ export const periodsToTimelineData = (concepts: TemporalConcept[]): TimeLineData
 
   determinePeriodRows(periodsToDisplay, periodsMap);
 
-  console.log(periodsToDisplay);
+  console.log('ptd', periodsToDisplay);
+  console.log('groups', periodsToDisplay.map(p => p.periodGroup.number))
 
   return {
     periods: periodsToDisplay,

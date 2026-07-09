@@ -1,20 +1,20 @@
 import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
 
-function* dummyConceptGenerator(): Generator<TemporalConcept> {
+export function* dummyConceptGenerator(): Generator<TemporalConcept> {
   let index = 0;
-  while (true) yield {
+  while (index++ < Infinity) yield {
     temporalExtends: [{
       start: {
         precision: 0,
         certainty: 0,
-        min: -10 * index % 5 + index,
-        max: -10 * index % 5 + index
+        min: -300 * (index % 2 + index),
+        max: -300 * (index % 2 + index)
       },
       end: {
         precision: 0,
         certainty: 0,
-        min: 10 * index % 5 + index,
-        max: 10 * index % 5 + index
+        min: 300 * (index % 7 + index),
+        max: 300 * (index % 7 + index)
       }
     }],
     title: `Title #${index}`,
