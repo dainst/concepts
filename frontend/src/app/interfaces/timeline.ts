@@ -1,6 +1,9 @@
+import {ConceptId} from 'concepts-common/src/interfaces/concept';
+
 export interface Period {
   id: string;
-  number: number; // TODO do we need this?
+  conceptId: ConceptId;
+  number: number;
   name: string;
   from: number;
   earliestFrom: number | undefined;

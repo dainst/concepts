@@ -12,24 +12,24 @@ export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineDat
     return array.length ? array[0] : undefined;
   }
 
-  // TODO is it a good idea to reduce id object to a string?
-  const idAsString = (id: ConceptAbstract): string =>
+  const getId = (id: ConceptAbstract): string =>
     `${id.id.id}-${id.id.type}`;
 
   const createPeriod = (concept: TemporalConcept, number: number): Period | undefined => {
     if (!concept.temporalExtends.length) return undefined;
     let timespan = concept.temporalExtends[0]; // TODO what if there are more?
     return {
-      id: idAsString(concept), // TODO tmp
+      id: getId(concept), // TODO tmp
+      conceptId: concept.id,
       number,
       name: concept.title || `concept ${concept.id.type}/${concept.id.id}`,
       from: (timespan.start.max - timespan.start.min) / 2 + timespan.start.min,
       earliestFrom: undefined, // timespan.start.min,
       to: (timespan.end.max - timespan.end.min) / 2 + timespan.end.min,
       latestTo: undefined, //  timespan.end.max,
-      successor: first(getRelated(concept, 'isFollowedBy').map(idAsString)), // TODO what if there are more?
-      parent: first(getRelated(concept, 'isPartOf').map(idAsString)), // TODO what if there are more?
-      children: getRelated(concept, 'hasPart').map(idAsString),
+      successor: first(getRelated(concept, 'isFollowedBy').map(getId)), // TODO what if there are more?
+      parent: first(getRelated(concept, 'isPartOf').map(getId)), // TODO what if there are more?
+      children: getRelated(concept, 'hasPart').map(getId),
       row: 1,
       colorGroup: 0,
       level: 0,

@@ -1,10 +1,9 @@
-import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild} from '@angular/core';
-
+import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild, inject} from '@angular/core';
 import * as d3 from 'd3';
 import {Period, TimeLineData, XDomain} from '../../interfaces/timeline';
 import {conceptsToTimelineData} from '../../functions/timeline';
 import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
-import {dummyData} from './dummy-data';
+import {Router } from "@angular/router";
 
 
 @Component({
@@ -16,10 +15,12 @@ import {dummyData} from './dummy-data';
 export class Timeline implements AfterViewInit {
   @ViewChild('timeline', { static: true }) tlContainer!: ElementRef;
 
+  private readonly router = inject(Router);
+
   readonly selectedPeriodId = input<string | undefined>();
   readonly axisTicks = input<number | undefined>();
   readonly inactive = input<boolean>(false);
-  readonly concepts = input<TemporalConcept[]>(dummyData);
+  readonly concepts = input<TemporalConcept[]>([]);
 
   private readonly margin = 15;
   private readonly maxZoomYears = 5;
@@ -202,7 +203,7 @@ export class Timeline implements AfterViewInit {
       .append('text')
       .classed('text', true)
       .attr('id', d => 'bar-text-'+ d.id)
-      .on('click', () => this.showPeriod);
+      .on('click', this.showPeriod);
 
     if (this.inactive()) {
       this.barTexts.classed('inactive', true);
@@ -345,8 +346,8 @@ export class Timeline implements AfterViewInit {
     return text.length * 7;
   };
 
-  private showPeriod(period: Period) {
-    console.log(`SHOW PERIOD`, period);
+  private showPeriod(event: MouseEvent, period: Period) {
+    this.router.navigate(['concept', period.conceptId.type, period.conceptId.id]);
   };
 
   private formatTickText(text: string | number): string {
