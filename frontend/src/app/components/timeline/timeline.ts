@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild, inject} from '@angular/core';
 import * as d3 from 'd3';
 import {Period, TimeLineData, XDomain} from '../../interfaces/timeline';
-import {conceptsToTimelineData} from '../../functions/timeline';
+import {prepareTimelineData} from '../../functions/timeline-data';
 import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
 import {Router } from "@angular/router";
 
@@ -51,7 +51,7 @@ export class Timeline implements AfterViewInit {
 
   private hoverPeriod: Period|undefined = undefined;
 
-  private readonly timelineData = computed(() => conceptsToTimelineData(this.concepts()));
+  private readonly timelineData = computed(() => prepareTimelineData(this.concepts()));
 
   constructor() {
     effect(() => {

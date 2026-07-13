@@ -1,7 +1,7 @@
 import {Period, PeriodGroup, PeriodsMap, TimeLineData, XDomain} from '../interfaces/timeline';
 import {BareConcept, ConceptAbstract, TemporalConcept} from 'concepts-common/src/interfaces/concept';
 
-export const conceptsToTimelineData = (concepts: TemporalConcept[]): TimeLineData => {
+export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData => {
 
   const getRelated = (concept: BareConcept, rId: string): ConceptAbstract[] =>
      (concept.relations?.to ?? [])
