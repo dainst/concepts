@@ -31,10 +31,10 @@ export interface PeriodGroup {
 
 export type PeriodsMap = {[id: string]: Period};
 
-export type XDomain = [number, number];
+export type Domain = [number, number];
 
 export interface TimeLineData {
   periods: Period[],
   periodsMap: PeriodsMap,
-  xDomain: XDomain
+  xDomain: Domain
 }

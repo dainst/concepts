@@ -1,4 +1,4 @@
-import {Period, PeriodGroup, PeriodsMap, TimeLineData, XDomain} from '../interfaces/timeline';
+import {Period, PeriodGroup, PeriodsMap, TimeLineData, Domain} from '../interfaces/timeline';
 import {BareConcept, ConceptAbstract, TemporalConcept} from 'concepts-common/src/interfaces/concept';
 
 export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData => {
@@ -248,7 +248,7 @@ export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData =
 
   const periodsToDisplay: Period[] = [];
   const periodsMap: PeriodsMap = {};
-  const xDomain: XDomain = [NaN, NaN];
+  const xDomain: Domain = [NaN, NaN];
 
   let periodNumberCounter = 0;
   let period: Period | undefined;

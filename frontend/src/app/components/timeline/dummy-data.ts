@@ -119,9 +119,8 @@ export function* dummyConceptGenerator(): Generator<TemporalConcept> {
       }
     };
   }
-};
+}
 
-const generator = dummyConceptGenerator();
-
-const dummyData: TemporalConcept[] = Array.from({length: 30}).map(_ => generator.next().value);
-console.table(dummyData.map(d => ([d.id.id, d.temporalExtends[0].start.min, d.temporalExtends[0].end.min])));
+// const generator = dummyConceptGenerator();
+// const dummyData: TemporalConcept[] = Array.from({length: 30}).map(_ => generator.next().value);
+// console.table(dummyData.map(d => ([d.id.id, d.temporalExtends[0].start.min, d.temporalExtends[0].end.min])));

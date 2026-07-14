@@ -1,9 +1,10 @@
 import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild, inject, untracked} from '@angular/core';
 import * as d3 from 'd3';
-import {Period, TimeLineData, XDomain} from '../../interfaces/timeline';
+import {Period, TimeLineData, Domain} from '../../interfaces/timeline';
 import {prepareTimelineData} from '../../functions/timeline-data';
 import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
 import {Router } from "@angular/router";
+import {D3ZoomEvent} from 'd3-zoom';
 
 
 @Component({
@@ -22,56 +23,67 @@ export class Timeline implements AfterViewInit {
   readonly inactive = input<boolean>(false);
   readonly concepts = input<TemporalConcept[]>([]);
 
-  private readonly margin = 15;
-  private readonly maxZoomYears = 5;
-  private readonly minStartYear = -10000;
-  private readonly maxStartYear = new Date().getFullYear();
-  private readonly barHeight = 20;
-  private readonly buttonZoomFactor = 0.5;
-
-  private timeline: d3.Selection<SVGSVGElement, Period, HTMLElement, Period>|undefined = undefined;
-  private canvas: d3.Selection<SVGGElement, Period, HTMLElement, Period>|undefined = undefined;
-  private axis:  d3.Axis<d3.NumberValue>|undefined = undefined;
-  private axisElement: d3.Selection<SVGGElement, Period, HTMLElement, Period>|undefined = undefined;
-  private bars: d3.Selection<d3.EnterElement, Period, SVGGElement, Period>|undefined = undefined;
-  private barPaths: d3.Selection<SVGPathElement, Period, SVGGElement, Period>|undefined = undefined;
-  private barTexts: d3.Selection<SVGTextElement, Period, SVGGElement, Period>|undefined = undefined;
-  private tooltip: d3.Selection<HTMLDivElement, Period, HTMLElement, Period>|undefined = undefined;
-  private zoom: d3.ZoomBehavior<SVGSVGElement, Period>|undefined = undefined;
-  private baseX: d3.ScaleLinear<number, number, never>|undefined = undefined;
-  private baseY: d3.ScaleLinear<number, number, never>|undefined = undefined;
-  private x: d3.ScaleLinear<number, number, never>|undefined = undefined;
-  private y: d3.ScaleLinear<number, number, never>|undefined = undefined;
-
-  private totalXDomain: XDomain = [NaN, NaN];
-  private startXDomain: XDomain = [NaN, NaN];
-  private startYDomain: XDomain = [NaN, NaN];
-
-  private initialized: boolean = false;
-
-  private hoverPeriod: Period|undefined = undefined;
-
   private readonly timelineData = computed(() => prepareTimelineData(this.concepts()));
+
+  private readonly settings = {
+    margin: 15,
+    maxZoomYears: 5,
+    minStartYear: -10000,
+    maxStartYear: new Date().getFullYear(),
+    barHeight : 20,
+    buttonZoomFactor : 0.5,
+  };
+
+  private d3!: {
+    timeline: d3.Selection<SVGSVGElement, Period, HTMLElement, Period>;
+    canvas: d3.Selection<SVGGElement, Period, HTMLElement, Period>;
+    axis:  d3.Axis<d3.NumberValue>;
+    axisElement: d3.Selection<SVGGElement, Period, HTMLElement, Period>;
+    tooltip: d3.Selection<HTMLDivElement, Period, HTMLElement, Period>;
+    zoom: d3.ZoomBehavior<SVGSVGElement, Period>;
+    baseX: d3.ScaleLinear<number, number, never>;
+    baseY: d3.ScaleLinear<number, number, never>;
+    x: d3.ScaleLinear<number, number, never>;
+    y: d3.ScaleLinear<number, number, never>,
+    totalXDomain: Domain;
+    startXDomain: Domain;
+    startYDomain: Domain;
+    hoverPeriod: Period | undefined;
+  }
+
+  private bars!: {
+    elems: d3.Selection<d3.EnterElement, Period, SVGGElement, Period>;
+    paths: d3.Selection<SVGPathElement, Period, SVGGElement, Period>;
+    texts: d3.Selection<SVGTextElement, Period, SVGGElement, Period>;
+  }
 
   constructor() {
     effect(() => {
       const tld = this.timelineData();
-      if (!this.initialized) return;
+
+      if (!this.d3) return;
+
       const spid = untracked(() => this.selectedPeriodId());
       this.updateDomains(tld, spid);
       this.draw(tld);
     });
     effect(() => {
-      this.selectPeriod(this.selectedPeriodId());
-      if (!this.initialized) return;
+      const spid = this.selectedPeriodId();
+
+      if (!this.d3 || !this.bars) return;
+
+      this.selectPeriod(spid);
       const tld = untracked(() => this.timelineData());
       this.updateDomains(tld, this.selectedPeriodId());
       this.setZoomExtend();
       this.zoomFn(true);
     });
     effect(() => {
-      if (!this.initialized) return;
-      this.updateAxisTicks(this.axisTicks());
+      const at = this.axisTicks();
+
+      if (!this.d3) return;
+
+      this.updateAxisTicks(at);
     });
   }
 
@@ -83,70 +95,88 @@ export class Timeline implements AfterViewInit {
     const height = this.getHeight();
     const width = this.getWidth();
 
-    this.baseY = d3.scaleLinear()
-      .domain([0, this.barHeight * 20])
+    const baseY = d3.scaleLinear()
+      .domain([0, this.settings.barHeight * 20])
       .range([0, height - 30]);
-    this.y = this.baseY.copy();
+    const y = baseY.copy();
 
-    this.baseX = d3.scaleLinear();
-    this.x = this.baseX.copy();
+    const baseX = d3.scaleLinear();
+    const x = baseX.copy();
 
-    this.timeline = d3
+    const timeline = d3
       .select<SVGSVGElement, Period>('#timeline')
       .append('svg')
       .attr('width', width)
       .attr('height', height)
       .classed('timeline', true);
 
-    this.canvas = this.timeline!.append('g')
+    const canvas = timeline
+      .append('g')
       .attr('width', width)
       .attr('height', height - 30);
 
-    this.axisElement = this.timeline
+    const axisElement = timeline
       .append('g')
       .attr('transform', `translate(0, ${height - 30})`)
       .classed('axis', true)
 
-    this.zoom = d3.zoom<SVGSVGElement, Period>()
-      .on('zoom', event => {
-        if (this.inactive()) return;
-        this.x = event.transform.rescaleX(this.baseX);
-        this.axis!.scale(this.x!);
-        this.axisElement!.call(this.axis!);
+    const zoom = d3.zoom<SVGSVGElement, Period>()
+      .on('zoom', this.zoomCallback.bind(this));
 
-        const start = this.baseY!.domain();
-        const pixelsPerDomain = (this.baseY!.range()[1] - this.baseY!.range()[0]) / (start[1] - start[0]);
-        const offset = event.transform.y / pixelsPerDomain;
-        this.y!.domain([
-          start[0] - offset,
-          start[1] - offset
-        ]);
+    timeline
+      .call(zoom)
 
-        this.updateBars();
-      });
-
-    this.timeline!
-      .call(this.zoom)
-
-    this.tooltip = d3.select<HTMLDivElement, Period>('body')
+    const tooltip = d3.select<HTMLDivElement, Period>('body')
       .append('div')
       .classed('timeline-tooltip', true);
 
     d3.select(window).on('resize', () => this.resize());
 
-    this.initialized = true;
+    const axis = d3.axisBottom(x);
+
+    this.d3 = {
+      axis,
+      axisElement,
+      baseX,
+      baseY,
+      canvas,
+      timeline,
+      tooltip,
+      x,
+      y,
+      zoom,
+      hoverPeriod: undefined,
+      startXDomain: [0, 0],
+      startYDomain: [0, 0],
+      totalXDomain: [0, 0]
+    }
   };
 
+  private zoomCallback(event: d3.D3ZoomEvent<SVGSVGElement, Period>): void {
+    this.d3.x = event.transform.rescaleX(this.d3.baseX);
+    this.d3.axis.scale(this.d3.x);
+    this.d3.axisElement!.call(this.d3.axis);
+
+    const start = this.d3.baseY.domain();
+    const pixelsPerDomain = (this.d3.baseY.range()[1] - this.d3.baseY.range()[0]) / (start[1] - start[0]);
+    const offset = event.transform.y / pixelsPerDomain;
+    this.d3.y.domain([
+      start[0] - offset,
+      start[1] - offset
+    ]);
+
+    this.updateBars();
+  }
+
   private selectPeriod(selectedPeriodId: string | undefined): void {
-    if (!this.barPaths) return;
-    this.barPaths
+    this.bars.paths
       .classed('selected', d => d.id === selectedPeriodId);
   }
 
   private updateDomains(timelineData: TimeLineData, spid: string | undefined): void {
     const width = this.getWidth();
 
-    this.totalXDomain = timelineData.xDomain;
+    this.d3.totalXDomain = timelineData.xDomain;
 
     if (spid && timelineData.periodsMap[spid]) {
       this.setStartDomainsToSelection(timelineData.periodsMap[spid]);
@@ -154,33 +184,35 @@ export class Timeline implements AfterViewInit {
       this.setStandardStartDomains();
     }
 
-    this.baseX!
-      .domain(this.startXDomain)
+    this.d3.baseX
+      .domain(this.d3.startXDomain)
       .range([0, width]);
-    this.x = this.baseX!.copy();
+    this.d3.x = this.d3.baseX.copy();
 
-    this.y!
-      .domain(this.startYDomain);
+    this.d3.y
+      .domain(this.d3.startYDomain);
   }
 
   private updateAxisTicks(axisTicks: number | undefined): void {
-    this.axis = d3.axisBottom(this.x!)
+    this.d3.axis = d3.axisBottom(this.d3.x)
       .ticks(axisTicks ?? 10)
       .tickSize(10);
 
-    this.axisElement!
-      .call(this.axis);
+    this.d3.axisElement
+      .call(this.d3.axis);
   }
 
   private draw(timelineData: TimeLineData) {
-    this.timeline!.classed('inactive', this.inactive());
+    this.d3.timeline.classed('inactive', this.inactive());
 
-    this.canvas!.selectAll("*").remove();
-    this.bars = this.canvas!.selectAll('g')
+    this.d3.canvas.selectAll("*").remove();
+    const elems = this.d3.canvas
+      .selectAll('g')
       .data(timelineData.periods)
       .enter(); // TODO use join
 
-    this.barPaths = this.bars.append('g')
+    const paths = elems
+      .append('g')
       .attr('id', d=> 'bar-path-' + d.id)
       .attr('class', d => {
         let barClass = 'bar level' + (d.level + 1);
@@ -194,22 +226,25 @@ export class Timeline implements AfterViewInit {
       .append('path');
 
     if (!this.inactive()) {
-      this.barPaths.on('click', this.showPeriod.bind(this));
-      this.addHoverBehavior(this.barPaths);
+      paths.on('click', this.showPeriod.bind(this));
+      this.addHoverBehavior(paths);
     }
 
-    this.barTexts = this.canvas!.selectAll<SVGTextElement, Period>('g')
+    const texts = this.d3.canvas
+      .selectAll<SVGTextElement, Period>('g')
       .append('text')
       .classed('text', true)
       .attr('id', d => 'bar-text-'+ d.id)
       .on('click', this.showPeriod.bind(this));
 
     if (this.inactive()) {
-      this.barTexts.classed('inactive', true);
+      texts
+        .classed('inactive', true);
     } else {
-      this.addHoverBehavior(this.barTexts);
+      this.addHoverBehavior(texts);
     }
 
+    this.bars = {elems, paths, texts};
     this.updateBars();
     this.updateAxisTicks(this.axisTicks());
     this.setStandardStartDomains();
@@ -217,51 +252,51 @@ export class Timeline implements AfterViewInit {
   }
 
   private setZoomExtend(): void {
-    const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
-    const maxZoom = (this.startXDomain[1] - this.startXDomain[0]) / this.maxZoomYears;
-    this.zoom!
+    const minZoom = (this.d3.startXDomain[1] - this.d3.startXDomain[0]) / (this.d3.totalXDomain[1] - this.d3.totalXDomain[0]);
+    const maxZoom = (this.d3.startXDomain[1] - this.d3.startXDomain[0]) / this.settings.maxZoomYears;
+    this.d3.zoom
       .scaleExtent([minZoom, maxZoom]);
   }
 
-  private resize() {
-    if (!this.initialized) return;
+  private resize(): void {
+    if (!this.d3) return;
 
     const width = this.getWidth();
     const height = this.getHeight();
 
-    this.y!.range([0, height - 30]);
-    this.x!.range([0, width]);
+    this.d3.y.range([0, height - 30]);
+    this.d3.x.range([0, width]);
 
-    this.timeline!.attr('width', width)
+    this.d3.timeline
+      .attr('width', width)
       .attr('height', height);
 
-    this.canvas!.attr('width', width)
+    this.d3.canvas
+      .attr('width', width)
       .attr('height', height - 30);
 
-    this.axisElement!.attr('y', height - 30);
-    this.axisElement!.attr('width', width);
-    this.axisElement!.call(this.axis!);
+    this.d3.axisElement.attr('y', height - 30);
+    this.d3.axisElement.attr('width', width);
+    this.d3.axisElement.call(this.d3.axis);
 
     this.updateBars();
   };
 
   private getWidth(): number {
-    return this.tlContainer.nativeElement.clientWidth - this.margin;
+    return this.tlContainer.nativeElement.clientWidth - this.settings.margin;
   };
 
   private getHeight(): number {
-    return this.tlContainer.nativeElement.clientHeight - this.margin;
+    return this.tlContainer.nativeElement.clientHeight - this.settings.margin;
   };
 
-  private updateBars() {
-    if (!this.barPaths) throw new Error('no barPaths');
-    if (!this.barTexts) throw new Error('no barTexts');
+  private updateBars(): void {
+    this.bars.paths
+      .attr('d', data => this.computeBarPaths(data));
 
-    this.barPaths.attr('d', data => this.computeBarPaths(data));
-
-    this.barTexts
-      .attr('x', data => this.x!(data.from) + (this.getBarWidth(data)) / 2)
-      .attr('y', data => this.y!(data.row) + data.row * (this.barHeight + 5) + this.barHeight / 2 + 5)
+    this.bars.texts
+      .attr('x', data => this.d3.x(data.from) + (this.getBarWidth(data)) / 2)
+      .attr('y', data => this.d3.y(data.row) + data.row * (this.settings.barHeight + 5) + this.settings.barHeight / 2 + 5)
       .text(data => {
         if (this.doesTextFitInBar(data.name, this.getBarWidth(data))) {
           data.textVisible = true;
@@ -272,14 +307,13 @@ export class Timeline implements AfterViewInit {
         }
       });
 
-    if (!this.axisElement) return;
-    this.axisElement.selectAll<SVGTextElement, string>('.tick text')
+    this.d3.axisElement.selectAll<SVGTextElement, string>('.tick text')
       .text(p => this.formatTickText(p));
   };
 
   private computeBarPaths(data: Period): string {
     const topY = this.getPathYPosition(data);
-    const bottomY = topY + this.barHeight;
+    const bottomY = topY + this.settings.barHeight;
     const edgeRadius = Math.min(Math.floor(this.getBarWidth(data) / 2), 5);
 
     return this.computeLeftEndPathDefinition(data, topY, bottomY, edgeRadius) + ' '
@@ -287,41 +321,39 @@ export class Timeline implements AfterViewInit {
   };
 
   private computeLeftEndPathDefinition(data: Period, topY: number, bottomY: number, edgeRadius: number): string {
-    if (!this.x) throw new Error("noX!");
     if (data.earliestFrom) {
       return 'M'
-        + (this.x(data.earliestFrom) + ((this.x(data.from) - this.x(data.earliestFrom)) / 10)) + ' ' + bottomY + ' '
-        + 'L' + (this.x(data.from) + + ((this.x(data.from) - this.x(data.earliestFrom)) / 10)) + ' ' + topY;
+        + (this.d3.x(data.earliestFrom) + ((this.d3.x(data.from) - this.d3.x(data.earliestFrom)) / 10)) + ' ' + bottomY + ' '
+        + 'L' + (this.d3.x(data.from) + + ((this.d3.x(data.from) - this.d3.x(data.earliestFrom)) / 10)) + ' ' + topY;
     } else if (edgeRadius > 0) {
-      return 'M' + (this.x(data.from) + edgeRadius) + ' ' + bottomY + ' '
-        + 'Q' + this.x(data.from) + ' ' + bottomY + ' ' + this.x(data.from) + ' ' + (bottomY - edgeRadius)
-        + 'L' + this.x(data.from) + ' ' + (topY + edgeRadius)
-        + 'Q' + this.x(data.from) + ' ' + topY + ' ' + (this.x(data.from) + edgeRadius) + ' ' + topY
+      return 'M' + (this.d3.x(data.from) + edgeRadius) + ' ' + bottomY + ' '
+        + 'Q' + this.d3.x(data.from) + ' ' + bottomY + ' ' + this.d3.x(data.from) + ' ' + (bottomY - edgeRadius)
+        + 'L' + this.d3.x(data.from) + ' ' + (topY + edgeRadius)
+        + 'Q' + this.d3.x(data.from) + ' ' + topY + ' ' + (this.d3.x(data.from) + edgeRadius) + ' ' + topY
     } else {
-      return 'M' + this.x(data.from) + ' ' + bottomY + ' '
-        + 'L' + this.x(data.from) + ' ' + topY;
+      return 'M' + this.d3.x(data.from) + ' ' + bottomY + ' '
+        + 'L' + this.d3.x(data.from) + ' ' + topY;
     }
   };
 
   private computeRightEndPathDefinition(data: Period, topY: number, bottomY: number, edgeRadius: number): string {
-    if (!this.x) throw new Error("noX!");
     if (data.latestTo || edgeRadius === 0) {
-      return 'L' + this.x(data.latestTo || data.to) + ' ' + topY + ' '
-        + 'L' + this.x(data.to) + ' ' + bottomY;
+      return 'L' + this.d3.x(data.latestTo || data.to) + ' ' + topY + ' '
+        + 'L' + this.d3.x(data.to) + ' ' + bottomY;
     } else {
-      return 'L' + (this.x(data.to) - edgeRadius) + ' ' + topY + ' '
-        + 'Q' + this.x(data.to) + ' ' + topY + ' ' + this.x(data.to) + ' ' + (topY + edgeRadius)
-        + 'L' + this.x(data.to) + ' ' + (bottomY - edgeRadius)
-        + 'Q' + this.x(data.to) + ' ' + bottomY + ' ' + (this.x(data.to) - edgeRadius) + ' ' + bottomY;
+      return 'L' + (this.d3.x(data.to) - edgeRadius) + ' ' + topY + ' '
+        + 'Q' + this.d3.x(data.to) + ' ' + topY + ' ' + this.d3.x(data.to) + ' ' + (topY + edgeRadius)
+        + 'L' + this.d3.x(data.to) + ' ' + (bottomY - edgeRadius)
+        + 'Q' + this.d3.x(data.to) + ' ' + bottomY + ' ' + (this.d3.x(data.to) - edgeRadius) + ' ' + bottomY;
     }
   };
 
   private getPathYPosition(data: Period): number {
-    return this.y!(data.row) + data.row * (this.barHeight + 5);
+    return this.d3.y(data.row) + data.row * (this.settings.barHeight + 5);
   };
 
   private getBarWidth(data: Period): number {
-    return this.x!(data.to) - this.x!(data.from);
+    return this.d3.x(data.to) - this.d3.x(data.from);
   };
 
   private doesTextFitInBar(text: string, barWidth: number): boolean {
@@ -355,78 +387,69 @@ export class Timeline implements AfterViewInit {
     selection
       .on('mouseover', (event: MouseEvent, period: Period) => {
         d3.select('#bar-path-' + period.id).classed('hover', true);
-        if (period !== this.hoverPeriod) {
+        if (period !== this.d3.hoverPeriod) {
           d3.select('#bar-path-' + period.id).raise();
           d3.select('#bar-text-' + period.id).raise();
-          this.hoverPeriod = period;
+          this.d3.hoverPeriod = period;
         }
         if (period.textVisible) return;
-        if (!this.tooltip) throw new Error('no this.tooltip');
-        this.tooltip.text(period.name);
-        return this.tooltip.style('visibility', 'visible');
+        this.d3.tooltip.text(period.name);
+        return this.d3.tooltip.style('visibility', 'visible');
       })
       .on('mousemove', (event: MouseEvent, period: Period) => {
-        if (!this.tooltip) throw new Error('no this.tooltip');
-        this.tooltip.style('top', (event.pageY - 10) + 'px');
-        const tooltipWidth = this.tooltip.node()?.getBoundingClientRect().width ?? 0;
+        this.d3.tooltip.style('top', (event.pageY - 10) + 'px');
+        const tooltipWidth = this.d3.tooltip.node()?.getBoundingClientRect().width ?? 0;
         return tooltipWidth < this.getWidth() - event.pageX
-          ? this.tooltip.style('left', (event.pageX + 10) + 'px')
-          : this.tooltip.style('left', (event.pageX - tooltipWidth - 10) + 'px');
+          ? this.d3.tooltip.style('left', (event.pageX + 10) + 'px')
+          : this.d3.tooltip.style('left', (event.pageX - tooltipWidth - 10) + 'px');
       })
       .on('mouseout', (event: MouseEvent, period: Period) => {
-        if (!this.tooltip) throw new Error('no this.tooltip');
         d3.select('#bar-path-' + period.id).classed('hover', false);
-        return this.tooltip.style('visibility', 'hidden');
+        return this.d3.tooltip.style('visibility', 'hidden');
       });
   };
 
   private setStartDomainsToSelection(selectedPeriod: Period): void {
     const span = (selectedPeriod.latestTo || selectedPeriod.to) - (selectedPeriod.earliestFrom || selectedPeriod.from);
-    const offset = (span < this.maxZoomYears) ? (this.maxZoomYears - span) / 2 : span / 2;
+    const offset = (span < this.settings.maxZoomYears) ? (this.settings.maxZoomYears - span) / 2 : span / 2;
     let from = (selectedPeriod.earliestFrom || selectedPeriod.from) - offset;
     let to = (selectedPeriod.latestTo || selectedPeriod.to) + offset;
-    if (from < this.totalXDomain[0]) from = this.totalXDomain[0];
-    if (to > this.totalXDomain[1]) to = this.totalXDomain[1];
-    this.startXDomain = [from, to];
+    if (from < this.d3.totalXDomain[0]) from = this.d3.totalXDomain[0];
+    if (to > this.d3.totalXDomain[1]) to = this.d3.totalXDomain[1];
+    this.d3.startXDomain = [from, to];
 
     let centralRow = selectedPeriod.row;
     if (centralRow < 5) centralRow = 5;
 
-    const rowHeight = this.barHeight + 5;
-    const center = centralRow * rowHeight + this.barHeight / 2;
+    const rowHeight = this.settings.barHeight + 5;
+    const center = centralRow * rowHeight + this.settings.barHeight / 2;
     const visibleHeight = 20 * rowHeight;
 
-    this.startYDomain = [
+    this.d3.startYDomain = [
       center - visibleHeight / 2,
       center + visibleHeight / 2
     ];
   };
 
   private setStandardStartDomains(): void {
-    this.startXDomain[0] = this.totalXDomain[0];
-    this.startXDomain[1] = this.totalXDomain[1];
-    if (this.startXDomain[0] < this.minStartYear)
-      this.startXDomain[0] = this.minStartYear;
-    if (this.startXDomain[1] > this.maxStartYear)
-      this.startXDomain[1] = this.maxStartYear;
-    this.startYDomain = [0, this.barHeight * 20];
+    this.d3.startXDomain[0] = this.d3.totalXDomain[0];
+    this.d3.startXDomain[1] = this.d3.totalXDomain[1];
+    if (this.d3.startXDomain[0] < this.settings.minStartYear) this.d3.startXDomain[0] = this.settings.minStartYear;
+    if (this.d3.startXDomain[1] > this.settings.maxStartYear) this.d3.startXDomain[1] = this.settings.maxStartYear;
+    this.d3.startYDomain = [0, this.settings.barHeight * 20];
   };
 
   protected zoomIn(event: PointerEvent): void {
-    // event.target.blur();
     this.zoomFn(true);
   };
 
   protected zoomOut(event: PointerEvent): void {
-    // event.target.blur();
     this.zoomFn(false);
   };
 
   private zoomFn(zoomIn: boolean): void {
-    if (!this.zoom) throw new Error("no zoom");
-    if (!this.timeline) throw new Error("no timeline");
-    const node = this.timeline.node();
-    if (!node) throw new Error("no node");
+    const node = this.d3.timeline.node();
+    if (!node) return;
 
     const center: [number, number] = [
       this.getWidth() / 2,
@@ -434,8 +457,8 @@ export class Timeline implements AfterViewInit {
     ];
 
     const transform = d3.zoomTransform(node);
-    const targetZoom = transform.k * (1 + this.buttonZoomFactor * (zoomIn ? 1 : -1));
-    const extent = this.zoom.scaleExtent();
+    const targetZoom = transform.k * (1 + this.settings.buttonZoomFactor * (zoomIn ? 1 : -1));
+    const extent = this.d3.zoom.scaleExtent();
 
     if (targetZoom < extent[0] || targetZoom > extent[1]) {
       return;
@@ -448,10 +471,10 @@ export class Timeline implements AfterViewInit {
       .translate(translateX, translateY)
       .scale(targetZoom);
 
-    this.timeline
+    this.d3.timeline
       .transition()
       .duration(350)
-      .call(this.zoom.transform, targetTransform);
+      .call(this.d3.zoom.transform, targetTransform);
   }
 }
 
