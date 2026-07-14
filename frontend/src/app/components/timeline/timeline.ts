@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild, inject} from '@angular/core';
+import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild, inject, untracked} from '@angular/core';
 import * as d3 from 'd3';
 import {Period, TimeLineData, XDomain} from '../../interfaces/timeline';
 import {prepareTimelineData} from '../../functions/timeline-data';
@@ -56,12 +56,18 @@ export class Timeline implements AfterViewInit {
   constructor() {
     effect(() => {
       const tld = this.timelineData();
-      const spid = this.selectedPeriodId();
-      const inactive = this.inactive();
       if (!this.initialized) return;
+      const spid = untracked(() => this.selectedPeriodId());
       this.updateDomains(tld, spid);
       this.draw(tld);
-      this.selectPeriod(spid);
+    });
+    effect(() => {
+      this.selectPeriod(this.selectedPeriodId());
+      if (!this.initialized) return;
+      const tld = untracked(() => this.timelineData());
+      this.updateDomains(tld, this.selectedPeriodId());
+      this.setZoomExtend();
+      this.zoomFn(true);
     });
     effect(() => {
       if (!this.initialized) return;
@@ -113,15 +119,11 @@ export class Timeline implements AfterViewInit {
 
     this.drag = d3.drag<SVGSVGElement, Period, Node>()
       .on('drag', event => {
-        if (this.inactive()) return;
-        if (!this.y) throw new Error("noY!");
-        if (!this.axis) throw new Error("noAxis!");
-        if (!this.axisElement) throw new Error("no axisElement!");
-        const domain = this.y.domain();
+        const domain = this.y!.domain();
         domain[0] -= event.dy;
         domain[1] -= event.dy;
-        this.y.domain(domain);
-        this.axisElement.call(this.axis);
+        this.y!.domain(domain);
+        this.axisElement!.call(this.axis!);
         this.updateBars();
       });
 
@@ -133,24 +135,24 @@ export class Timeline implements AfterViewInit {
       .append('div')
       .classed('timeline-tooltip', true);
 
+    d3.select(window).on('resize', () => this.resize());
+
     this.initialized = true;
   };
 
   private selectPeriod(selectedPeriodId: string | undefined): void {
-    if (selectedPeriodId) {
-      this.barPaths!
-        .filter(d => d.id === selectedPeriodId)
-        .classed('selected', true);
-    }
+    if (!this.barPaths) return;
+    this.barPaths
+      .classed('selected', d => d.id === selectedPeriodId);
   }
 
-  private updateDomains(timelineData: TimeLineData, selectedPeriodId: string | undefined) {
+  private updateDomains(timelineData: TimeLineData, spid: string | undefined): void {
     const width = this.getWidth();
 
     this.totalXDomain = timelineData.xDomain;
 
-    if (selectedPeriodId && timelineData.periodsMap[selectedPeriodId]) {
-      this.setStartDomainsToSelection(timelineData.periodsMap[selectedPeriodId]);
+    if (spid && timelineData.periodsMap[spid]) {
+      this.setStartDomainsToSelection(timelineData.periodsMap[spid]);
     } else {
       this.setStandardStartDomains();
     }
@@ -158,13 +160,13 @@ export class Timeline implements AfterViewInit {
     this.baseX!
       .domain(this.startXDomain)
       .range([0, width]);
-
     this.x = this.baseX!.copy();
 
-    this.y!.domain(this.startYDomain); // TODO is ! a good choice here?
+    this.y!
+      .domain(this.startYDomain);
   }
 
-  private updateAxisTicks(axisTicks: number | undefined) {
+  private updateAxisTicks(axisTicks: number | undefined): void {
     this.axis = d3.axisBottom(this.x!)
       .ticks(axisTicks ?? 10)
       .tickSize(10);
@@ -195,7 +197,7 @@ export class Timeline implements AfterViewInit {
       .append('path');
 
     if (!this.inactive()) {
-      this.barPaths.on('click', this.showPeriod);
+      this.barPaths.on('click', this.showPeriod.bind(this));
       this.addHoverBehavior(this.barPaths);
     }
 
@@ -203,7 +205,7 @@ export class Timeline implements AfterViewInit {
       .append('text')
       .classed('text', true)
       .attr('id', d => 'bar-text-'+ d.id)
-      .on('click', this.showPeriod);
+      .on('click', this.showPeriod.bind(this));
 
     if (this.inactive()) {
       this.barTexts.classed('inactive', true);
@@ -211,15 +213,17 @@ export class Timeline implements AfterViewInit {
       this.addHoverBehavior(this.barTexts);
     }
 
-    const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
-    const maxZoom = (this.startXDomain[1] - this.startXDomain[0]) / this.maxZoomYears;
-
-    this.zoom!
-      .scaleExtent([minZoom, maxZoom]);
-
     this.updateBars();
     this.updateAxisTicks(this.axisTicks());
-    d3.select(window).on('resize', () => this.resize());
+    this.setStandardStartDomains();
+    this.setZoomExtend();
+  }
+
+  private setZoomExtend(): void {
+    const minZoom = (this.startXDomain[1] - this.startXDomain[0]) / (this.totalXDomain[1] - this.totalXDomain[0]);
+    const maxZoom = (this.startXDomain[1] - this.startXDomain[0]) / this.maxZoomYears;
+    this.zoom!
+      .scaleExtent([minZoom, maxZoom]);
   }
 
   private resize() {
@@ -228,25 +232,18 @@ export class Timeline implements AfterViewInit {
     const width = this.getWidth();
     const height = this.getHeight();
 
-    if (!this.y) throw new Error('no y');
-    if (!this.x) throw new Error('no x');
-    if (!this.timeline) throw new Error('no timeline');
-    if (!this.canvas) throw new Error('no canvas');
-    if (!this.axisElement) throw new Error('no axisElement');
-    if (!this.axis) throw new Error('no axis');
+    this.y!.range([0, height - 30]);
+    this.x!.range([0, width]);
 
-    this.y.range([0, height - 30]);
-    this.x.range([0, width]);
-
-    this.timeline.attr('width', width)
+    this.timeline!.attr('width', width)
       .attr('height', height);
 
-    this.canvas.attr('width', width)
+    this.canvas!.attr('width', width)
       .attr('height', height - 30);
 
-    this.axisElement.attr('y', height - 30);
-    this.axisElement.attr('width', width);
-    this.axisElement.call(this.axis);
+    this.axisElement!.attr('y', height - 30);
+    this.axisElement!.attr('width', width);
+    this.axisElement!.call(this.axis!);
 
     this.updateBars();
   };
@@ -266,14 +263,8 @@ export class Timeline implements AfterViewInit {
     this.barPaths.attr('d', data => this.computeBarPaths(data));
 
     this.barTexts
-      .attr('x', data => {
-        if (!this.x) throw new Error("noX!");
-        return this.x(data.from) + (this.getBarWidth(data)) / 2
-      })
-      .attr('y', data => {
-        if (!this.y) throw new Error("noY!");
-        return this.y(data.row) + data.row * (this.barHeight + 5) + this.barHeight / 2 + 5
-      })
+      .attr('x', data => this.x!(data.from) + (this.getBarWidth(data)) / 2)
+      .attr('y', data => this.y!(data.row) + data.row * (this.barHeight + 5) + this.barHeight / 2 + 5)
       .text(data => {
         if (this.doesTextFitInBar(data.name, this.getBarWidth(data))) {
           data.textVisible = true;
@@ -329,13 +320,11 @@ export class Timeline implements AfterViewInit {
   };
 
   private getPathYPosition(data: Period): number {
-    if (!this.y) throw new Error("noY!");
-    return this.y(data.row) + data.row * (this.barHeight + 5);
+    return this.y!(data.row) + data.row * (this.barHeight + 5);
   };
 
   private getBarWidth(data: Period): number {
-    if (!this.x) throw new Error("noX!");
-    return this.x(data.to) - this.x(data.from);
+    return this.x!(data.to) - this.x!(data.from);
   };
 
   private doesTextFitInBar(text: string, barWidth: number): boolean {
@@ -405,9 +394,15 @@ export class Timeline implements AfterViewInit {
 
     let centralRow = selectedPeriod.row;
     if (centralRow < 5) centralRow = 5;
-    if (!this.y) throw new Error('no y');
-    const yPos = centralRow + this.y.invert(centralRow * (this.barHeight + 5)) - 5;
-    this.startYDomain = [yPos - this.barHeight * 10, yPos + this.barHeight * 10];
+
+    const rowHeight = this.barHeight + 5;
+    const center = centralRow * rowHeight + this.barHeight / 2;
+    const visibleHeight = 20 * rowHeight;
+
+    this.startYDomain = [
+      center - visibleHeight / 2,
+      center + visibleHeight / 2
+    ];
   };
 
   private setStandardStartDomains(): void {

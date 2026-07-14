@@ -31,7 +31,7 @@ export class Results {
     stream: ({ params }) => this.bs.search(params)
   });
 
-  searchQuery: Signal<SearchQuery> = toSignal(
+  readonly searchQuery: Signal<SearchQuery> = toSignal(
     this.route.queryParamMap.pipe(
       map(params => {
         const q = params.get('q') ?? '*';

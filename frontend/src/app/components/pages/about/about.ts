@@ -13,12 +13,8 @@ import {dummyConceptGenerator} from '../../timeline/dummy-data';
 })
 export class About implements OnInit {
   ngOnInit(): void {
-      setTimeout(() => {
-        this.pumpData();
-      },100)
-    setTimeout(() => {
-      this.pumpData();
-    },1000)
+    setTimeout(() => {this.pumpData();},100)
+    setTimeout(() => {this.pumpData();},1000)
   }
   protected data = signal<TemporalConcept[]>([]);
   protected selected = signal<string | undefined>(undefined);

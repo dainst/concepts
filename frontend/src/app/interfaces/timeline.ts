@@ -16,13 +16,8 @@ export interface Period {
   colorGroup: number;
   level: number;
   textVisible?: boolean;
-  periodGroup: PeriodGroup; // ?
-  groupRow: any; // !
-}
-
-export interface PeriodRow {
-  from: number;
-  to: number;
+  periodGroup: PeriodGroup;
+  groupRow: number;
 }
 
 export interface PeriodGroup {

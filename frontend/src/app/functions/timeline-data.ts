@@ -34,15 +34,8 @@ export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData =
       colorGroup: 0,
       level: 0,
       textVisible: false,
-      groupRow: undefined,
-      periodGroup: {
-        number: -1,
-        rows: [],
-        periodsCount: 0,
-        from: 0,
-        to: 0,
-        startRow: 0
-      },
+      groupRow: -1,
+      periodGroup: createGroup()
     };
   }
 
@@ -110,7 +103,7 @@ export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData =
     return period;
   }
 
-  const createGroup = (groupNumber: number): PeriodGroup => {
+  const createGroup = (groupNumber: number = -1): PeriodGroup => {
     return {
       startRow: 0,
       number: groupNumber,
