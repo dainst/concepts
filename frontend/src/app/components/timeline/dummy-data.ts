@@ -10,7 +10,7 @@ interface GeneratedNumbers {
 }
 
 const generateNumbers = (nr: number): GeneratedNumbers => {
-  const r: GeneratedNumbers = {
+  let r: GeneratedNumbers = {
     nr,
     children: [],
     successor: undefined,
@@ -19,8 +19,13 @@ const generateNumbers = (nr: number): GeneratedNumbers => {
     parent: NaN
   }
 
-  r.a = nr * 50 + ((nr % 3) * 5 - (nr % 5) * 3) + (nr >= 0 ? generateNumbers(nr -1 ).b : -2500);
-  r.b = r.a + (nr % 7) * 50 + nr * (nr % 4);
+  r.a = (nr * 50 + ((nr % 3) * 5 - (nr % 5) * 3) + (nr >= 0 ? generateNumbers(nr -1 ).b : -2500)) % 2500;
+  r.b = (r.a + (nr % 7) * 50 + nr * (nr % 4)) % 2500;
+  if (r.a > r.b) r = {
+    ...r,
+    a: r.b,
+    b: r.a
+  };
 
   if ((nr % 4 === 0) && (nr != 0)) {
     r.children.push(nr - 1, nr - 2, nr - 3);
@@ -118,4 +123,5 @@ export function* dummyConceptGenerator(): Generator<TemporalConcept> {
 
 const generator = dummyConceptGenerator();
 
-export const dummyData: TemporalConcept[] = Array.from({length: 10}).map(_ => generator.next().value);
+const dummyData: TemporalConcept[] = Array.from({length: 30}).map(_ => generator.next().value);
+console.table(dummyData.map(d => ([d.id.id, d.temporalExtends[0].start.min, d.temporalExtends[0].end.min])));

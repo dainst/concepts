@@ -38,8 +38,8 @@ export class Timeline implements AfterViewInit {
   private barTexts: d3.Selection<SVGTextElement, Period, SVGGElement, Period>|undefined = undefined;
   private tooltip: d3.Selection<HTMLDivElement, Period, HTMLElement, Period>|undefined = undefined;
   private zoom: d3.ZoomBehavior<SVGSVGElement, Period>|undefined = undefined;
-  private drag: d3.DragBehavior<SVGSVGElement, Period, Node>|undefined = undefined;
   private baseX: d3.ScaleLinear<number, number, never>|undefined = undefined;
+  private baseY: d3.ScaleLinear<number, number, never>|undefined = undefined;
   private x: d3.ScaleLinear<number, number, never>|undefined = undefined;
   private y: d3.ScaleLinear<number, number, never>|undefined = undefined;
 
@@ -83,9 +83,10 @@ export class Timeline implements AfterViewInit {
     const height = this.getHeight();
     const width = this.getWidth();
 
-    this.y = d3.scaleLinear()
+    this.baseY = d3.scaleLinear()
       .domain([0, this.barHeight * 20])
       .range([0, height - 30]);
+    this.y = this.baseY.copy();
 
     this.baseX = d3.scaleLinear();
     this.x = this.baseX.copy();
@@ -109,27 +110,23 @@ export class Timeline implements AfterViewInit {
     this.zoom = d3.zoom<SVGSVGElement, Period>()
       .on('zoom', event => {
         if (this.inactive()) return;
-        if (!this.axis) throw new Error("noAxis!");
-        if (!this.axisElement) throw new Error("no axisElement!");
         this.x = event.transform.rescaleX(this.baseX);
-        this.axis.scale(this.x!);
-        this.axisElement.call(this.axis);
-        this.updateBars();
-      });
-
-    this.drag = d3.drag<SVGSVGElement, Period, Node>()
-      .on('drag', event => {
-        const domain = this.y!.domain();
-        domain[0] -= event.dy;
-        domain[1] -= event.dy;
-        this.y!.domain(domain);
+        this.axis!.scale(this.x!);
         this.axisElement!.call(this.axis!);
+
+        const start = this.baseY!.domain();
+        const pixelsPerDomain = (this.baseY!.range()[1] - this.baseY!.range()[0]) / (start[1] - start[0]);
+        const offset = event.transform.y / pixelsPerDomain;
+        this.y!.domain([
+          start[0] - offset,
+          start[1] - offset
+        ]);
+
         this.updateBars();
       });
 
     this.timeline!
       .call(this.zoom)
-      .call(this.drag);
 
     this.tooltip = d3.select<HTMLDivElement, Period>('body')
       .append('div')
