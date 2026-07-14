@@ -9,27 +9,26 @@
 
   --dark-blue-fg: white;
 
-  --home-header-background: linear-gradient(to right, rgba(106, 164, 184, 0.95) 0%, rgba(71, 123, 199, 0.66) 95%);
-  --home-header-height: 60px;
-  --system-header-height: 60px;
-  --system-header-background: var(--dark-blue);
+  --header-background: linear-gradient(to right, rgba(106, 164, 184, 0.95) 0%, rgba(71, 123, 199, 0.66) 95%);
+  --header-height: 56px;
 
-  --bs-primary: var(--light-grey);
-  --bs-secondary: var(--grey);
-  --bs-success: #198754;
-  --bs-danger: #dc3545;
-  --bs-warning: #ffc107;
-  --bs-info: #0dcaf0;
-  --bs-light: #f8f9fa;
-  --bs-dark: #212529;
+  /*--bs-primary: var(--light-grey);*/
+  /*--bs-secondary: var(--grey);*/
+  /*--bs-success: #198754;*/
+  /*--bs-danger: #dc3545;*/
+  /*--bs-warning: #ffc107;*/
+  /*--bs-info: #0dcaf0;*/
+  /*--bs-light: #f8f9fa;*/
+  /*--bs-dark: #212529;*/
 }
 
 .navbar {
   --bs-navbar-color: var(--dark-blue-fg);
   --bs-navbar-active-color: var(--light-grey);
+  --bs-navbar-padding-y: 100;
 }
 
 
 body {
-  padding-top: calc(var(--home-header-height) + var(--system-header-height));
+  padding-top: var(--header-height);
 }

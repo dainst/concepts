@@ -1,0 +1,50 @@
+#header {
+  background: var(--header-background);
+  width: 100%;
+  position: fixed;
+  padding-left: 0;
+  padding-right: 0;
+  height: var(--header-height);
+  color: white;
+  top: 0;
+  z-index: 1050;
+}
+
+a {
+  padding: 15px 11px;
+  color: white;
+}
+
+a:hover {
+  background-color: rgba(116, 141, 181, 0.9);
+}
+
+#brand-img {
+  margin-top: -16px;
+  margin-bottom: -14px;
+  margin-left: 10px;
+}
+
+#project-logo {
+  font-family: "Cargan", serif;
+  display: inline;
+  font-size: 20px;
+  line-height: 50px;
+  white-space: nowrap;
+  color: #fff;
+  margin-right: 15px;
+  padding: 2px 11px;
+  text-decoration: none;
+}
+#project-logo span {
+  margin-left: 1em;
+}
+
+#project-logo:hover {
+  background-color: transparent;
+}
+
+#project-logo:hover span {
+  text-decoration: underline;
+}
+

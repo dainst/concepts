@@ -1,0 +1,45 @@
+<nav id="header" class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+<!--    <a class="navbar-brand" href="#">Navbar</a>-->
+<!--    <button class="navbar-toggler" type="button" >-->
+<!--      <span class="navbar-toggler-icon"></span>-->
+<!--    </button>-->
+
+    <div class="pull-left">
+      <ul class="nav navbar-nav">
+        <li ngbDropdown>
+          <a href="#" ngbDropdownToggle aria-haspopup="true" aria-expanded="false">
+            <i class="bi bi-list"></i>
+            <img ngSrc="img/logo_idai.png" width="57" height="38" id="brand-img" alt="logo"><!-- style="height: 38px" height="38" -->
+          </a>
+          <ul ngbDropdownMenu class="dropdown-menu">
+            <iframe src="https://idai.world/config/idai-nav.html" frameborder="0" style="height: 100vh; width: 200px;"></iframe>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <a href="/" class="pull-left ng-binding" id="project-logo"><!-- style="height: 36px;" -->
+      <img ngSrc="img/logo_chronontology.png" width="36" height="36" priority>
+      <span>concepts</span>
+    </a>
+
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/pages/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/pages/status">Status</a>
+        </li>
+      </ul>
+      <form class="d-flex" role="search" (ngSubmit)="search()">
+        <input class="form-control me-2" type="search" placeholder="Results" aria-label="Results" [(ngModel)]="queryParams.q" name="q" />
+        <button class="btn btn-outline-success" type="submit">Results</button>
+      </form>
+    </div>
+  </div>
+</nav>

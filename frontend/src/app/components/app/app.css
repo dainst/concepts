@@ -1,6 +1,6 @@
 #body {
   position: fixed;
-  top: calc(var(--home-header-height) + var(--system-header-height));
+  top: var(--header-height);
   left: 0;
   right: 0;
   bottom: 0;
