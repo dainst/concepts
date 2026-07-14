@@ -1,4 +1,5 @@
 import {isPreferredLabels} from './labels.typeguards';
+
 import {
   BareConcept,
   Concept,
@@ -8,7 +9,7 @@ import {
   TemporalConcept, TemporalExtend
 } from '../interfaces/concept';
 
-const isConceptId = (thing: unknown): thing is ConceptId =>
+export const isConceptId = (thing: unknown): thing is ConceptId =>
 	(typeof thing === 'object')
 	&& (thing != null)
 	&& ('id' in thing)
@@ -16,12 +17,12 @@ const isConceptId = (thing: unknown): thing is ConceptId =>
 	&& ('type' in thing)
 	&& (typeof thing.type === 'string');
 
-const isConceptAbstract = (thing: unknown): thing is ConceptAbstract =>
+export const isConceptAbstract = (thing: unknown): thing is ConceptAbstract =>
 	(isPreferredLabels(thing))
 	&& ('id' in thing)
 	&& (isConceptId(thing.id));
 
-const isBareConcept = (thing: unknown): thing is BareConcept =>
+export const isBareConcept = (thing: unknown): thing is BareConcept =>
 	(isConceptAbstract(thing))
 	&& ('labels' in thing)
 	&& (Array.isArray(thing.labels))
@@ -29,23 +30,23 @@ const isBareConcept = (thing: unknown): thing is BareConcept =>
 	&& ('relations' in thing)
 	&& (isRelationAbstractSets(thing.relations));
 
-const isGeographicalConcept = (thing: unknown): thing is GeographicalConcept =>
+export const isGeographicalConcept = (thing: unknown): thing is GeographicalConcept =>
 	(isBareConcept(thing))
 	&& ('geographicalExtends' in thing)
 	&& (Array.isArray(thing.geographicalExtends))
 	&& (thing.geographicalExtends.every(isGeographicalExtend));
 
-const isTemporalConcept = (thing: unknown): thing is TemporalConcept =>
+export const isTemporalConcept = (thing: unknown): thing is TemporalConcept =>
 	(isBareConcept(thing))
 	&& ('temporalExtends' in thing)
 	&& (Array.isArray(thing.temporalExtends))
 	&& (thing.temporalExtends.every(isTemporalExtend));
 
-const isConcept = (thing: unknown): thing is Concept =>
+export const isConcept = (thing: unknown): thing is Concept =>
 	(isGeographicalConcept(thing))
 	&& (isTemporalConcept(thing));
 
-const isRelationAbstractSet = (thing: unknown): thing is RelationAbstractSet =>
+export const isRelationAbstractSet = (thing: unknown): thing is RelationAbstractSet =>
 	(typeof thing === 'object')
 	&& (thing != null)
 	&& ('relation' in thing)
@@ -54,7 +55,7 @@ const isRelationAbstractSet = (thing: unknown): thing is RelationAbstractSet =>
 	&& (Array.isArray(thing.objects))
 	&& (thing.objects.every(isConceptAbstract));
 
-const isRelationAbstractSets = (thing: unknown): thing is RelationAbstractSets =>
+export const isRelationAbstractSets = (thing: unknown): thing is RelationAbstractSets =>
 	(typeof thing === 'object')
 	&& (thing != null)
 	&& ('to' in thing)
@@ -64,7 +65,7 @@ const isRelationAbstractSets = (thing: unknown): thing is RelationAbstractSets =
 	&& (Array.isArray(thing.from))
 	&& (thing.from.every(isRelationAbstractSet));
 
-const isLabel = (thing: unknown): thing is Label =>
+export const isLabel = (thing: unknown): thing is Label =>
 	(typeof thing === 'object')
 	&& (thing != null)
 	&& ('type' in thing)
@@ -76,7 +77,7 @@ const isLabel = (thing: unknown): thing is Label =>
 	&& ('transliteration' in thing)
 	&& (typeof thing.transliteration === 'string');
 
-const isTemporalBound = (thing: unknown): thing is TemporalBound =>
+export const isTemporalBound = (thing: unknown): thing is TemporalBound =>
 	(typeof thing === 'object')
 	&& (thing != null)
 	&& ('precision' in thing)
@@ -88,7 +89,7 @@ const isTemporalBound = (thing: unknown): thing is TemporalBound =>
 	&& ('max' in thing)
 	&& (typeof thing.max === 'number');
 
-const isTemporalExtend = (thing: unknown): thing is TemporalExtend =>
+export const isTemporalExtend = (thing: unknown): thing is TemporalExtend =>
 	(typeof thing === 'object')
 	&& (thing != null)
 	&& ('start' in thing)
@@ -96,7 +97,7 @@ const isTemporalExtend = (thing: unknown): thing is TemporalExtend =>
 	&& ('end' in thing)
 	&& (isTemporalBound(thing.end));
 
-const isGeographicalExtend = (thing: unknown): thing is GeographicalExtend =>
+export const isGeographicalExtend = (thing: unknown): thing is GeographicalExtend =>
 	(typeof thing === 'object')
 	&& (thing != null)
 	&& ('center' in thing)

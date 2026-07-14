@@ -8,7 +8,7 @@
 }
 
 .menu-label {
-  display: inline-block;
+
   writing-mode: vertical-lr;
   transform: rotate(180deg);
 }

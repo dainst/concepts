@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ConceptViewExample } from './concept-view-example';
+import { ConceptViewTimeline } from './concept-view-timeline.component';
 
 describe('ConceptViewExample', () => {
-  let component: ConceptViewExample;
-  let fixture: ComponentFixture<ConceptViewExample>;
+  let component: ConceptViewTimeline;
+  let fixture: ComponentFixture<ConceptViewTimeline>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConceptViewExample],
+      imports: [ConceptViewTimeline],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConceptViewExample);
+    fixture = TestBed.createComponent(ConceptViewTimeline);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

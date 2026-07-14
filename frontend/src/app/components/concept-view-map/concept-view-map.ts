@@ -31,7 +31,6 @@ export class ConceptViewMap extends ConceptViewComponent implements AfterViewIni
   ngAfterViewInit() {
     this.initMap();
     this.viewInitialized.set(true);
-    console.log('initt')
   }
 
   private initMap() {

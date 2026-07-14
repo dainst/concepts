@@ -7,10 +7,11 @@
       [disabled]="item.disabled"
       (click)="select(item)"
     >
+      <span class="menu-label">
       @if (item.icon) {
         <i class="{{ item.icon }} me-2"></i>
       }
-      <span class="menu-label">{{ item.label }}</span>
+      {{ item.label }}</span>
     </button>
   }
 </div>

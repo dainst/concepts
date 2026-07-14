@@ -8,7 +8,7 @@ import {ConceptId} from 'concepts-common/src/interfaces/concept';
 import {ConceptMenuEntry} from '../../interfaces/ui';
 import {ConceptMenu} from '../concept-menu/concept-menu';
 import {ConceptViewRaw} from '../concept-view-raw/concept-view-raw';
-import {ConceptViewExample} from '../concept-view-example/concept-view-example';
+import {ConceptViewTimeline} from '../concept-view-example/concept-view-timeline.component';
 import {ConceptAbstract} from '../concept-abstract/concept-abstract';
 import {ConceptViewMap} from '../concept-view-map/concept-view-map';
 
@@ -41,10 +41,10 @@ export class ConceptComponent {
       component: ConceptViewRaw
     },
     {
-      id: 'example',
-      label: 'Example',
+      id: 'timeline',
+      label: 'Timeline',
       icon: 'bi bi-people',
-      component: ConceptViewExample
+      component: ConceptViewTimeline
     },
   ]);
   readonly currentViewId = signal<string>('map');
