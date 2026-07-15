@@ -5,9 +5,7 @@ export interface ConceptRow {
   readonly type: string;
 }
 
-export interface LabelledConceptRow {
-  readonly id: string;
-  readonly type: string;
+export interface LabelledConceptRow extends ConceptRow {
   readonly labels: LabelRowAgg[];
 }
 
@@ -28,18 +26,31 @@ export interface LabelRowAgg {
   readonly is_preferred: boolean;
 }
 
-export interface LabelRow extends LabelRowAgg {
-  readonly id: number;
+export interface ConceptExtensionRow {
   readonly concept_id: string;
   readonly concept_type: string;
 }
 
-export interface GeographicalExtendsRow {
+export interface LabelRow extends LabelRowAgg, ConceptExtensionRow {
   readonly id: number;
-  readonly concept_id: string;
-  readonly concept_type: string;
+}
+
+export interface GeographicalExtendsRow extends ConceptExtensionRow {
+  readonly id: number;
   readonly center: string;
   readonly shape: string;
   readonly certainty: string;
   readonly precision: string;
+}
+
+export interface TemporalExtendsRow extends ConceptExtensionRow {
+  readonly id: number;
+  readonly start_min: number;
+  readonly start_max: number;
+  readonly start_precision: number;
+  readonly start_certainty: number;
+  readonly end_min: number;
+  readonly end_max: number;
+  readonly end_precision: number;
+  readonly end_certainty: number;
 }

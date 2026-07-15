@@ -1,11 +1,11 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient, QueryResult} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
-import {Concept, ConceptAbstract, RelationAbstractSet, RelationAbstractSets} from 'common/interfaces/concept';
+import {Concept, ConceptAbstract, RelationAbstractSets} from 'common/interfaces/concept';
 import {
   isGeographicalExtendsRow,
+  isTemporalExtendsRow,
   isLabelledConceptRow,
-  isLabelRow,
   isRelationRow
 } from '../../functions/rows.typeguards';
 import {convertRow} from '../../functions/convert-row';
@@ -13,10 +13,10 @@ import {getPreferredLabels} from '../../functions/label';
 import {ConceptSelector} from 'common/interfaces/select';
 import {isById, isByQ} from '../../functions/selector.typeguards';
 import {Settings} from 'common/interfaces/settings';
-import {ConceptRow, LabelledConceptRow, RelationRow} from '../../interfaces/rows';
+import {LabelledConceptRow, RelationRow} from '../../interfaces/rows';
 import {SearchQuery, SearchResult} from 'common/interfaces/search';
 import {CacheService} from '../cache/cache.service';
-
+//v numeric(5, 4) check (v between 0 and 100),
 const settings: Settings = {
   preferredLanguage: 'deu',
   preferTransliteration: false,
@@ -68,7 +68,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async query(sql: string, params: any[] = [], useCache = false): Promise<QueryResult> {
-    console.log(sql);
+    console.log(sql, params);
 
     if (!useCache) return this.pool.query(sql, params);
 
@@ -182,6 +182,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         concept_id = $1 and concept_type = $2;`,
       [id.id, id.type]
     );
+    const resTemp = await this.query(
+      `select * from temporal_extends where concept_id = $1 and concept_type = $2;`,
+      [id.id, id.type]
+    );
 
     const relations = resRels
       .rows
@@ -201,8 +205,6 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
             objects: []
           }) - 1;
         }
-        console.log(rass.to);
-        console.log(rasIndex);
         rass.to[rasIndex].objects.push({
           id: {
             id: row.object_id,
@@ -214,10 +216,16 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       },
       {from: [], to: []}
     );
+
     const geographicalExtends = resGeog
       .rows
       .filter(isGeographicalExtendsRow)
       .map(convertRow.geographicalExtend);
+
+    const temporalExtends = resTemp
+      .rows
+      .filter(isTemporalExtendsRow)
+      .map(convertRow.temporalExtend);
 
     const labels = conceptRows[0].labels;
     const preferredLabels = getPreferredLabels(labels, settings);
@@ -227,7 +235,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       ...preferredLabels,
       relations,
       labels,
-      geographicalExtends
+      geographicalExtends,
+      temporalExtends
     }
   }
 }
