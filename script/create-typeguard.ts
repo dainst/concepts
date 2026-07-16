@@ -2,8 +2,8 @@ import ts, {Program, SourceFile} from "typescript";
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-const filePath = "/home/pfranck/IdeaProjects/concepts/backend/src/interfaces/rows.ts";
-const outPath = "/home/pfranck/IdeaProjects/concepts/backend/src/functions/rows.typeguards.ts";
+const filePath = "/home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts";
+const outPath = "/home/pfranck/IdeaProjects/concepts/common/src/functions/concept.typeguards.ts";
 const createDebugTypeGuards = false;
 
 interface Member {

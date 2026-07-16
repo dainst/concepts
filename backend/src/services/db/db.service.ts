@@ -233,10 +233,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return {
       id,
       ...preferredLabels,
-      relations,
       labels,
-      geographicalExtends,
-      temporalExtends
+      relations,
+      ...(geographicalExtends.length && {geographicalExtends}), // TODO distinguish between is not geographical at all and has no coordinates
+      ...(temporalExtends.length && {temporalExtends})  // TODO distinguish between is not temporal at all and has no coordinates
     }
   }
 }

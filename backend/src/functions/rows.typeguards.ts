@@ -49,10 +49,10 @@ export const isLabelRowAgg = (thing: unknown): thing is LabelRowAgg =>
 export const isConceptExtensionRow = (thing: unknown): thing is ConceptExtensionRow =>
 	(typeof thing === 'object')
 	&& (thing != null)
-	&& ('concept_id' in thing)
-	&& (typeof thing.concept_id === 'string')
-	&& ('concept_type' in thing)
-	&& (typeof thing.concept_type === 'string');
+	// && ('concept_id' in thing)
+	// && (typeof thing.concept_id === 'string')
+	// && ('concept_type' in thing)
+	// && (typeof thing.concept_type === 'string');
 
 export const isLabelRow = (thing: unknown): thing is LabelRow =>
 	(isLabelRowAgg(thing))
@@ -62,16 +62,16 @@ export const isLabelRow = (thing: unknown): thing is LabelRow =>
 
 export const isGeographicalExtendsRow = (thing: unknown): thing is GeographicalExtendsRow =>
 	(isConceptExtensionRow(thing))
-	&& ('id' in thing)
-	&& (typeof thing.id === 'number')
-	&& ('center' in thing)
-	&& (typeof thing.center === 'string')
-	&& ('shape' in thing)
-	&& (typeof thing.shape === 'string')
-	&& ('certainty' in thing)
-	&& (typeof thing.certainty === 'string')
-	&& ('precision' in thing)
-	&& (typeof thing.precision === 'string');
+	// && ('id' in thing)
+	// && (typeof thing.id === 'number')
+	// && ('center' in thing)
+	// && (typeof thing.center === 'string')
+	// && ('shape' in thing)
+	// && (typeof thing.shape === 'string')
+	// && ('certainty' in thing)
+	// && (typeof thing.certainty === 'string')
+	// && ('precision' in thing)
+	// && (typeof thing.precision === 'string');
 
 export const isTemporalExtendsRow = (thing: unknown): thing is TemporalExtendsRow =>
 	(isConceptExtensionRow(thing))

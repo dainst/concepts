@@ -1,13 +1,6 @@
+import {ConceptId, ConceptAbstract, Concept, GeographicalConcept, TemporalConcept, RelationAbstractSet, RelationAbstractSets, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
 import {isPreferredLabels} from './labels.typeguards';
 
-import {
-  BareConcept,
-  Concept,
-  ConceptAbstract, ConceptId,
-  GeographicalConcept, GeographicalExtend, Label,
-  RelationAbstractSet, RelationAbstractSets, TemporalBound,
-  TemporalConcept, TemporalExtend
-} from '../interfaces/concept';
 
 export const isConceptId = (thing: unknown): thing is ConceptId =>
 	(typeof thing === 'object')
@@ -22,7 +15,7 @@ export const isConceptAbstract = (thing: unknown): thing is ConceptAbstract =>
 	&& ('id' in thing)
 	&& (isConceptId(thing.id));
 
-export const isBareConcept = (thing: unknown): thing is BareConcept =>
+export const isConcept = (thing: unknown): thing is Concept =>
 	(isConceptAbstract(thing))
 	&& ('labels' in thing)
 	&& (Array.isArray(thing.labels))
@@ -31,20 +24,16 @@ export const isBareConcept = (thing: unknown): thing is BareConcept =>
 	&& (isRelationAbstractSets(thing.relations));
 
 export const isGeographicalConcept = (thing: unknown): thing is GeographicalConcept =>
-	(isBareConcept(thing))
+	(isConcept(thing))
 	&& ('geographicalExtends' in thing)
 	&& (Array.isArray(thing.geographicalExtends))
 	&& (thing.geographicalExtends.every(isGeographicalExtend));
 
 export const isTemporalConcept = (thing: unknown): thing is TemporalConcept =>
-	(isBareConcept(thing))
+	(isConcept(thing))
 	&& ('temporalExtends' in thing)
 	&& (Array.isArray(thing.temporalExtends))
 	&& (thing.temporalExtends.every(isTemporalExtend));
-
-export const isConcept = (thing: unknown): thing is Concept =>
-	(isGeographicalConcept(thing))
-	&& (isTemporalConcept(thing));
 
 export const isRelationAbstractSet = (thing: unknown): thing is RelationAbstractSet =>
 	(typeof thing === 'object')
@@ -103,7 +92,7 @@ export const isGeographicalExtend = (thing: unknown): thing is GeographicalExten
 	&& ('center' in thing)
 	&& (typeof thing.center === 'string')
 	&& ('shape' in thing)
-	&& (typeof thing.shape === 'string')
+	// && ((typeof thing.shape === 'string') || (thing.shape == null))
 	&& ('certainty' in thing)
 	&& (typeof thing.certainty === 'number')
 	&& ('precision' in thing)
