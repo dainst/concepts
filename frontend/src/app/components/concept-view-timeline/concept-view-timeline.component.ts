@@ -16,17 +16,15 @@ export class ConceptViewTimeline extends ConceptViewComponent implements AfterVi
   private viewInitialized = signal(false);
 
   protected readonly data = computed<TemporalConcept[]>(() => {
+    const concept = this.concept();
     if (!this.viewInitialized()) {
       console.warn('not initialized');
       return [];
     }
-    if (!isTemporalConcept(this.concept())) {
-      console.warn('no tmp extend', this.concept());
-      // TODO show some warning
-      return [];
+    if (!isTemporalConcept(concept)) {
+      throw new Error('timeline not available for concept without temporal dimension');
     }
-    console.log("sd")
-    return [this.concept()];
+    return [concept];
   });
 
   // TODO this is ugly. use the real id

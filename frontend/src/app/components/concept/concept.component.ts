@@ -8,9 +8,29 @@ import {ConceptId} from 'concepts-common/src/interfaces/concept';
 import {ConceptMenuEntry} from '../../interfaces/ui';
 import {ConceptMenu} from '../concept-menu/concept-menu';
 import {ConceptViewRaw} from '../concept-view-raw/concept-view-raw';
-import {ConceptViewTimeline} from '../concept-view-example/concept-view-timeline.component';
+import {ConceptViewTimeline} from '../concept-view-timeline/concept-view-timeline.component';
 import {ConceptAbstract} from '../concept-abstract/concept-abstract';
 import {ConceptViewMap} from '../concept-view-map/concept-view-map';
+import {ViewMap} from '../../interfaces/views';
+import {getAvailableViews} from '../../functions/available-views';
+
+const viewsMap: ViewMap<ConceptMenuEntry> = {
+  map: {
+    id: 'map',
+    label: 'Map',
+    component: ConceptViewMap
+  },
+  raw: {
+    id: 'raw',
+    label: 'Raw',
+    component: ConceptViewRaw
+  },
+  timeline:   {
+    id: 'timeline',
+    label: 'Timeline',
+    component: ConceptViewTimeline
+  }
+};
 
 @Component({
   selector: 'app-concept',
@@ -27,29 +47,18 @@ export class ConceptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly bs = inject(Backend);
 
-  readonly menu = signal<ConceptMenuEntry[]>([
-    {
-      id: 'map',
-      label: 'Map',
-      icon: 'bi bi-map',
-      component: ConceptViewMap
-    },
-    {
-      id: 'raw',
-      label: 'Raw',
-      icon: 'bi bi-speedometer2',
-      component: ConceptViewRaw
-    },
-    {
-      id: 'timeline',
-      label: 'Timeline',
-      icon: 'bi bi-people',
-      component: ConceptViewTimeline
-    },
-  ]);
+  readonly menu: Signal<ConceptMenuEntry[]> =
+    computed(() => {
+      const av = getAvailableViews(this.concept.value());
+      console.log({av});
+      return av.map(view => Object.assign({}, viewsMap[view]))
+      }
+    );
   readonly currentViewId = signal<string>('map');
   readonly currentView: Signal<ConceptMenuEntry> =
-    computed(() => (this.menu().find(e => e.id === this.currentViewId()) ?? this.menu()[0]));
+    computed(() =>
+      (this.menu().find(e => e.id === this.currentViewId()) ?? this.menu()[0])
+    );
 
   menuChanged(newId: string) {
     this.currentViewId.set(newId);

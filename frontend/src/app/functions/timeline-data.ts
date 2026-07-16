@@ -1,9 +1,9 @@
 import {Period, PeriodGroup, PeriodsMap, TimeLineData, Domain} from '../interfaces/timeline';
-import {BareConcept, ConceptAbstract, TemporalConcept} from 'concepts-common/src/interfaces/concept';
+import {Concept, ConceptAbstract, TemporalConcept} from 'concepts-common/src/interfaces/concept';
 
 export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData => {
 
-  const getRelated = (concept: BareConcept, rId: string): ConceptAbstract[] =>
+  const getRelated = (concept: Concept, rId: string): ConceptAbstract[] =>
      (concept.relations?.to ?? [])
       .find(r => (r.relation.id.id === rId && r.relation.id.type === 'chronontology'))
       ?.objects ?? [];

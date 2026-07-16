@@ -2,15 +2,12 @@
   @for (item of items(); track item.id) {
     <button
       type="button"
-      class="btn btn-primary"
+      class="btn btn-primary btn-sm"
       [class.active]="isSelected(item.id)"
       [disabled]="item.disabled"
       (click)="select(item)"
     >
       <span class="menu-label">
-      @if (item.icon) {
-        <i class="{{ item.icon }} me-2"></i>
-      }
       {{ item.label }}</span>
     </button>
   }

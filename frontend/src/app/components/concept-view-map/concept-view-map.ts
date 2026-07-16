@@ -3,6 +3,7 @@ import {ConceptViewComponent} from '../concept-view';
 import * as L from 'leaflet';
 import {GeographicalExtend} from 'concepts-common/src/interfaces/concept';
 import {isGeoJsonObject} from '../../functions/geo-json.typeguards';
+import {isGeographicalConcept} from 'concepts-common/src/functions/concept.typeguards';
 
 @Component({
   selector: 'app-concept-view-map',
@@ -21,8 +22,13 @@ export class ConceptViewMap extends ConceptViewComponent implements AfterViewIni
       if (!this.viewInitialized()) {
         return;
       }
-      this.concept().geographicalExtends
+      const concept = this.concept();
+      if (!isGeographicalConcept(concept)) {
+        throw new Error('map view not possible for non-spatial concepts');
+      }
+      concept.geographicalExtends
         .forEach(ge => this.loadShape(ge));
+      // TODO how to display a geographical concept without geometry
       this.centerMap();
     });
     super();
@@ -40,6 +46,7 @@ export class ConceptViewMap extends ConceptViewComponent implements AfterViewIni
   }
 
   private centerMap() {
+    if (!this.features.length) return;
     this.map.fitBounds(L.featureGroup(this.features).getBounds());
   }
 
