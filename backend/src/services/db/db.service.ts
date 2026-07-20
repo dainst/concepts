@@ -11,7 +11,6 @@ import {
 import {convertRow} from '../../functions/convert-row';
 import {getPreferredLabels} from '../../functions/label';
 import {ConceptSelector} from 'common/interfaces/select';
-import {isById, isByQ, isBySearchHash} from '../../functions/selector.typeguards';
 import {Settings} from 'common/interfaces/settings';
 import {LabelledConceptRow, RelationRow} from '../../interfaces/rows';
 import {SearchQuery, SearchResult} from 'common/interfaces/search';
@@ -112,11 +111,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       .filter(isLabelledConceptRow); // TODO should we raise error here maybe?
   }
 
-  async search(query: SearchQuery): Promise<SearchResult> {
-    let searchHash: string;
-
-    if (isBySearchHash(query.selector)) {
-      searchHash = query.selector.hash;
+  async search(query: SearchQuery, searchHash: string | undefined = undefined): Promise<SearchResult> {
+    if (searchHash) {
       const storedSelector = this.cs.getByHash('selector', searchHash).result;
       if (!storedSelector) throw new Error(`unknown hash: ${searchHash}`);
       query.selector = storedSelector;
@@ -142,14 +138,30 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getSearchResultCount(selector: ConceptSelector): Promise<number> {
-    const sql = `select count(*) as count from (select concept_id, concept_type from labels ${this.buildWhere(selector)} group by concept_id, concept_type)`;
+    const sql = `
+      select
+        count(*) as count
+      from (
+        select
+          concept_id, concept_type from concepts
+            left join labels on concepts.id = labels.concept_id and concepts.type = labels.concept_type
+        ${this.buildWhere(selector)}
+        group by concept_id, concept_type
+      )`;
     return (await this.query(sql, [], true)).rows[0].count;
   }
 
   private buildWhere(selector: ConceptSelector): string {
-    let conditions= [];
-    if (isById(selector)) conditions.push(`concept_id = '${selector.id}' and concept_type = '${selector.type}'`);
-    if (isByQ(selector)) conditions.push(`label ilike '%${selector.q}%'`);
+    let conditions= Object.entries(selector)
+      .map(([cond, val]) => {
+        switch (cond) {
+          case 'q': return `label ilike '%${selector.q}%'`;
+          case 'id': return `concept_id = '${selector.id}'`;
+          case 'type': return `concept_type = '${selector.type}'`;
+          case 'domain': return `scope_id = '${selector.domain}'`;
+          default: throw new Error(`Unknown search property: ${cond}`);
+        }
+      });
     return (conditions.length ? 'where ' : '')
       + conditions
         .map(e => `(${e})`)
@@ -168,7 +180,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           'transliteration', labels.transliteration,
           'is_preferred', labels.is_preferred
         )) as labels
-      from labels
+      from concepts
+        left join labels on concepts.id = labels.concept_id and concepts.type = labels.concept_type
       ${this.buildWhere(searchQuery.selector)}
       group by concept_id, concept_type
       limit ${searchQuery.limit ?? 10} offset ${searchQuery.offset ?? 0}`;

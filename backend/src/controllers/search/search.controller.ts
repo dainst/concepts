@@ -24,23 +24,15 @@ export class SearchController {
     if (!hash) {
       throw new Error('no-hash-given');
     }
-    return await this.db.search({
-      selector: {hash},
-      limit,
-      offset
-    });
+    return await this.db.search({selector: {}, limit, offset}, hash);
   }
 
   @Post()
   async get(
     @Query('limit') limit: number = 10,
     @Query('offset') offset: number = 0,
-    @Body() selector: ConceptSelector = {q: '*'}
+    @Body() selector: ConceptSelector = {}
   ): Promise<SearchResult> {
-    return await this.db.search({
-      selector,
-      limit,
-      offset
-    });
+    return await this.db.search({selector, limit, offset});
   }
 }

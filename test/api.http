@@ -16,3 +16,12 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/search/2d2286a9604d312f3dce28973ccedae4
+
+
+###
+POST http://localhost:3000/search
+Content-Type: application/json
+
+{
+  "domain": "Chronontology"
+}

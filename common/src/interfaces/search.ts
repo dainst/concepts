@@ -8,9 +8,9 @@ export interface SearchQuery {
 }
 
 export interface SearchResult extends SearchQuery {
+  searchHash: string;
   count: number;
   warnings: string[];
-  searchHash: string;
   results: ConceptAbstract[];
 }
 
