@@ -10,5 +10,7 @@ export interface SearchQuery {
 export interface SearchResult extends SearchQuery {
   count: number;
   warnings: string[];
+  searchHash: string;
   results: ConceptAbstract[];
 }
+

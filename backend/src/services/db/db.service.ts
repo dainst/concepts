@@ -11,11 +11,12 @@ import {
 import {convertRow} from '../../functions/convert-row';
 import {getPreferredLabels} from '../../functions/label';
 import {ConceptSelector} from 'common/interfaces/select';
-import {isById, isByQ} from '../../functions/selector.typeguards';
+import {isById, isByQ, isBySearchHash} from '../../functions/selector.typeguards';
 import {Settings} from 'common/interfaces/settings';
 import {LabelledConceptRow, RelationRow} from '../../interfaces/rows';
 import {SearchQuery, SearchResult} from 'common/interfaces/search';
 import {CacheService} from '../cache/cache.service';
+import {CacheServiceStoreKey} from '../../interfaces/cache';
 //v numeric(5, 4) check (v between 0 and 100),
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -32,7 +33,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   };
 
   constructor(
-    private readonly cache: CacheService
+    private readonly cs: CacheService
   ) {
     this.pool = new Pool({
       user: 'app_user',
@@ -67,16 +68,18 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     await this.pool.end();
   }
 
-  async query(sql: string, params: any[] = [], useCache = false): Promise<QueryResult> {
+  async query(sql: string, params: any[] = [], useCache: boolean = false): Promise<QueryResult> {
     console.log(sql, params);
 
     if (!useCache) return this.pool.query(sql, params);
 
-    const cached = this.cache.get(sql + params?.join());
-    if (cached.result) console.log(`from cache ${cached.hash}, ${cached.cacheCount}`);
+    const cached = this.cs.get('result', sql + params?.join());
+    const result = cached.result;
+    if (cached.result) console.log(`from cache ${cached.hash}, ${cached.storeCount}`);
     if (cached.result) return cached.result;
+
     const res =  await this.pool.query(sql, params);
-    this.cache.store(sql + params?.join(), res, cached.hash);
+    this.cs.store('result', sql + params?.join(), res, cached.hash);
     return res;
   }
 
@@ -110,6 +113,16 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async search(query: SearchQuery): Promise<SearchResult> {
+    let searchHash: string;
+
+    if (isBySearchHash(query.selector)) {
+      searchHash = query.selector.hash;
+      const storedSelector = this.cs.getByHash('selector', searchHash).result;
+      if (!storedSelector) throw new Error(`unknown hash: ${searchHash}`);
+      query.selector = storedSelector;
+    } else {
+      searchHash = this.cs.store('selector', JSON.stringify(query.selector), query.selector);
+    }
     const results: ConceptAbstract[] = (await this.queryConcepts(query))
       .map(concept => ({
         id: {
@@ -121,6 +134,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     const count = await this.getSearchResultCount(query.selector);
     return {
       ...query,
+      searchHash,
       results,
       count,
       warnings: []

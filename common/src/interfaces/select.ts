@@ -5,8 +5,13 @@ export interface ById {
   type: string;
 }
 
-export interface ByQ {
+export interface BySearch {
   q: string;
 }
 
-export type ConceptSelector = XOR<ById, ByQ>;
+export interface BySearchHash {
+  hash: string;
+}
+
+
+export type ConceptSelector = XOR<XOR<ById, BySearch>, BySearchHash>;
