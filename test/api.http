@@ -1,27 +1,10 @@
 ###
 GET http://localhost:3000/search
 
-###
-GET http://localhost:3000/search/2735075f7d579decfa64b62e3fe34e2f
-
-
 
 ###
-POST http://localhost:3000/search
-Content-Type: application/json
-
-{
-  "q": "Saar"
-}
-
-###
-GET http://localhost:3000/search/2d2286a9604d312f3dce28973ccedae4
+GET http://localhost:3000/search?q=Saar
 
 
 ###
-POST http://localhost:3000/search
-Content-Type: application/json
-
-{
-  "domain": "Chronontology"
-}
+GET http://localhost:3000/search?domain=Chronontology&limit=22

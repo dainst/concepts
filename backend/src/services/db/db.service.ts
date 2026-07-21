@@ -10,13 +10,12 @@ import {
 } from '../../functions/rows.typeguards';
 import {convertRow} from '../../functions/convert-row';
 import {getPreferredLabels} from '../../functions/label';
-import {ConceptSelector} from 'common/interfaces/select';
+import {ConceptSelector} from 'common/interfaces/selector';
 import {Settings} from 'common/interfaces/settings';
 import {LabelledConceptRow, RelationRow} from '../../interfaces/rows';
-import {SearchQuery, SearchResult} from 'common/interfaces/search';
+import {SearchResult} from 'common/interfaces/search';
 import {CacheService} from '../cache/cache.service';
-import {CacheServiceStoreKey} from '../../interfaces/cache';
-//v numeric(5, 4) check (v between 0 and 100),
+
 const settings: Settings = {
   preferredLanguage: 'deu',
   preferTransliteration: false,
@@ -104,22 +103,15 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return this.status;
   }
 
-  private async queryConcepts(searchQuery: SearchQuery): Promise<LabelledConceptRow[]> {
-    const query = this.buildQuery(searchQuery);
+  private async queryConcepts(selector: ConceptSelector): Promise<LabelledConceptRow[]> {
+    const query = this.buildQuery(selector);
     const res = await this.query(query, []);
     return res.rows
       .filter(isLabelledConceptRow); // TODO should we raise error here maybe?
   }
 
-  async search(query: SearchQuery, searchHash: string | undefined = undefined): Promise<SearchResult> {
-    if (searchHash) {
-      const storedSelector = this.cs.getByHash('selector', searchHash).result;
-      if (!storedSelector) throw new Error(`unknown hash: ${searchHash}`);
-      query.selector = storedSelector;
-    } else {
-      searchHash = this.cs.store('selector', JSON.stringify(query.selector), query.selector);
-    }
-    const results: ConceptAbstract[] = (await this.queryConcepts(query))
+  async search(selector: ConceptSelector): Promise<SearchResult> {
+    const results: ConceptAbstract[] = (await this.queryConcepts(selector))
       .map(concept => ({
         id: {
           id: concept.id,
@@ -127,10 +119,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         },
         ...getPreferredLabels(concept.labels, settings)
       }));
-    const count = await this.getSearchResultCount(query.selector);
+    const count = await this.getSearchResultCount(selector);
     return {
-      ...query,
-      searchHash,
+      selector,
       results,
       count,
       warnings: []
@@ -155,20 +146,28 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     let conditions= Object.entries(selector)
       .map(([cond, val]) => {
         switch (cond) {
-          case 'q': return `label ilike '%${selector.q}%'`;
-          case 'id': return `concept_id = '${selector.id}'`;
-          case 'type': return `concept_type = '${selector.type}'`;
-          case 'domain': return `scope_id = '${selector.domain}'`;
-          default: throw new Error(`Unknown search property: ${cond}`);
+          case 'q':
+            return `label ilike '%${selector.q}%'`;
+          case 'id':
+            return `concept_id = '${selector.id}'`;
+          case 'type':
+            return `concept_type = '${selector.type}'`;
+          case 'domain':
+            return `scope_id = '${selector.domain}'`;
+          case 'limit':
+          case 'offset':
+          default:
+            return undefined;
         }
-      });
+      })
+        .filter(a => !!a);
     return (conditions.length ? 'where ' : '')
       + conditions
         .map(e => `(${e})`)
         .join(' and ');
   }
 
-  private buildQuery(searchQuery: SearchQuery): string {
+  private buildQuery(selector: ConceptSelector): string {
     return `
       select
         labels.concept_id as id,
@@ -182,14 +181,14 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         )) as labels
       from concepts
         left join labels on concepts.id = labels.concept_id and concepts.type = labels.concept_type
-      ${this.buildWhere(searchQuery.selector)}
+      ${this.buildWhere(selector)}
       group by concept_id, concept_type
-      limit ${searchQuery.limit ?? 10} offset ${searchQuery.offset ?? 0}`;
+      limit ${selector.limit ?? 10} offset ${selector.offset ?? 0}`;
   }
 
   async getConcept(selector: ConceptSelector): Promise<Concept> {
-    const conceptRows = await this.queryConcepts({selector, limit:1, offset: 0});
-    if (conceptRows.length !== 1) throw new Error(`wrong result number: ${0}`);  // TODO error handling
+    const conceptRows = await this.queryConcepts({...selector, limit: 1, offset: 0});
+    if (conceptRows.length !== 1) throw new Error(`wrong result number: ${0}`);
     const id = {
       id: conceptRows[0].id,
       type: conceptRows[0].type

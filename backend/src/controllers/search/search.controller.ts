@@ -1,38 +1,31 @@
-import {Controller, Get, Query, Param, Post, Body} from '@nestjs/common';
+import {Controller, Get, Query, Param, Post, Body, ParseIntPipe} from '@nestjs/common';
 import {DbService} from '../../services/db/db.service';
 import {SearchResult} from 'common/interfaces/search';
-import {CacheService} from '../../services/cache/cache.service';
-import {ConceptSelector} from 'common/interfaces/select';
-
-
-
+import {validateConceptSelector} from 'common/functions/selector.validator';
+import {removeUndefinedMembers} from '../../functions/remove-undefined-members';
+import {queryParamsToConceptSelector} from '../../functions/query-params';
 
 @Controller('search')
 export class SearchController {
   constructor(
     private readonly db: DbService,
-    private readonly cs: CacheService,
   ) {
   }
 
-  @Get(':hash')
-  async getSearchHash(
-    @Param('hash') hash: string,
-    @Query('limit') limit: number = 10,
-    @Query('offset') offset: number = 0,
-  ) {
-    if (!hash) {
-      throw new Error('no-hash-given');
-    }
-    return await this.db.search({selector: {}, limit, offset}, hash);
-  }
+  // @Query('q') q: string,
+  // @Query('domain') domain: string,
+  // @Query('id') id: string,
+  // @Query('type') type: string,
 
-  @Post()
+  // @Query('offset') offset: number,
+
+  @Get()
   async get(
-    @Query('limit') limit: number = 10,
-    @Query('offset') offset: number = 0,
-    @Body() selector: ConceptSelector = {}
+    @Query() queryParams: Record<string, string>
   ): Promise<SearchResult> {
-    return await this.db.search({selector, limit, offset});
+
+    const searchQuery = queryParamsToConceptSelector(queryParams);
+    console.log( searchQuery)
+    return await this.db.search(searchQuery);
   }
 }

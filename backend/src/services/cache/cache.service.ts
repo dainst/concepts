@@ -8,8 +8,7 @@ import {
   CacheServiceStoreKey,
   CacheStore
 } from '../../interfaces/cache';
-import {SearchQuery} from 'common/interfaces/search';
-import {ConceptSelector} from 'common/interfaces/select';
+import {ConceptSelector} from 'common/interfaces/selector';
 
 @Injectable()
 export class CacheService {
@@ -18,12 +17,7 @@ export class CacheService {
       max: 3,
       items: {},
       keys: []
-    },
-    selector: <CacheStore<ConceptSelector>>{
-      max: 3,
-      items: {},
-      keys: []
-    },
+    }
   } ;
 
   pop<T extends CacheServiceStoreKey>(

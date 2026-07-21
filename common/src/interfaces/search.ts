@@ -1,14 +1,8 @@
-import {ConceptSelector} from './select';
+import {ConceptSelector} from './selector';
 import {ConceptAbstract} from './concept';
 
-export interface SearchQuery {
+export interface SearchResult {
   selector: ConceptSelector,
-  limit: number;
-  offset: number;
-}
-
-export interface SearchResult extends SearchQuery {
-  searchHash: string;
   count: number;
   warnings: string[];
   results: ConceptAbstract[];

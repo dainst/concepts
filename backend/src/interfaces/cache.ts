@@ -1,6 +1,4 @@
-import {SearchQuery} from 'common/interfaces/search';
 import {QueryResult} from "pg";
-import {ConceptSelector} from 'common/interfaces/select';
 
 export interface CacheStore<T> {
   max: number;
@@ -10,7 +8,6 @@ export interface CacheStore<T> {
 
 export interface CacheServiceStore {
   result: CacheStore<QueryResult>;
-  selector: CacheStore<ConceptSelector>;
 }
 
 export type CacheServiceStoreKey = keyof  CacheServiceStore;

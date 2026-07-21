@@ -2,10 +2,6 @@ import ts, {Program, SourceFile} from "typescript";
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-const filePath = "/home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts";
-const outPath = "/home/pfranck/IdeaProjects/concepts/common/src/functions/concept.typeguards.ts";
-const createDebugTypeGuards = false;
-
 interface Member {
   name: string;
   type: string;
@@ -142,118 +138,160 @@ const analyzeInterfaceFile = (input: string, target: string): {interfaces: Inter
   return {interfaces, imports};
 }
 
-const createTypeGuard = (iface: Interface): string => {
-  const wrap = (s: string): string => `(${s})`;
-  const createTypeCheck = (member: Member, thingName: string = 'thing'): string[] => {
-    if (member.optional) {
-      return [
-        [
-          (`'${member.name}' ! in ${thingName}`),
-          createTypeCheck({...member, optional: false}).join(' && ')
-        ]
-          .map(wrap)
-          .join(' || ')
-      ];
-    }
+const wrap = (s: string): string => `(${s})`;
+const createTypeCheck = (member: Member, thingName: string = 'thing'): string[] => {
+  if (member.optional) {
+    return [
+      [
+        (`!('${member.name}' in ${thingName})`),
+        createTypeCheck({...member, optional: false}).join(' && ')
+      ]
+        .map(wrap)
+        .join(' || ')
+    ];
+  }
 
-    if (member.type.includes('|')) {
-      const options: string[] = [];
-      const types = member.type.split('|').map(s => s.trim());
-      const stringTypes = types
-        .filter(t => t.startsWith('"') && t.endsWith('"'));
-      const nonStringTypes = types
-        .filter(t => !stringTypes.includes(t));
-      if (stringTypes.length > 1) {
-        options.push(wrap(`typeof ${thingName}.${member.name} === 'string' && [${stringTypes.join()}].includes(${thingName}.${member.name})`));
-      } else {
-        nonStringTypes.push(...stringTypes);
-      }
-      options.push(
-        ...nonStringTypes
-          .map(type => wrap(
-            createTypeCheck({name: member.name, type, optional: false})
-              .slice(1)
-              .join(' && ')
-          ))
-      );
-      return [
-        `'${member.name}' in ${thingName}`,
-        options.join(' || ')
-      ];
+  if (member.type.includes('|')) {
+    const options: string[] = [];
+    const types = member.type.split('|').map(s => s.trim());
+    const stringTypes = types
+      .filter(t => t.startsWith('"') && t.endsWith('"'));
+    const nonStringTypes = types
+      .filter(t => !stringTypes.includes(t));
+    if (stringTypes.length > 1) {
+      options.push(wrap(`typeof ${thingName}.${member.name} === 'string' && [${stringTypes.join()}].includes(${thingName}.${member.name})`));
+    } else {
+      nonStringTypes.push(...stringTypes);
     }
-    if (member.type.startsWith('"') && member.type.endsWith('"')) {
-      return [
-        `'${member.name}' in ${thingName}`,
-        `typeof ${thingName} === 'string'`,
-        `${thingName} === ${member.type}`
-      ];
-    }
-    if (member.type.endsWith('[]')) {
-      const subCheck =
-        ['string', 'number', 'boolean'].includes(member.type)
-          ? `e => typeof e.${member.name} === '${member.type}'`
-          : `is${member.type.substring(0, member.type.length - 2)}`;
-      return [
-        `'${member.name}' in ${thingName}`,
-        `Array.isArray(${thingName}.${member.name})`,
-        `thing.${member.name}.every(${subCheck})`
-      ];
-    }
-    if (['string', 'number', 'boolean'].includes(member.type)) {
-      return [
-        `'${member.name}' in ${thingName}`,
-        `typeof ${thingName}.${member.name} === '${member.type}'`
-      ];
-    }
+    options.push(
+      ...nonStringTypes
+        .map(type => wrap(
+          createTypeCheck({name: member.name, type, optional: false})
+            .slice(1)
+            .join(' && ')
+        ))
+    );
     return [
       `'${member.name}' in ${thingName}`,
-      `is${member.type}(${thingName}.${member.name})`
-    ]
+      options.join(' || ')
+    ];
   }
-  const signature = `export const is${iface.name} = (thing: unknown): thing is ${iface.name} => \n\t`;
+  if (member.type.startsWith('"') && member.type.endsWith('"')) {
+    return [
+      `'${member.name}' in ${thingName}`,
+      `typeof ${thingName} === 'string'`,
+      `${thingName} === ${member.type}`
+    ];
+  }
+  if (member.type.endsWith('[]')) {
+    const subCheck =
+      ['string', 'number', 'boolean'].includes(member.type)
+        ? `e => typeof e.${member.name} === '${member.type}'`
+        : `is${member.type.substring(0, member.type.length - 2)}`;
+    return [
+      `'${member.name}' in ${thingName}`,
+      `Array.isArray(${thingName}.${member.name})`,
+      `thing.${member.name}.every(${subCheck})`
+    ];
+  }
+  if (['string', 'number', 'boolean'].includes(member.type)) {
+    return [
+      `'${member.name}' in ${thingName}`,
+      `typeof ${thingName}.${member.name} === '${member.type}'`
+    ];
+  }
+  return [
+    `'${member.name}' in ${thingName}`,
+    `is${member.type}(${thingName}.${member.name})`
+  ]
+}
+
+const collectConditions = (iface: Interface): string[] => {
   const rows = [];
   if (!iface.extends.length) rows.push(`typeof thing === 'object'`, `thing != null`)
   rows.push(...iface.extends.map(ex => `is${ex}(thing)`))
   rows.push(...iface.members.flatMap(member => createTypeCheck(member)));
-
-  if (createDebugTypeGuards) {
-    return signature
-      + '{'
-      + rows
-        .map(r => `
-  if (!(${r})) {
-   console.warn("condition failed: ${r.replaceAll('\"', '')}");
-   return false
-  }`)
-        .join(`\n`)
-  + `
-  return true;
-}`;
-  }
-
-  return signature + rows.map(wrap).join(`\n\t&& `);
+  return rows;
 }
 
 const createImport = (imp: ImportCollection): string =>
   `import {${imp.names.join(', ')}} from '${imp.module}'`;
 
-const r = analyzeInterfaceFile(filePath, outPath);
-const imports = r.imports
-  .reduce(
-    (c: ImportCollection[], i: Import) => {
-      const entry = c.find(e => e.module === i.module);
-      if (entry) {
-        entry.names.push(i.name);
-      } else {
-        c.push({module: i.module, names: [i.name]});
-      }
-      return c;
-    },
-    <ImportCollection[]>[]
-  )
-  .map(createImport)
-  .join(";\n");
-const typeguards = r.interfaces
-  .map(createTypeGuard)
-  .join(";\n\n");
-fs.writeFileSync(outPath, imports + ";\n\n\n" + typeguards, 'utf8');
+const functionCreators = {
+  typeguard: (iface: Interface): string => {
+    const rows = collectConditions(iface);
+    return `
+export const is${iface.name} = (thing: unknown): thing is ${iface.name} => {
+${rows.map(wrap).join(`\n\t&& `)}
+  return true;
+}`;
+  },
+
+  debugTypeguard: (iface: Interface): string => {
+    const strCond = (r: string): string =>  `
+if (!(${r})) {
+ console.warn("condition failed: ${r.replaceAll('\"', '')}");
+ return false
+}`;
+
+    const rows = collectConditions(iface);
+    return `
+export const validate${iface.name} = (thing: unknown): thing is ${iface.name} => {
+  ${rows.map(strCond).join(`\n`)}
+  return true;
+}`;
+  },
+
+  validator: (iface: Interface): string => {
+    const strCond = (row: {condition: string, member: Member}): string =>
+`if (!(${row.condition}))\n\t\tfailedConditions.push("${row.member.name.replaceAll('"', '\'')}")`;
+
+    const rows =  iface.members
+      .flatMap(member => createTypeCheck(member)
+        .map(condition => ({member, condition}))
+      );
+
+    return `
+export const validate${iface.name} = (thing: unknown): thing is ${iface.name} => {
+  if ((typeof thing !== 'object') || (thing == null)) throw new Error('is not an object');
+  const failedConditions = [];
+${rows.map(strCond).map(l => `\t${l};\n`).join('')}
+  if (failedConditions.length) throw new Error('invalid ${iface.name}: ' + failedConditions.join());
+  return true;
+}`;
+  }
+}
+
+
+const createFunctionsFile = (filePath: string, outPath: string, type: keyof typeof functionCreators)=> {
+  console.log(`Input: ${filePath}`);
+  console.log(`Output: ${outPath}`);
+  const r = analyzeInterfaceFile(filePath, outPath);
+  const imports = r.imports
+    .reduce(
+      (c: ImportCollection[], i: Import) => {
+        const entry = c.find(e => e.module === i.module);
+        if (entry) {
+          entry.names.push(i.name);
+        } else {
+          c.push({module: i.module, names: [i.name]});
+        }
+        return c;
+      },
+      <ImportCollection[]>[]
+    )
+    .map(createImport)
+    .join(";\n");
+  const typeguards = r.interfaces
+    .map(functionCreators[type])
+    .join(";\n\n");
+  fs.writeFileSync(outPath, imports + ";\n\n\n" + typeguards, 'utf8');
+  console.log('done.');
+};
+
+
+createFunctionsFile(
+ "/home/pfranck/IdeaProjects/concepts/common/src/interfaces/selector.ts",
+  "/home/pfranck/IdeaProjects/concepts/common/src/functions/selector.validator.ts",
+  'validator'
+);

@@ -3,4 +3,6 @@ export interface ConceptSelector {
   domain?: string;
   id?: string;
   type?: string;
+  limit?: number;
+  offset?: number;
 }
