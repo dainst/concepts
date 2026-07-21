@@ -1,8 +1,6 @@
 import {Controller, Get, Query, Param, Post, Body, ParseIntPipe} from '@nestjs/common';
 import {DbService} from '../../services/db/db.service';
 import {SearchResult} from 'common/interfaces/search';
-import {validateConceptSelector} from 'common/functions/selector.validator';
-import {removeUndefinedMembers} from '../../functions/remove-undefined-members';
 import {queryParamsToConceptSelector} from '../../functions/query-params';
 
 @Controller('search')
@@ -11,13 +9,6 @@ export class SearchController {
     private readonly db: DbService,
   ) {
   }
-
-  // @Query('q') q: string,
-  // @Query('domain') domain: string,
-  // @Query('id') id: string,
-  // @Query('type') type: string,
-
-  // @Query('offset') offset: number,
 
   @Get()
   async get(

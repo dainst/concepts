@@ -7,4 +7,4 @@ GET http://localhost:3000/search?q=Saar
 
 
 ###
-GET http://localhost:3000/search?domain=Chronontology&limit=22
+GET http://localhost:3000/search?domain=Chronontology&limit=22&type=s
