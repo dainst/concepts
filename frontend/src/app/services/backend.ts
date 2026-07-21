@@ -2,8 +2,9 @@ import {Service, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, retry, timer} from 'rxjs';
 import {Concept} from 'concepts-common/src/interfaces/concept';
-import {SearchQuery, SearchResult} from 'concepts-common/src/interfaces/search';
+import {SearchResult} from 'concepts-common/src/interfaces/search';
 import {searchToHttpParams} from '../functions/query-params';
+import {ConceptSelector} from 'concepts-common/src/interfaces/selector';
 
 @Service()
 export class Backend {
@@ -27,7 +28,7 @@ export class Backend {
       );
   }
 
-  search(searchQuery: SearchQuery): Observable<SearchResult> {
+  search(searchQuery: ConceptSelector): Observable<SearchResult> {
     return this.http.get<SearchResult>(this.api + `search`, {params: searchToHttpParams(searchQuery)})
       .pipe(
         retry({

@@ -1,10 +1,10 @@
 @if (result.isLoading()) {
-  <h1>Search for "{{searchQuery().selector.q ?? ''}}"</h1>
+  <h1>Search for "{{searchQuery().q ?? ''}}"</h1>
   <p>Results are loading</p>
 }
 
 @if (result.error()) {
-  <h1>Search for "{{searchQuery().selector.q ?? ''}}"</h1>
+  <h1>Search for "{{searchQuery().q ?? ''}}"</h1>
   <p>Error: {{result.error() | json}}</p>
 }
 
@@ -25,5 +25,5 @@
     <button (click)="navigate('next')">→</button>
     <button (click)="navigate('last')">→|</button>
   </div>
-  <div>limit: {{result.limit}} | offset: {{result.offset}}</div>
+  <div>limit: {{result.selector.limit}} | offset: {{result.selector.offset}}</div>
 }

@@ -3,9 +3,10 @@ import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Backend} from '../../services/backend';
-import {SearchQuery, SearchResult} from 'concepts-common/src/interfaces/search';
+import {SearchResult} from 'concepts-common/src/interfaces/search';
 import {flatten} from '../../functions/object';
 import {JsonPipe} from '@angular/common';
+import {ConceptSelector} from 'concepts-common/src/interfaces/selector';
 
 @Component({
   selector: 'app-search',
@@ -23,7 +24,9 @@ export class Results {
   readonly pageNr = computed(() => {
     const result = this.result.value();
     if (!result) return 0;
-    return 'c:' + result.offset / result.limit;
+    const offset = result.selector.offset ?? 0;
+    const limit = result.selector.limit ?? Infinity;
+    return Math.floor(offset / limit);
   });
 
   readonly result: ResourceRef<SearchResult|undefined> = rxResource({
@@ -31,7 +34,7 @@ export class Results {
     stream: ({ params }) => this.bs.search(params)
   });
 
-  readonly searchQuery: Signal<SearchQuery> = toSignal(
+  readonly searchQuery: Signal<ConceptSelector> = toSignal(
     this.route.queryParamMap.pipe(
       map(params => {
         const q = params.get('q') ?? '*';
@@ -49,18 +52,24 @@ export class Results {
 
   protected navigate(target: string) {
     const sq = this.searchQuery();
-    const max = (this.result.value()?.count ?? sq.offset)  - sq.limit;
+    const previousOffset = sq.offset ?? 0;
+    const limit = sq.limit ?? 0;
+    const max = (this.result.value()?.count ?? previousOffset)  - limit;
     let offset = 0;
     if (target === 'first') {
       offset = 0;
     } else if (target === 'last') {
       offset = max;
     } else if (target === 'next') {
-      offset = Math.min(max, sq.offset + sq.limit);
+
+      offset = Math.min(max, previousOffset + limit);
+      console.log({
+        max, previousOffset , limit, offset
+      })
     } else if (target === 'prev') {
-      offset = Math.max(0, sq.offset - sq.limit);
+      offset = Math.max(0, previousOffset - limit);
     } else if (Number.isSafeInteger(parseInt(target))) {
-      offset = Math.min(max, Math.max(0, parseInt(target) * sq.limit));
+      offset = Math.min(max, Math.max(0, parseInt(target) * limit));
     }
     const queryParams = flatten({...sq, offset});
     this.router.navigate([], {
