@@ -1,5 +1,5 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
-import {Pool, PoolClient, QueryResult} from 'pg';
+import {Pool, PoolClient, QueryResult, types} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
 import {Concept, ConceptAbstract, RelationAbstractSets} from 'common/interfaces/concept';
 import {
@@ -44,6 +44,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     try {
+      types.setTypeParser(types.builtins.INT8, Number);
       await this.pool.connect();
       console.log('Connected');
       this.status = {
@@ -153,7 +154,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           case 'type':
             return `concept_type = '${selector.type}'`;
           case 'domain':
-            return `scope_id = '${selector.domain}'`;
+            return `domain = '${selector.domain}'`;
           case 'limit':
           case 'offset':
           default:
@@ -252,6 +253,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       .rows
       .filter(isTemporalExtendsRow)
       .map(convertRow.temporalExtend);
+    console.log(resTemp.rows)
 
     const labels = conceptRows[0].labels;
     const preferredLabels = getPreferredLabels(labels, settings);
