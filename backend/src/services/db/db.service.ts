@@ -120,11 +120,14 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   private buildWhere(selector: ConceptSelector): string {
+    const existsCond = (agg: string, where: string): string => `exists (
+      select 1 from ${agg} where ${where} and concepts.id = ${agg}.concept_id and concepts.type = ${agg}.concept_type
+    )`;
     let conditions= Object.entries(selector)
       .map(([cond, val]) => {
         switch (cond) {
           case 'q':
-            return `label ilike '%${selector.q}%'`;
+            return existsCond('labels', `label ilike '%${selector.q}%'`);
           case 'id':
             return `concepts.id = '${selector.id}'`;
           case 'type':
@@ -145,66 +148,77 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   private autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
-    const uniqueShard = new Set<SearchShard>(['base', ...(selector.shards ?? [])]);
-    if (selector.q) uniqueShard.add('labels');
-    return [...uniqueShard];
+    const uniqueShard = selector.shards ?? [];
+    if (selector.q) uniqueShard.push('labels');
+    return [...new Set<SearchShard>(uniqueShard)];
   }
 
   private buildQuery(selector: ConceptSelector): string {
     const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
-    const shardSelectMap: {[s in SearchShard]: string} = {
-      base: `
-        concepts.id as id,
-        concepts.type as type,
-        concepts.domain_id as domain`,
-      geographical_extends: `
-        json_agg(json_build_object(
-          'center', ${geoFn}(geographical_extends.center),
-          'shape', ${geoFn}(geographical_extends.shape)
-        )) as geographical_extends,`,
-      labels: `
-        json_agg(json_build_object(
-          'type', labels.type,
-          'label', labels.label,
-          'language', labels.language,
-          'transliteration', labels.transliteration,
-          'is_preferred', labels.is_preferred
-        )) as labels`,
-      relations: `
-        json_agg(json_build_object(
-          'predicate_id', relations.predicate_id,
-          'predicate_type', relations.predicate_type,
-          'object_id', relations.object_id,
-          'object_type', relations.object_type
-        )) as relationsFrom`,
-      temporal_extends: `
-        json_agg(json_build_object(
-         'start_min', temporal_extends.start_min,
-         'start_max', temporal_extends.start_max,
-         'end_min', temporal_extends.end_min,
-         'end_max', temporal_extends.end_max,
-         'start_precision', temporal_extends.start_precision,
-         'end_precision', temporal_extends.end_precision,
-         'start_certainty', temporal_extends.start_certainty,
-         'end_certainty', temporal_extends.end_certainty
-        )) as temporal_extends`
-    };
-    const shardJoinsMap: {[s in SearchShard]: string} = {
-      base: `-- never used`,
-      geographical_extends: `left join geographical_extends on concepts.id = geographical_extends.concept_id and concepts.type = geographical_extends.concept_type`,
-      labels: `left join labels on concepts.id = labels.concept_id and concepts.type = labels.concept_type`,
-      relations: `left join relations on concepts.id = relations.subject_id and concepts.type = relations.subject_type`,
-      temporal_extends: `left join temporal_extends on concepts.id = temporal_extends.concept_id and concepts.type = temporal_extends.concept_type`
-    };
     const shards = this.autoCompleteShards(selector);
+    const select= [
+      `concepts.id as id`,
+      `concepts.type as type`,
+      `concepts.domain_id as domain`,
+      ...shards
+    ];
+    const shardJoinsMap: {[s in SearchShard]: string} = {
+      geographical_extends: `left join lateral (
+        select
+          json_agg(json_build_object(
+            'center', ${geoFn}(geographical_extends.center),
+            'shape', ${geoFn}(geographical_extends.shape),
+            'certainty', certainty,
+            'precision', precision
+          )) as geographical_extends
+        from geographical_extends
+        where concepts.id = geographical_extends.concept_id and concepts.type = geographical_extends.concept_type
+      ) on true`,
+      labels: `left join lateral (
+        select
+          json_agg(json_build_object(
+            'type', labels.type,
+            'label', labels.label,
+            'language', labels.language,
+            'transliteration', labels.transliteration,
+            'is_preferred', labels.is_preferred
+          )) as labels
+        from labels
+        where concepts.id = labels.concept_id and concepts.type = labels.concept_type
+      ) on true`,
+      relations_to: `left join lateral (
+        select
+          json_agg(json_build_object(
+            'predicate_id', relations.predicate_id,
+            'predicate_type', relations.predicate_type,
+            'object_id', relations.object_id,
+            'object_type', relations.object_type
+          )) as relations_to
+        from relations
+        where concepts.id = relations.subject_id and concepts.type = relations.subject_type
+      ) on true`,
+      temporal_extends: `left join lateral (
+        select
+          json_agg(json_build_object(
+            'start_min', temporal_extends.start_min,
+            'start_max', temporal_extends.start_max,
+            'end_min', temporal_extends.end_min,
+            'end_max', temporal_extends.end_max,
+            'start_precision', temporal_extends.start_precision,
+            'end_precision', temporal_extends.end_precision,
+            'start_certainty', temporal_extends.start_certainty,
+            'end_certainty', temporal_extends.end_certainty
+          )) as temporal_extends
+        from temporal_extends
+        where concepts.id = temporal_extends.concept_id and concepts.type = temporal_extends.concept_type
+      ) on true`
+    };
+
     return `select
-      ${(shards).map((s: SearchShard) => shardSelectMap[s]).join(`,\n\t\t`)}
-    from
-      concepts
-        ${(shards).filter(a => a !== 'base').map((s: SearchShard) => shardJoinsMap[s]).join(`,\n\t\t`)}
+      ${(select).join(`,\n\t\t`)}
+    from concepts
+      ${(shards).map((s: SearchShard) => shardJoinsMap[s]).join(`\n\t\t\t`)}
     ${this.buildWhere(selector)}
-    group by
-      concepts.id, concepts.type
     limit ${selector.limit ?? 10}
     offset ${selector.offset ?? 0}`;
   }
@@ -215,7 +229,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       id,
       limit: 1,
       offset: 0,
-      shards: ['base', 'labels', 'relations', 'geographical_extends', 'temporal_extends']
+      shards: ['labels', 'relations_to', 'geographical_extends', 'temporal_extends']
     });
 
     if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);
@@ -224,7 +238,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async search(selector: ConceptSelector): Promise<SearchResult> {
-    const results: ConceptAbstract[] = (await this.queryConcepts(selector))
+    const results: Concept[] = (await this.queryConcepts(selector))
       .map(convertRow(settings));
     const count = await this.getSearchResultCount(selector);
     return {

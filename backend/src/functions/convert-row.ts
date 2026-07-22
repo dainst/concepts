@@ -87,12 +87,12 @@ export const convertRow  = (settings: Settings) => (row: ConceptRow): Concept =>
   const labels: Label[] = (row.labels ?? []).map(convertLabel);
 
   // TODO distinguish between is not geographical at all and has no coordinates
-  const geographicalExtends: GeographicalExtend[] = (row.geographicalExtends ?? []).map(convertGeographicalExtend);
+  const geographicalExtends: GeographicalExtend[] = (row.geographical_extends ?? []).map(convertGeographicalExtend);
 
   // TODO distinguish between is not temporal at all and has no coordinates
-  const temporalExtends: TemporalExtend[] = (row.temporalExtends ?? []).map(convertTemporalExtend);
+  const temporalExtends: TemporalExtend[] = (row.temporal_extends ?? []).map(convertTemporalExtend);
 
-  const relationsTo: RelationAbstractSet[] = row.relationsTo ? convertRelationAgg(row.relationsTo) : [];
+  const relationsTo: RelationAbstractSet[] = row.relations_to ? convertRelationAgg(row.relations_to) : [];
   // TODO relationFrom
 
   const preferredLabels = getPreferredLabels(labels, settings);

@@ -6,9 +6,9 @@ export interface ConceptRow {
   readonly type: string;
   readonly labels?: LabelsAgg[];
   readonly domain: string;
-  readonly geographicalExtends?: GeographicalExtendsAgg[];
-  readonly temporalExtends?: TemporalExtendsAgg[];
-  readonly relationsTo?: RelationsAgg[];
+  readonly geographical_extends?: GeographicalExtendsAgg[];
+  readonly temporal_extends?: TemporalExtendsAgg[];
+  readonly relations_to?: RelationsAgg[];
 }
 
 export interface RelationsAgg {
