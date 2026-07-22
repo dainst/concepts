@@ -139,11 +139,14 @@ const analyzeInterfaceFile = (input: string, target: string): {interfaces: Inter
 }
 
 const wrap = (s: string): string => `(${s})`;
-const createTypeCheck = (member: Member, thingName: string = 'thing'): string[] => {
+
+const createTypeCheck = (member: Member, overrideName: string = ''): string[] => {
+  const objectName = overrideName ? overrideName : `thing.${member.name}`;
+
   if (member.optional) {
     return [
       [
-        (`!('${member.name}' in ${thingName})`),
+        (`!('${member.name}' in thing)`),
         createTypeCheck({...member, optional: false}).join(' && ')
       ]
         .map(wrap)
@@ -159,7 +162,7 @@ const createTypeCheck = (member: Member, thingName: string = 'thing'): string[] 
     const nonStringTypes = types
       .filter(t => !stringTypes.includes(t));
     if (stringTypes.length > 1) {
-      options.push(wrap(`typeof ${thingName}.${member.name} === 'string' && [${stringTypes.join()}].includes(${thingName}.${member.name})`));
+      options.push(wrap(`typeof ${objectName} === 'string' && [${stringTypes.join()}].includes(${objectName})`));
     } else {
       nonStringTypes.push(...stringTypes);
     }
@@ -172,37 +175,49 @@ const createTypeCheck = (member: Member, thingName: string = 'thing'): string[] 
         ))
     );
     return [
-      `'${member.name}' in ${thingName}`,
+      `'${member.name}' in thing`,
       options.join(' || ')
     ];
   }
   if (member.type.startsWith('"') && member.type.endsWith('"')) {
     return [
-      `'${member.name}' in ${thingName}`,
-      `typeof ${thingName} === 'string'`,
-      `${thingName} === ${member.type}`
+      `'${member.name}' in thing`,
+      `typeof ${overrideName} === 'string'`,
+      `${overrideName} === ${member.type}`
     ];
   }
   if (member.type.endsWith('[]')) {
+    const subChecks = createTypeCheck({
+      name: 'e',
+      optional: false,
+      type: member.type.substring(0, member.type.length - 2)
+    }, 'e');
+    subChecks.shift();
     const subCheck =
-      ['string', 'number', 'boolean'].includes(member.type)
-        ? `e => typeof e.${member.name} === '${member.type}'`
-        : `is${member.type.substring(0, member.type.length - 2)}`;
+      (subChecks.length === 1 && subChecks[0].endsWith('(e)'))
+        ? subChecks[0].substring(0, subChecks[0].length - 3)
+        : subChecks.join(' && ');
     return [
-      `'${member.name}' in ${thingName}`,
-      `Array.isArray(${thingName}.${member.name})`,
-      `thing.${member.name}.every(${subCheck})`
+      `'${member.name}' in thing`,
+      `Array.isArray(${objectName})`,
+      `${objectName}.every(${subCheck})`
     ];
   }
   if (['string', 'number', 'boolean'].includes(member.type)) {
     return [
-      `'${member.name}' in ${thingName}`,
-      `typeof ${thingName}.${member.name} === '${member.type}'`
+      `'${member.name}' in thing`,
+      `typeof ${objectName} === '${member.type}'`
+    ];
+  }
+  if (member.type === 'null') {
+    return [
+      `'${member.name}' in thing`,
+      `${objectName} == null`
     ];
   }
   return [
-    `'${member.name}' in ${thingName}`,
-    `is${member.type}(${thingName}.${member.name})`
+    `'${member.name}' in thing`,
+    `is${member.type}(${objectName})`
   ]
 }
 
@@ -218,14 +233,9 @@ const createImport = (imp: ImportCollection): string =>
   `import {${imp.names.join(', ')}} from '${imp.module}'`;
 
 const functionCreators = {
-  typeguard: (iface: Interface): string => {
-    const rows = collectConditions(iface);
-    return `
-export const is${iface.name} = (thing: unknown): thing is ${iface.name} => {
-${rows.map(wrap).join(`\n\t&& `)}
-  return true;
-}`;
-  },
+  typeguard: (iface: Interface): string =>
+    `export const is${iface.name} = (thing: unknown): thing is ${iface.name} =>
+  ${collectConditions(iface).map(wrap).join(`\n\t&& `)}`,
 
   debugTypeguard: (iface: Interface): string => {
     const strCond = (r: string): string =>  `
@@ -266,6 +276,7 @@ ${rows.map(strCond).map(l => `\t${l};\n`).join('')}
 const createFunctionsFile = (filePath: string, outPath: string, type: keyof typeof functionCreators)=> {
   console.log(`Input: ${filePath}`);
   console.log(`Output: ${outPath}`);
+  const header = `// generated with script/creates-typeguards.ts\n\n`;
   const r = analyzeInterfaceFile(filePath, outPath);
   const imports = r.imports
     .reduce(
@@ -285,13 +296,15 @@ const createFunctionsFile = (filePath: string, outPath: string, type: keyof type
   const typeguards = r.interfaces
     .map(functionCreators[type])
     .join(";\n\n");
-  fs.writeFileSync(outPath, imports + ";\n\n\n" + typeguards, 'utf8');
+  fs.writeFileSync(outPath, header + imports + ";\n\n" + typeguards, 'utf8');
   console.log('done.');
 };
 
 
+// /home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts
+
 createFunctionsFile(
- "/home/pfranck/IdeaProjects/concepts/common/src/interfaces/selector.ts",
-  "/home/pfranck/IdeaProjects/concepts/common/src/functions/selector.validator.ts",
-  'validator'
+ "/home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts",
+  "/home/pfranck/IdeaProjects/concepts/common/src/functions/concept.typeguards.ts",
+  'typeguard'
 );

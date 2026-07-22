@@ -19,27 +19,38 @@ export interface ConceptAbstract extends PreferredLabels {
   readonly id: ConceptId;
 }
 
-export interface Concept extends ConceptAbstract {
-  readonly labels: Label[];
-  readonly relations: RelationAbstractSets;
+export interface RelationalConcept extends ConceptAbstract {
+  readonly relationsTo: RelationAbstractSet[];
 }
 
-export interface GeographicalConcept extends Concept {
+export interface RelatedConcept extends ConceptAbstract {
+  readonly relationsFrom: RelationAbstractSet[];
+}
+
+export interface LabelledConcept extends ConceptAbstract {
+  readonly labels: Label[];
+}
+
+export interface GeographicalConcept extends ConceptAbstract {
   readonly geographicalExtends: GeographicalExtend[];
 }
 
-export interface TemporalConcept extends Concept {
+export interface TemporalConcept extends ConceptAbstract {
   readonly temporalExtends: TemporalExtend[];
+}
+
+export interface Concept extends ConceptAbstract {
+  readonly domain: string;
+  readonly temporalExtends?: TemporalExtend[];
+  readonly geographicalExtends?: GeographicalExtend[];
+  readonly labels?: Label[];
+  readonly relationsTo?: RelationAbstractSet[];
+  readonly relationsFrom?: RelationAbstractSet[];
 }
 
 export interface RelationAbstractSet {
   readonly relation: ConceptAbstract;
   readonly objects: ConceptAbstract[];
-}
-
-export interface RelationAbstractSets {
-  readonly to: RelationAbstractSet[];
-  readonly from: RelationAbstractSet[];
 }
 
 export interface Label {

@@ -1,4 +1,4 @@
-export type ErrorResponseType = 'unknown-error' | 'internal-server-error';
+export type ErrorResponseType = 'unknown-error' | 'internal-server-error' | 'not-found';
 
 export interface ErrorResponse {
   readonly type: ErrorResponseType;

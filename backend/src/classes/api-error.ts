@@ -1,11 +1,11 @@
 import {ErrorResponseType} from 'common/interfaces/api';
 
 export class ApiError extends Error {
-  type: ErrorResponseType;
-  params: string[];
+  readonly type: ErrorResponseType;
+  readonly params: string[];
   constructor(
     type: ErrorResponseType = 'unknown-error',
-    params: []
+    params: string[] = []
   ) {
     super(type);
     this.type = type;

@@ -1,20 +1,14 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient, QueryResult, types} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
-import {Concept, ConceptAbstract, RelationAbstractSets} from 'common/interfaces/concept';
-import {
-  isGeographicalExtendsRow,
-  isTemporalExtendsRow,
-  isLabelledConceptRow,
-  isRelationRow
-} from '../../functions/rows.typeguards';
-import {convertRow} from '../../functions/convert-row';
-import {getPreferredLabels} from '../../functions/label';
-import {ConceptSelector} from 'common/interfaces/selector';
-import {Settings} from 'common/interfaces/settings';
-import {LabelledConceptRow, RelationRow} from '../../interfaces/rows';
-import {SearchResult} from 'common/interfaces/search';
+import {isConceptRow} from '../../functions/rows.typeguards';
 import {CacheService} from '../cache/cache.service';
+import {ApiError} from '../../classes/api-error';
+import {ConceptRow} from '../../interfaces/rows';
+import {convertRow} from '../../functions/convert-row';
+import {Concept, ConceptAbstract} from 'common/interfaces/concept';
+import {Settings} from 'common/interfaces/settings';
+import {ConceptSelector, SearchResult, SearchShard} from 'common/interfaces/search';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -104,29 +98,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return this.status;
   }
 
-  private async queryConcepts(selector: ConceptSelector): Promise<LabelledConceptRow[]> {
+  private async queryConcepts(selector: ConceptSelector): Promise<ConceptRow[]> {
     const query = this.buildQuery(selector);
     const res = await this.query(query, []);
     return res.rows
-      .filter(isLabelledConceptRow); // TODO should we raise error here maybe?
-  }
-
-  async search(selector: ConceptSelector): Promise<SearchResult> {
-    const results: ConceptAbstract[] = (await this.queryConcepts(selector))
-      .map(concept => ({
-        id: {
-          id: concept.id,
-          type: concept.type,
-        },
-        ...getPreferredLabels(concept.labels, settings)
-      }));
-    const count = await this.getSearchResultCount(selector);
-    return {
-      selector,
-      results,
-      count,
-      warnings: []
-    };
+      .filter(isConceptRow); // TODO should we raise error here maybe?
   }
 
   async getSearchResultCount(selector: ConceptSelector): Promise<number> {
@@ -150,11 +126,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           case 'q':
             return `label ilike '%${selector.q}%'`;
           case 'id':
-            return `concept_id = '${selector.id}'`;
+            return `concepts.id = '${selector.id}'`;
           case 'type':
-            return `concept_type = '${selector.type}'`;
+            return `concepts.type = '${selector.type}'`;
           case 'domain':
-            return `domain = '${selector.domain}'`;
+            return `concepts.domain_id = '${selector.domain}'`;
           case 'limit':
           case 'offset':
           default:
@@ -168,103 +144,94 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         .join(' and ');
   }
 
+  private autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
+    const uniqueShard = new Set<SearchShard>(['base', ...(selector.shards ?? [])]);
+    if (selector.q) uniqueShard.add('labels');
+    return [...uniqueShard];
+  }
+
   private buildQuery(selector: ConceptSelector): string {
-    return `
-      select
-        labels.concept_id as id,
-        labels.concept_type as type,
+    const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
+    const shardSelectMap: {[s in SearchShard]: string} = {
+      base: `
+        concepts.id as id,
+        concepts.type as type,
+        concepts.domain_id as domain`,
+      geographical_extends: `
+        json_agg(json_build_object(
+          'center', ${geoFn}(geographical_extends.center),
+          'shape', ${geoFn}(geographical_extends.shape)
+        )) as geographical_extends,`,
+      labels: `
         json_agg(json_build_object(
           'type', labels.type,
           'label', labels.label,
           'language', labels.language,
           'transliteration', labels.transliteration,
           'is_preferred', labels.is_preferred
-        )) as labels
-      from concepts
-        left join labels on concepts.id = labels.concept_id and concepts.type = labels.concept_type
-      ${this.buildWhere(selector)}
-      group by concept_id, concept_type
-      limit ${selector.limit ?? 10} offset ${selector.offset ?? 0}`;
+        )) as labels`,
+      relations: `
+        json_agg(json_build_object(
+          'predicate_id', relations.predicate_id,
+          'predicate_type', relations.predicate_type,
+          'object_id', relations.object_id,
+          'object_type', relations.object_type
+        )) as relationsFrom`,
+      temporal_extends: `
+        json_agg(json_build_object(
+         'start_min', temporal_extends.start_min,
+         'start_max', temporal_extends.start_max,
+         'end_min', temporal_extends.end_min,
+         'end_max', temporal_extends.end_max,
+         'start_precision', temporal_extends.start_precision,
+         'end_precision', temporal_extends.end_precision,
+         'start_certainty', temporal_extends.start_certainty,
+         'end_certainty', temporal_extends.end_certainty
+        )) as temporal_extends`
+    };
+    const shardJoinsMap: {[s in SearchShard]: string} = {
+      base: `-- never used`,
+      geographical_extends: `left join geographical_extends on concepts.id = geographical_extends.concept_id and concepts.type = geographical_extends.concept_type`,
+      labels: `left join labels on concepts.id = labels.concept_id and concepts.type = labels.concept_type`,
+      relations: `left join relations on concepts.id = relations.subject_id and concepts.type = relations.subject_type`,
+      temporal_extends: `left join temporal_extends on concepts.id = temporal_extends.concept_id and concepts.type = temporal_extends.concept_type`
+    };
+    const shards = this.autoCompleteShards(selector);
+    return `select
+      ${(shards).map((s: SearchShard) => shardSelectMap[s]).join(`,\n\t\t`)}
+    from
+      concepts
+        ${(shards).filter(a => a !== 'base').map((s: SearchShard) => shardJoinsMap[s]).join(`,\n\t\t`)}
+    ${this.buildWhere(selector)}
+    group by
+      concepts.id, concepts.type
+    limit ${selector.limit ?? 10}
+    offset ${selector.offset ?? 0}`;
   }
 
-  async getConcept(selector: ConceptSelector): Promise<Concept> {
-    const conceptRows = await this.queryConcepts({...selector, limit: 1, offset: 0});
-    if (conceptRows.length !== 1) throw new Error(`wrong result number: ${0}`);
-    const id = {
-      id: conceptRows[0].id,
-      type: conceptRows[0].type
-    };
-    const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
-
-    // TODO be more effective, use less queries
-    const resRels = await this.query('select * from relations where subject_id = $1 and subject_type = $2;', [id.id, id.type]);
-    const resGeog = await this.query(
-      `select
-        *,
-        ${geoFn}(center) as center,
-        ${geoFn}(shape) as shape
-      from
-        geographical_extends
-      where
-        concept_id = $1 and concept_type = $2;`,
-      [id.id, id.type]
-    );
-    const resTemp = await this.query(
-      `select * from temporal_extends where concept_id = $1 and concept_type = $2;`,
-      [id.id, id.type]
-    );
-
-    const relations = resRels
-      .rows
-      .filter(isRelationRow)
-      .reduce((rass: RelationAbstractSets, row: RelationRow) => {
-        let rasIndex = rass.to
-          .findIndex(r => (r.relation.id.id === row.predicate_id && r.relation.id.type === row.predicate_type));
-        if (rasIndex === -1) {
-          rasIndex = rass.to.push({
-            relation: {
-              id: {
-                id: row.predicate_id,
-                type: row.predicate_type,
-              },
-              title: `TODO: ${row.predicate_id}`
-            },
-            objects: []
-          }) - 1;
-        }
-        rass.to[rasIndex].objects.push({
-          id: {
-            id: row.object_id,
-            type: row.object_type
-          },
-          title: `TODO: ${row.object_id}`
-        });
-        return rass
-      },
-      {from: [], to: []}
-    );
-
-    const geographicalExtends = resGeog
-      .rows
-      .filter(isGeographicalExtendsRow)
-      .map(convertRow.geographicalExtend);
-
-    const temporalExtends = resTemp
-      .rows
-      .filter(isTemporalExtendsRow)
-      .map(convertRow.temporalExtend);
-    console.log(resTemp.rows)
-
-    const labels = conceptRows[0].labels;
-    const preferredLabels = getPreferredLabels(labels, settings);
-
-    return {
+  async getConcept(type: string, id: string): Promise<Concept> {
+    const conceptRows = await this.queryConcepts({
+      type,
       id,
-      ...preferredLabels,
-      labels,
-      relations,
-      ...(geographicalExtends.length && {geographicalExtends}), // TODO distinguish between is not geographical at all and has no coordinates
-      ...(temporalExtends.length && {temporalExtends})  // TODO distinguish between is not temporal at all and has no coordinates
-    }
+      limit: 1,
+      offset: 0,
+      shards: ['base', 'labels', 'relations', 'geographical_extends', 'temporal_extends']
+    });
+
+    if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);
+
+    return convertRow(settings)(conceptRows[0]);
+  }
+
+  async search(selector: ConceptSelector): Promise<SearchResult> {
+    const results: ConceptAbstract[] = (await this.queryConcepts(selector))
+      .map(convertRow(settings));
+    const count = await this.getSearchResultCount(selector);
+    return {
+      selector,
+      results,
+      count,
+      warnings: []
+    };
   }
 }

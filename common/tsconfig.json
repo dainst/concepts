@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "target": "ES2023",
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"]
+}

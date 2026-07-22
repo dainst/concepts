@@ -1,23 +1,24 @@
-import {ConceptRow, LabelledConceptRow, RelationRow, LabelRowAgg, ConceptExtensionRow, LabelRow, GeographicalExtendsRow, TemporalExtendsRow} from '../interfaces/rows';
+// generated with script/creates-typeguards.ts
+
+import {ConceptRow, RelationsAgg, LabelsAgg, GeographicalExtendsAgg, TemporalExtendsAgg} from '../interfaces/rows';
 import {isLabelType} from 'common/functions/labels.typeguards';
 
-
 export const isConceptRow = (thing: unknown): thing is ConceptRow =>
-	(typeof thing === 'object')
+  (typeof thing === 'object')
 	&& (thing != null)
 	&& ('id' in thing)
 	&& (typeof thing.id === 'string')
 	&& ('type' in thing)
-	&& (typeof thing.type === 'string');
+	&& (typeof thing.type === 'string')
+	&& ((!('labels' in thing)) || ('labels' in thing && Array.isArray(thing.labels) && thing.labels.every(isLabelsAgg)))
+	&& ('domain' in thing)
+	&& (typeof thing.domain === 'string')
+	&& ((!('geographicalExtends' in thing)) || ('geographicalExtends' in thing && Array.isArray(thing.geographicalExtends) && thing.geographicalExtends.every(isGeographicalExtendsAgg)))
+	&& ((!('temporalExtends' in thing)) || ('temporalExtends' in thing && Array.isArray(thing.temporalExtends) && thing.temporalExtends.every(isTemporalExtendsAgg)))
+	&& ((!('relationsTo' in thing)) || ('relationsTo' in thing && Array.isArray(thing.relationsTo) && thing.relationsTo.every(isRelationsAgg)));
 
-export const isLabelledConceptRow = (thing: unknown): thing is LabelledConceptRow =>
-	(isConceptRow(thing))
-	&& ('labels' in thing)
-	&& (Array.isArray(thing.labels))
-	&& (thing.labels.every(isLabelRowAgg));
-
-export const isRelationRow = (thing: unknown): thing is RelationRow =>
-	(typeof thing === 'object')
+export const isRelationsAgg = (thing: unknown): thing is RelationsAgg =>
+  (typeof thing === 'object')
 	&& (thing != null)
 	&& ('subject_id' in thing)
 	&& (typeof thing.subject_id === 'string')
@@ -32,8 +33,8 @@ export const isRelationRow = (thing: unknown): thing is RelationRow =>
 	&& ('object_type' in thing)
 	&& (typeof thing.object_type === 'string');
 
-export const isLabelRowAgg = (thing: unknown): thing is LabelRowAgg =>
-	(typeof thing === 'object')
+export const isLabelsAgg = (thing: unknown): thing is LabelsAgg =>
+  (typeof thing === 'object')
 	&& (thing != null)
 	&& ('type' in thing)
 	&& (isLabelType(thing.type))
@@ -46,37 +47,21 @@ export const isLabelRowAgg = (thing: unknown): thing is LabelRowAgg =>
 	&& ('is_preferred' in thing)
 	&& (typeof thing.is_preferred === 'boolean');
 
-export const isConceptExtensionRow = (thing: unknown): thing is ConceptExtensionRow =>
-	(typeof thing === 'object')
+export const isGeographicalExtendsAgg = (thing: unknown): thing is GeographicalExtendsAgg =>
+  (typeof thing === 'object')
 	&& (thing != null)
-	// && ('concept_id' in thing)
-	// && (typeof thing.concept_id === 'string')
-	// && ('concept_type' in thing)
-	// && (typeof thing.concept_type === 'string');
+	&& ('center' in thing)
+	&& (typeof thing.center === 'string')
+	&& ('shape' in thing)
+	&& (typeof thing.shape === 'string')
+	&& ('certainty' in thing)
+	&& (typeof thing.certainty === 'string')
+	&& ('precision' in thing)
+	&& (typeof thing.precision === 'string');
 
-export const isLabelRow = (thing: unknown): thing is LabelRow =>
-	(isLabelRowAgg(thing))
-	&& (isConceptExtensionRow(thing))
-	&& ('id' in thing)
-	&& (typeof thing.id === 'number');
-
-export const isGeographicalExtendsRow = (thing: unknown): thing is GeographicalExtendsRow =>
-	(isConceptExtensionRow(thing))
-	// && ('id' in thing)
-	// && (typeof thing.id === 'number')
-	// && ('center' in thing)
-	// && (typeof thing.center === 'string')
-	// && ('shape' in thing)
-	// && (typeof thing.shape === 'string')
-	// && ('certainty' in thing)
-	// && (typeof thing.certainty === 'string')
-	// && ('precision' in thing)
-	// && (typeof thing.precision === 'string');
-
-export const isTemporalExtendsRow = (thing: unknown): thing is TemporalExtendsRow =>
-	(isConceptExtensionRow(thing))
-	&& ('id' in thing)
-	&& (typeof thing.id === 'number')
+export const isTemporalExtendsAgg = (thing: unknown): thing is TemporalExtendsAgg =>
+  (typeof thing === 'object')
+	&& (thing != null)
 	&& ('start_min' in thing)
 	&& (typeof thing.start_min === 'number')
 	&& ('start_max' in thing)

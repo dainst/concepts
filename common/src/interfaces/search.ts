@@ -1,4 +1,3 @@
-import {ConceptSelector} from './selector';
 import {ConceptAbstract} from './concept';
 
 export interface SearchResult {
@@ -8,3 +7,17 @@ export interface SearchResult {
   results: ConceptAbstract[];
 }
 
+
+export const searchShards = ['base', 'labels', 'relations', 'geographical_extends', 'temporal_extends'] as const;
+
+export type SearchShard = typeof searchShards[number];
+
+export interface ConceptSelector {
+  q?: string;
+  domain?: string;
+  id?: string;
+  type?: string;
+  limit?: number;
+  offset?: number;
+  shards?: SearchShard[];
+}

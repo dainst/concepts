@@ -8,7 +8,6 @@ import {
   CacheServiceStoreKey,
   CacheStore
 } from '../../interfaces/cache';
-import {ConceptSelector} from 'common/interfaces/selector';
 
 @Injectable()
 export class CacheService {
@@ -38,7 +37,6 @@ export class CacheService {
     hash = hash ?? createHash('md5').update(key).digest('hex');
     if (!this.stores[store].keys.includes(hash)) this.stores[store].keys.push(hash);
     this.stores[store].items[hash] = data;
-    // console.log(`> ${store}:`, hash, this.stores[store])
     return hash;
   }
 
@@ -47,7 +45,6 @@ export class CacheService {
     key: string
   ): CacheServiceResponse<T> {
     const hash = createHash('md5').update(key).digest('hex');
-    console.log(`< ${store}:`, hash, this.stores[store])
     return {
       hash,
       result: <CachedObjectType<T>>this.stores[store].items[hash],

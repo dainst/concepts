@@ -14,6 +14,6 @@ export class ConceptController {
     @Param('type') type: string,
     @Param('id') id: string
   ): Promise<Concept> {
-    return await this.db.getConcept({type, id});
+    return await this.db.getConcept(type, id);
   }
 }
