@@ -1,6 +1,6 @@
-import {Component, OnInit, signal, Signal} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {Timeline} from '../../timeline/timeline';
-import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
+import {Concept} from 'concepts-common/interfaces/concept';
 import {dummyConceptGenerator} from '../../timeline/dummy-data';
 
 @Component({
@@ -16,7 +16,7 @@ export class About implements OnInit {
     setTimeout(() => {this.pumpData();},100)
     setTimeout(() => {this.pumpData();},1000)
   }
-  protected data = signal<TemporalConcept[]>([]);
+  protected data = signal<Concept[]>([]);
   protected selected = signal<string | undefined>(undefined);
   protected axisTicks = signal<number>(10);
   protected inactive = signal<boolean>(false);

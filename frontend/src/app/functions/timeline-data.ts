@@ -1,10 +1,9 @@
 import {Period, PeriodGroup, PeriodsMap, TimeLineData, Domain} from '../interfaces/timeline';
-import {Concept, ConceptAbstract, TemporalConcept} from 'concepts-common/src/interfaces/concept';
+import {Concept, ConceptAbstract} from 'concepts-common/interfaces/concept';
 
-export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData => {
-
+export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
   const getRelated = (concept: Concept, rId: string): ConceptAbstract[] =>
-     (concept.relations?.to ?? [])
+     (concept.relationsTo ?? [])
       .find(r => (r.relation.id.id === rId && r.relation.id.type === 'chronontology'))
       ?.objects ?? [];
 
@@ -15,8 +14,8 @@ export const prepareTimelineData = (concepts: TemporalConcept[]): TimeLineData =
   const getId = (id: ConceptAbstract): string =>
     `${id.id.id}-${id.id.type}`;
 
-  const createPeriod = (concept: TemporalConcept, number: number): Period | undefined => {
-    if (!concept.temporalExtends.length) return undefined;
+  const createPeriod = (concept: Concept, number: number): Period | undefined => {
+    if (!concept.temporalExtends?.length) return undefined;
     let timespan = concept.temporalExtends[0]; // TODO what if there are more?
     return {
       id: getId(concept), // TODO tmp

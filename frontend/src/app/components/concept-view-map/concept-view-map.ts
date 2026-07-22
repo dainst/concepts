@@ -1,9 +1,9 @@
 import {AfterViewInit, Component, effect, signal} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import * as L from 'leaflet';
-import {GeographicalExtend} from 'concepts-common/src/interfaces/concept';
+import {GeographicalExtend} from 'concepts-common/interfaces/concept';
 import {isGeoJsonObject} from '../../functions/geo-json.typeguards';
-import {isGeographicalConcept} from 'concepts-common/src/functions/concept.typeguards';
+import {isGeographicalConcept} from 'concepts-common/functions/concept.typeguards';
 
 @Component({
   selector: 'app-concept-view-map',
@@ -51,8 +51,6 @@ export class ConceptViewMap extends ConceptViewComponent implements AfterViewIni
   }
 
   private loadShape(ge: GeographicalExtend) {
-    console.log(ge);
-
     try {
       const geometry = JSON.parse(ge.shape ?? ge.center);
       if (!isGeoJsonObject(geometry)) throw new Error(`Invalid GeoJSON: ${ge.shape ?? ge.center}`);

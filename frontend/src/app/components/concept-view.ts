@@ -1,5 +1,5 @@
 import { Directive, input } from '@angular/core';
-import {Concept} from 'concepts-common/src/interfaces/concept';
+import {Concept} from 'concepts-common/interfaces/concept';
 
 
 @Directive()

@@ -1,4 +1,4 @@
-import {ConceptAbstract, TemporalConcept} from 'concepts-common/src/interfaces/concept';
+import {Concept, ConceptAbstract, TemporalConcept} from 'concepts-common/interfaces/concept';
 
 interface GeneratedNumbers {
   nr: number,
@@ -19,7 +19,7 @@ const generateNumbers = (nr: number): GeneratedNumbers => {
     parent: NaN
   }
 
-  r.a = (nr * 50 + ((nr % 3) * 5 - (nr % 5) * 3) + (nr >= 0 ? generateNumbers(nr -1 ).b : -2500)) % 2500;
+  r.a = (nr * 50 + ((nr % 3) * 5 - (nr % 5) * 3) + (nr >= 0 ? generateNumbers(nr - 1).b : -2500)) % 2500;
   r.b = (r.a + (nr % 7) * 50 + nr * (nr % 4)) % 2500;
   if (r.a > r.b) r = {
     ...r,
@@ -39,12 +39,12 @@ const generateNumbers = (nr: number): GeneratedNumbers => {
   return r
 }
 
-export function* dummyConceptGenerator(): Generator<TemporalConcept> {
+export function* dummyConceptGenerator(): Generator<Concept> {
   const makeObj = (i: number): ConceptAbstract => ({
     id: {
       id: String(i),
       type: "dummy"
-    }
+    },
   });
 
   let index = 0;
@@ -67,6 +67,7 @@ export function* dummyConceptGenerator(): Generator<TemporalConcept> {
       }],
       title: `Title #${index}`,
       description: `Description #${index}`,
+      domain: 'dummy',
       labels: [
         {
           type: "title",
@@ -81,38 +82,35 @@ export function* dummyConceptGenerator(): Generator<TemporalConcept> {
           transliteration: ""
         }
       ],
-      relations: {
-        to: [
-          {
-            relation: {
-              id: {
-                id: 'hasPart',
-                type: 'chronontology'
-              },
+      relationsTo: [
+        {
+          relation: {
+            id: {
+              id: 'hasPart',
+              type: 'chronontology'
             },
-            objects: numbers.children.map(makeObj)
           },
-          {
-            relation: {
-              id: {
-                id: 'isFollowedBy',
-                type: 'chronontology'
-              },
+          objects: numbers.children.map(makeObj)
+        },
+        {
+          relation: {
+            id: {
+              id: 'isFollowedBy',
+              type: 'chronontology'
             },
-            objects: numbers.successor ? [makeObj(numbers.successor)] : []
           },
-          {
-            relation: {
-              id: {
-                id: 'isPartOf',
-                type: 'chronontology'
-              },
+          objects: numbers.successor ? [makeObj(numbers.successor)] : []
+        },
+        {
+          relation: {
+            id: {
+              id: 'isPartOf',
+              type: 'chronontology'
             },
-            objects: numbers.parent ? [makeObj(numbers.parent)] : []
-          }
-        ],
-        from: []
-      },
+          },
+          objects: numbers.parent ? [makeObj(numbers.parent)] : []
+        }
+      ],
       id: {
         id: String(index),
         type: "dummy"

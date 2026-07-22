@@ -1,7 +1,7 @@
 <h1>{{concept().title}}</h1>
 <p>{{concept().description}}</p>
 <h2>Relations →</h2>
-@for(relation of concept().relations.to; track relation.relation.id.id) {
+@for(relation of concept().relationsTo; track relation.relation.id.id) {
   <h3>{{relation.relation.title}}</h3>
   <ul>
     @for(target of relation.objects; track target.id.id) {

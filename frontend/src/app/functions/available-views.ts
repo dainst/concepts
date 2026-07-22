@@ -1,6 +1,6 @@
-import {Concept} from 'concepts-common/src/interfaces/concept';
+import {Concept} from 'concepts-common/interfaces/concept';
 import {View, ViewMap, conceptViews} from '../interfaces/views';
-import {isGeographicalConcept, isTemporalConcept} from 'concepts-common/src/functions/concept.typeguards';
+import {isGeographicalConcept, isTemporalConcept} from 'concepts-common/functions/concept.typeguards';
 
 export const availableViews = (concepts: Concept[]): ViewMap<number> =>
   concepts

@@ -1,4 +1,4 @@
-import {ConceptId} from 'concepts-common/src/interfaces/concept';
+import {ConceptId} from 'concepts-common/interfaces/concept';
 
 export interface Period {
   id: string;

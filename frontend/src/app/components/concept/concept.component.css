@@ -29,3 +29,7 @@ section:first-child {
   transform: rotate(180deg);
   background: rgba(255,255,0,0.2);
 }
+
+.row {
+  height: 100%;
+}

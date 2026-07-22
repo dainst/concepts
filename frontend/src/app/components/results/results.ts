@@ -3,10 +3,9 @@ import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Backend} from '../../services/backend';
-import {SearchResult} from 'concepts-common/src/interfaces/search';
+import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
 import {flatten} from '../../functions/object';
 import {JsonPipe} from '@angular/common';
-import {ConceptSelector} from 'concepts-common/src/interfaces/selector';
 
 @Component({
   selector: 'app-search',
@@ -43,7 +42,7 @@ export class Results {
         return {
           limit,
           offset,
-          selector: {q}
+          q
         };
       })
     ),

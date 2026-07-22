@@ -1,4 +1,18 @@
-<timeline
-  [concepts]="data()"
-  [selectedPeriodId]="selected()"
-/>
+@if (data.error()) {
+  <div>No Timeline-Data erhalten</div>
+}
+
+@if (data.isLoading()) {
+  <div>Time line loading</div>
+}
+
+
+@if (data.value(); as periods) {
+  <timeline
+    style="height: 500px"
+    [concepts]="periods"
+    [selectedPeriodId]="selected()"
+  />
+}
+
+

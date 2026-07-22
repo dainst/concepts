@@ -1,7 +1,40 @@
 import {HttpParams} from '@angular/common/http';
-import {ConceptSelector} from 'concepts-common/src/interfaces/selector';
+import {ConceptSelector} from 'concepts-common/interfaces/search';
+
+const parametrize = (k: string, v: any, prefix: string = ''): [string, string][] => {
+  console.log(k, v)
+  switch (typeof v) {
+    case "bigint":
+    case "string":
+    case "boolean":
+    case "number":
+      return [[`${prefix}${k}`, String(v)]];
+    case "object":
+      console.log('obj')
+      if (Array.isArray(v)) {
+        return v
+          .flatMap(e => parametrize(`${prefix}${k}`, e));
+      }
+      if (v == null) {
+        return [[`${prefix}${k}`, 'null']];
+      }
+      return Object
+        .entries(v)
+        .map(([ok, ov]) => parametrize(`${prefix}${ok}`, ov, `${k}.`))
+        .flat();
+    case "function":
+    case "symbol":
+      throw new Error(`could not serialize ${v}`);
+    case "undefined":
+    default:
+      return [];
+  }
+}
 
 export const searchToHttpParams = (searchQuery: ConceptSelector): HttpParams =>
   Object.entries(searchQuery)
-    .filter(([k, v]) => ['string', 'number', 'boolean'].includes(typeof v))
-    .reduce(((params, entry) => params.set(...entry)), new HttpParams());
+    .flatMap(([k, v]) => parametrize(k, v))
+    .reduce(
+      ((params, entry) => params.append(...entry)),
+      new HttpParams()
+    );

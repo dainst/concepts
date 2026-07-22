@@ -1,10 +1,9 @@
 import {Service, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, retry, timer} from 'rxjs';
-import {Concept} from 'concepts-common/src/interfaces/concept';
-import {SearchResult} from 'concepts-common/src/interfaces/search';
+import {Concept} from 'concepts-common/interfaces/concept';
+import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
 import {searchToHttpParams} from '../functions/query-params';
-import {ConceptSelector} from 'concepts-common/src/interfaces/selector';
 
 @Service()
 export class Backend {

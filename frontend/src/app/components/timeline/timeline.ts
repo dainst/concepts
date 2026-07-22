@@ -1,10 +1,9 @@
-import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild, inject, untracked} from '@angular/core';
+import {AfterViewInit, Component, computed, effect, ElementRef, input, ViewChild, inject, untracked, signal} from '@angular/core';
 import * as d3 from 'd3';
 import {Period, TimeLineData, Domain} from '../../interfaces/timeline';
 import {prepareTimelineData} from '../../functions/timeline-data';
-import {TemporalConcept} from 'concepts-common/src/interfaces/concept';
+import {Concept} from 'concepts-common/interfaces/concept';
 import {Router } from "@angular/router";
-import {D3ZoomEvent} from 'd3-zoom';
 
 
 @Component({
@@ -21,7 +20,9 @@ export class Timeline implements AfterViewInit {
   readonly selectedPeriodId = input<string | undefined>();
   readonly axisTicks = input<number | undefined>();
   readonly inactive = input<boolean>(false);
-  readonly concepts = input<TemporalConcept[]>([]);
+  readonly concepts = input<Concept[]>([]);
+
+  private d3Ready = signal(false);
 
   private readonly timelineData = computed(() => prepareTimelineData(this.concepts()));
 
@@ -61,7 +62,7 @@ export class Timeline implements AfterViewInit {
     effect(() => {
       const tld = this.timelineData();
 
-      if (!this.d3) return;
+      if (!this.d3Ready()) return;
 
       const spid = untracked(() => this.selectedPeriodId());
       this.updateDomains(tld, spid);
@@ -70,18 +71,18 @@ export class Timeline implements AfterViewInit {
     effect(() => {
       const spid = this.selectedPeriodId();
 
-      if (!this.d3 || !this.bars) return;
+      if (!this.d3Ready()) return;
 
-      this.selectPeriod(spid);
       const tld = untracked(() => this.timelineData());
-      this.updateDomains(tld, this.selectedPeriodId());
+      this.selectPeriod(spid);
+      this.updateDomains(tld, spid);
       this.setZoomExtend();
       this.zoomFn(true);
     });
     effect(() => {
       const at = this.axisTicks();
 
-      if (!this.d3) return;
+      if (!this.d3Ready()) return;
 
       this.updateAxisTicks(at);
     });
@@ -150,6 +151,8 @@ export class Timeline implements AfterViewInit {
       startYDomain: [0, 0],
       totalXDomain: [0, 0]
     }
+
+    this.d3Ready.set(true);
   };
 
   private zoomCallback(event: d3.D3ZoomEvent<SVGSVGElement, Period>): void {

@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "paths": {
       "concepts-common/*": [
-        "../common/*"
+        "../common/src/*"
       ]
     }
   },

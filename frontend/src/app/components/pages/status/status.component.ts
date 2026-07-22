@@ -1,7 +1,7 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {lastValueFrom} from 'rxjs';
-import {Status} from 'concepts-common/src/interfaces/default';
+import {Status} from 'concepts-common/interfaces/default';
 
 @Component({
   selector: 'app-status',

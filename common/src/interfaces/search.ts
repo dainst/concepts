@@ -1,10 +1,10 @@
-import {ConceptAbstract} from './concept';
+import {Concept} from './concept';
 
 export interface SearchResult {
   selector: ConceptSelector,
   count: number;
   warnings: string[];
-  results: ConceptAbstract[];
+  results: Concept[];
 }
 
 

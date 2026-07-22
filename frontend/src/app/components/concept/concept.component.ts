@@ -4,7 +4,7 @@ import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 import {Backend} from '../../services/backend';
 import {JsonPipe, NgComponentOutlet} from '@angular/common';
-import {ConceptId} from 'concepts-common/src/interfaces/concept';
+import {ConceptId} from 'concepts-common/interfaces/concept';
 import {ConceptMenuEntry} from '../../interfaces/ui';
 import {ConceptMenu} from '../concept-menu/concept-menu';
 import {ConceptViewRaw} from '../concept-view-raw/concept-view-raw';
@@ -48,12 +48,11 @@ export class ConceptComponent {
   private readonly bs = inject(Backend);
 
   readonly menu: Signal<ConceptMenuEntry[]> =
-    computed(() => {
-      const av = getAvailableViews(this.concept.value());
-      console.log({av});
-      return av.map(view => Object.assign({}, viewsMap[view]))
-      }
-    );
+    computed(() =>
+     getAvailableViews(this.concept.value())
+       .map(view => Object.assign({}, viewsMap[view]))
+     );
+
   readonly currentViewId = signal<string>('map');
   readonly currentView: Signal<ConceptMenuEntry> =
     computed(() =>
