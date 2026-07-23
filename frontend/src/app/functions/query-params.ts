@@ -2,7 +2,6 @@ import {HttpParams} from '@angular/common/http';
 import {ConceptSelector} from 'concepts-common/interfaces/search';
 
 const parametrize = (k: string, v: any, prefix: string = ''): [string, string][] => {
-  console.log(k, v)
   switch (typeof v) {
     case "bigint":
     case "string":
@@ -10,7 +9,6 @@ const parametrize = (k: string, v: any, prefix: string = ''): [string, string][]
     case "number":
       return [[`${prefix}${k}`, String(v)]];
     case "object":
-      console.log('obj')
       if (Array.isArray(v)) {
         return v
           .flatMap(e => parametrize(`${prefix}${k}`, e));
