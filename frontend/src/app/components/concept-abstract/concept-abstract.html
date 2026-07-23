@@ -1,13 +1,13 @@
 <h1>{{concept().title}}</h1>
 <p>{{concept().description}}</p>
 <h2>Relations →</h2>
-@for(relation of concept().relationsTo; track relation.relation.id) {
-  <h3>{{titles()?.get(relation.relation) ?? `#${relation.relation.type}/${relation.relation.id}`}}</h3>
+@for(r of concept().relationsTo; track r.relation.id) {
+  <h3>{{titles()?.[r.relation.type]?.[r.relation.id] ?? `#${r.relation.type}/${r.relation.id}`}}</h3>
   <ul>
-    @for(target of relation.objects; track target.id) {
+    @for(target of r.objects; track target.id) {
       <li>
         <a href="concept/{{target.type}}/{{target.id}}">
-          {{titles()?.get(target) ?? `#${target.type}/${target.id}`}}
+          {{titles()?.[target.type]?.[target.id] ?? `#${target.type}/${target.id}`}}
         </a>
       </li>
     }

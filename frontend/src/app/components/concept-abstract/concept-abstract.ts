@@ -1,13 +1,14 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, Signal} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {Backend} from '../../services/backend';
-import {forkJoin, map, switchMap, tap} from 'rxjs';
-import {ConceptId} from 'concepts-common/interfaces/concept';
+import {forkJoin, map, switchMap} from 'rxjs';
+import {JsonPipe} from '@angular/common';
 
 @Component({
   selector: 'app-concept-abstract',
-  imports: [],
+  imports: [
+    JsonPipe],
   templateUrl: './concept-abstract.html',
   styleUrl: './concept-abstract.css',
 })
@@ -22,10 +23,9 @@ export class ConceptAbstract extends ConceptViewComponent {
    * having to build our own cache
    * TODO move this to conceptComponent, so the other views can use titles as well
    */
-  protected readonly titles = toSignal(
+  protected readonly titles: Signal<{[type: string]: {[id: string]: string}}|undefined> = toSignal(
     toObservable(this.concept)
       .pipe(
-        tap(e => console.log('input comes', e)),
         switchMap(concept =>
           forkJoin(
             (concept.relationsTo ?? [])
@@ -35,16 +35,18 @@ export class ConceptAbstract extends ConceptViewComponent {
               ])
           )
         ),
-        tap(e => console.log('next', e)),
         map(
           responses => responses
             .reduce(
               (map, response) => {
                 response.results
-                  .forEach(result => map.set(result.id, result.title ?? `#${result.id}`));
+                  .forEach(result => {
+                    if (!(result.id.type in map)) map[result.id.type] = {};
+                    map[result.id.type][result.id.id] = result.title ?? `#${result.id}`
+                  });
                 return map;
               },
-              new Map<ConceptId, string>()
+              <{[type: string]: {[id: string]: string}}>{}
             )
         )
     )
