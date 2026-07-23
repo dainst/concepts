@@ -1,11 +1,15 @@
 <h1>{{concept().title}}</h1>
 <p>{{concept().description}}</p>
 <h2>Relations →</h2>
-@for(relation of concept().relationsTo; track relation.relation.id.id) {
-  <h3>{{relation.relation.title}}</h3>
+@for(relation of concept().relationsTo; track relation.relation.id) {
+  <h3>{{titles()?.get(relation.relation.id) ?? '#' + relation.relation.id.id}}</h3>
   <ul>
     @for(target of relation.objects; track target.id.id) {
-      <li><a href="concept/{{target.id.type}}/{{target.id.id}}">{{target.title}}</a></li>
+      <li>
+        <a href="concept/{{target.id.type}}/{{target.id.id}}">
+          {{titles()?.get(relation.relation.id) ?? '#' + target.id.id}}
+        </a>
+      </li>
     }
   </ul>
 }
