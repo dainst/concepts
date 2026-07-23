@@ -1,4 +1,4 @@
-import {Concept, ConceptAbstract, TemporalConcept} from 'concepts-common/interfaces/concept';
+import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 
 interface GeneratedNumbers {
   nr: number,
@@ -40,11 +40,9 @@ const generateNumbers = (nr: number): GeneratedNumbers => {
 }
 
 export function* dummyConceptGenerator(): Generator<Concept> {
-  const makeObj = (i: number): ConceptAbstract => ({
-    id: {
-      id: String(i),
-      type: "dummy"
-    },
+  const makeObj = (i: number): ConceptId => ({
+    id: String(i),
+    type: "dummy"
   });
 
   let index = 0;
@@ -85,28 +83,22 @@ export function* dummyConceptGenerator(): Generator<Concept> {
       relationsTo: [
         {
           relation: {
-            id: {
-              id: 'hasPart',
-              type: 'chronontology'
-            },
+            id: 'hasPart',
+            type: 'chronontology'
           },
           objects: numbers.children.map(makeObj)
         },
         {
           relation: {
-            id: {
-              id: 'isFollowedBy',
-              type: 'chronontology'
-            },
+            id: 'isFollowedBy',
+            type: 'chronontology'
           },
           objects: numbers.successor ? [makeObj(numbers.successor)] : []
         },
         {
           relation: {
-            id: {
-              id: 'isPartOf',
-              type: 'chronontology'
-            },
+            id: 'isPartOf',
+            type: 'chronontology'
           },
           objects: numbers.parent ? [makeObj(numbers.parent)] : []
         }

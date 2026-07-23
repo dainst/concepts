@@ -49,8 +49,8 @@ export interface Concept extends ConceptAbstract {
 }
 
 export interface RelationAbstractSet {
-  readonly relation: ConceptAbstract;
-  readonly objects: ConceptAbstract[];
+  readonly relation: ConceptId;
+  readonly objects: ConceptId[];
 }
 
 export interface Label {

@@ -16,28 +16,22 @@ const convertRelationAgg = (cell: RelationsAgg[]): RelationAbstractSet[] => cell
   .reduce(
     (relationAstractSets: RelationAbstractSet[], relation: RelationsAgg): RelationAbstractSet[] => {
       const predicateIndex = relationAstractSets
-        .findIndex(p => (p.relation.id.id === relation.predicate_id && p.relation.id.type === relation.predicate_type));
+        .findIndex(p => (p.relation.id === relation.predicate_id && p.relation.id === relation.predicate_type));
       if (predicateIndex === -1) {
         relationAstractSets.push({
           objects: [{
-            id: {
-              id: relation.object_id,
-              type: relation.object_type
-            }
+            id: relation.object_id,
+            type: relation.object_type
           }],
           relation: {
-            id: {
-              id: relation.predicate_id,
-              type: relation.predicate_type
-            }
+            id: relation.predicate_id,
+            type: relation.predicate_type
           }
         });
       } else {
         relationAstractSets[predicateIndex].objects.push({
-          id: {
-            id: relation.object_id,
-            type: relation.object_type
-          }
+          id: relation.object_id,
+          type: relation.object_type
         });
       }
       return relationAstractSets;

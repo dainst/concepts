@@ -30,8 +30,8 @@ export class ConceptAbstract extends ConceptViewComponent {
           forkJoin(
             (concept.relationsTo ?? [])
               .flatMap(rel => [
-                this.bs.search({...rel.relation.id, shards: ['labels']}),
-                ...rel.objects.map(obj => this.bs.search({...obj.id, shards: ['labels']}))
+                this.bs.search({...rel.relation, shards: ['labels']}),
+                ...rel.objects.map(obj => this.bs.search({...obj, shards: ['labels']}))
               ])
           )
         ),

@@ -1,24 +1,25 @@
 import {Period, PeriodGroup, PeriodsMap, TimeLineData, Domain} from '../interfaces/timeline';
-import {Concept, ConceptAbstract} from 'concepts-common/interfaces/concept';
+import {Concept, ConceptAbstract, ConceptId} from 'concepts-common/interfaces/concept';
 
 export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
-  const getRelated = (concept: Concept, rId: string): ConceptAbstract[] =>
+  const getRelated = (concept: Concept, rId: string): ConceptId[] =>
      (concept.relationsTo ?? [])
-      .find(r => (r.relation.id.id === rId && r.relation.id.type === 'chronontology'))
+      .find(r => (r.relation.id === rId && r.relation.type === 'chronontology'))
       ?.objects ?? [];
+  // TODO dont hardcode "chronontology"
 
   const first = <T>(array: T[]): T | undefined => {
     return array.length ? array[0] : undefined;
   }
 
-  const getId = (id: ConceptAbstract): string =>
-    `${id.id.id}-${id.id.type}`;
+  const serializeId = (id: ConceptId): string =>
+    `${id.id}-${id.type}`; // TODO find a better way of serialization or use the id obj.
 
   const createPeriod = (concept: Concept, number: number): Period | undefined => {
     if (!concept.temporalExtends?.length) return undefined;
     let timespan = concept.temporalExtends[0]; // TODO what if there are more?
     return {
-      id: getId(concept), // TODO tmp
+      id: serializeId(concept.id),
       conceptId: concept.id,
       number,
       name: concept.title || `concept ${concept.id.type}/${concept.id.id}`,
@@ -26,9 +27,9 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       earliestFrom: undefined, // timespan.start.min,
       to: (timespan.end.max - timespan.end.min) / 2 + timespan.end.min,
       latestTo: undefined, //  timespan.end.max,
-      successor: first(getRelated(concept, 'isFollowedBy').map(getId)), // TODO what if there are more?
-      parent: first(getRelated(concept, 'isPartOf').map(getId)), // TODO what if there are more?
-      children: getRelated(concept, 'hasPart').map(getId),
+      successor: first(getRelated(concept, 'isFollowedBy').map(serializeId)), // TODO what if there are more?
+      parent: first(getRelated(concept, 'isPartOf').map(serializeId)), // TODO what if there are more?
+      children: getRelated(concept, 'hasPart').map(serializeId),
       row: 1,
       colorGroup: 0,
       level: 0,
