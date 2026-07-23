@@ -2,7 +2,7 @@ import {
   Concept,
   GeographicalExtend,
   Label,
-  RelationAbstractSet,
+  RelationSet,
   TemporalExtend
 } from 'common/interfaces/concept';
 import {
@@ -12,13 +12,13 @@ import {
 import {getPreferredLabels} from './label';
 import {Settings} from 'common/interfaces/settings';
 
-const convertRelationAgg = (cell: RelationsAgg[]): RelationAbstractSet[] => cell
+const convertRelationAgg = (cell: RelationsAgg[]): RelationSet[] => cell
   .reduce(
-    (relationAstractSets: RelationAbstractSet[], relation: RelationsAgg): RelationAbstractSet[] => {
-      const predicateIndex = relationAstractSets
-        .findIndex(p => (p.relation.id === relation.predicate_id && p.relation.id === relation.predicate_type));
+    (relationSets: RelationSet[], relation: RelationsAgg): RelationSet[] => {
+      const predicateIndex = relationSets
+        .findIndex(p => (p.relation.id === relation.predicate_id && p.relation.type === relation.predicate_type));
       if (predicateIndex === -1) {
-        relationAstractSets.push({
+        relationSets.push({
           objects: [{
             id: relation.object_id,
             type: relation.object_type
@@ -29,14 +29,14 @@ const convertRelationAgg = (cell: RelationsAgg[]): RelationAbstractSet[] => cell
           }
         });
       } else {
-        relationAstractSets[predicateIndex].objects.push({
+        relationSets[predicateIndex].objects.push({
           id: relation.object_id,
           type: relation.object_type
         });
       }
-      return relationAstractSets;
+      return relationSets;
     },
-    <RelationAbstractSet[]>[]
+    <RelationSet[]>[]
   );
 
 const convertLabel = (cell: LabelsAgg): Label => ({
@@ -86,7 +86,7 @@ export const convertRow  = (settings: Settings) => (row: ConceptRow): Concept =>
   // TODO distinguish between is not temporal at all and has no coordinates
   const temporalExtends: TemporalExtend[] = (row.temporal_extends ?? []).map(convertTemporalExtend);
 
-  const relationsTo: RelationAbstractSet[] = row.relations_to ? convertRelationAgg(row.relations_to) : [];
+  const relationsTo: RelationSet[] = row.relations_to ? convertRelationAgg(row.relations_to) : [];
   // TODO relationFrom
 
   const preferredLabels = getPreferredLabels(labels, settings);

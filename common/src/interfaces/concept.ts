@@ -20,11 +20,11 @@ export interface ConceptAbstract extends PreferredLabels {
 }
 
 export interface RelationalConcept extends ConceptAbstract {
-  readonly relationsTo: RelationAbstractSet[];
+  readonly relationsTo: RelationSet[];
 }
 
 export interface RelatedConcept extends ConceptAbstract {
-  readonly relationsFrom: RelationAbstractSet[];
+  readonly relationsFrom: RelationSet[];
 }
 
 export interface LabelledConcept extends ConceptAbstract {
@@ -44,11 +44,11 @@ export interface Concept extends ConceptAbstract {
   readonly temporalExtends?: TemporalExtend[];
   readonly geographicalExtends?: GeographicalExtend[];
   readonly labels?: Label[];
-  readonly relationsTo?: RelationAbstractSet[];
-  readonly relationsFrom?: RelationAbstractSet[];
+  readonly relationsTo?: RelationSet[];
+  readonly relationsFrom?: RelationSet[];
 }
 
-export interface RelationAbstractSet {
+export interface RelationSet {
   readonly relation: ConceptId;
   readonly objects: ConceptId[];
 }

@@ -1,6 +1,6 @@
 // generated with script/creates-typeguards.ts
 
-import {ConceptId, ConceptAbstract, RelationalConcept, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, Concept, RelationAbstractSet, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
+import {ConceptId, ConceptAbstract, RelationalConcept, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, Concept, RelationSet, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
 import {isPreferredLabels} from './labels.typeguards';
 
 export const isConceptId = (thing: unknown): thing is ConceptId =>
@@ -56,7 +56,7 @@ export const isConcept = (thing: unknown): thing is Concept =>
 	&& ((!('relationsTo' in thing)) || ('relationsTo' in thing && Array.isArray(thing.relationsTo) && thing.relationsTo.every(isRelationAbstractSet)))
 	&& ((!('relationsFrom' in thing)) || ('relationsFrom' in thing && Array.isArray(thing.relationsFrom) && thing.relationsFrom.every(isRelationAbstractSet)));
 
-export const isRelationAbstractSet = (thing: unknown): thing is RelationAbstractSet =>
+export const isRelationAbstractSet = (thing: unknown): thing is RelationSet =>
   (typeof thing === 'object')
 	&& (thing != null)
 	&& ('relation' in thing)
