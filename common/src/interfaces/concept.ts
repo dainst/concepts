@@ -48,7 +48,7 @@ export interface Concept extends ConceptAbstract {
   readonly relationsFrom?: RelationSet[];
 }
 
-export interface RelationSet {
+export interface RelationSet { // TODO better naming of properties
   readonly relation: ConceptId;
   readonly objects: ConceptId[];
 }
