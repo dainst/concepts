@@ -1,6 +1,7 @@
 export const conceptViews = [
   'map',
   'timeline',
+  'graph',
   'raw'
 ] as const;
 

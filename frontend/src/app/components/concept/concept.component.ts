@@ -13,6 +13,7 @@ import {ConceptAbstract} from '../concept-abstract/concept-abstract';
 import {ConceptViewMap} from '../concept-view-map/concept-view-map';
 import {ViewMap} from '../../interfaces/views';
 import {getAvailableViews} from '../../functions/available-views';
+import {ConceptViewGraph} from '../concept-view-graph/concept-view-graph';
 
 const viewsMap: ViewMap<ConceptMenuEntry> = {
   map: {
@@ -20,16 +21,22 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
     label: 'Map',
     component: ConceptViewMap
   },
+  timeline: {
+    id: 'timeline',
+    label: 'Timeline',
+    component: ConceptViewTimeline
+  },
+  graph: {
+    id: 'graph',
+    label: 'Relationen',
+    component: ConceptViewGraph
+  },
   raw: {
     id: 'raw',
     label: 'Raw',
     component: ConceptViewRaw
   },
-  timeline:   {
-    id: 'timeline',
-    label: 'Timeline',
-    component: ConceptViewTimeline
-  }
+
 };
 
 @Component({

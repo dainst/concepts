@@ -29,7 +29,8 @@
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css",
-              "src/app/components/timeline/timeline-global.css"
+              "src/app/components/timeline/timeline-global.css",
+              "src/app/components/concept-view-graph/graph-global.css"
             ],
             "polyfills": ["@angular/localize/init"]
           },
