@@ -1,21 +1,16 @@
-import {GraphData, GraphNode} from '../interfaces/graph';
-import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
+import {GraphLink, GraphNode} from '../interfaces/graph';
+import {ConceptId} from 'concepts-common/interfaces/concept';
 
-const uniqueConcepts = (concepts: ConceptId[]): ConceptId[] =>
-  [...(new Map(concepts.map(c => [`${c.type}→→→${c.id}`, c]))).values()];
-
-export const prepareGraphData = (concept: Concept): GraphData => {
-  const protagonist: GraphNode = {...concept.id, concept};
-  const links: { relation: ConceptId; source: ConceptId; target: ConceptId }[] = [
-    ...(concept.relationsTo ?? [])
-      .flatMap(r => r.objects.map(target => ({source: protagonist, relation: r.relation, target}))),
-    ...(concept.relationsFrom ?? [])
-      .flatMap(r => r.objects.map(target => ({source: protagonist, relation: r.relation, target}))),
-  ];
-  const nodes: GraphNode[] = [
-    protagonist,
-    ...links.map(r => r.target)
-  ];
-  return {links, nodes};
+export const stringifyId = (cid: ConceptId|GraphNode): string => `${cid.id}«${cid.type}`;
+export const stringifyLinkId = (link: GraphLink): string => {
+  const sV = (v: string|number|GraphNode|ConceptId): string => {
+    switch (typeof v) {
+      case "string": return v;
+      case "number": return `##${v}`;
+      case "object": return stringifyId(v);
+    }
+  }
+  return `${sV(link.source)}→${sV(link.relation)}→${sV(link.target)}`;
 }
+
 

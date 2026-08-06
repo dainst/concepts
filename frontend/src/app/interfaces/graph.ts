@@ -2,7 +2,8 @@ import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import d3 from 'd3';
 
 export interface GraphNode extends ConceptId, d3.SimulationNodeDatum {
-  concept?: Concept;
+  concept: Concept | undefined;
+  readonly distance: number;
 }
 
 export interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
@@ -10,6 +11,6 @@ export interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
 }
 
 export interface GraphData {
-  links: GraphLink[];
-  nodes: GraphNode[];
+  readonly links: GraphLink[];
+  readonly nodes: GraphNode[];
 }

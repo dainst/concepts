@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   Component,
-  computed,
   effect,
   ElementRef,
   inject,
@@ -13,10 +12,17 @@ import {ConceptViewComponent} from '../concept-view';
 import {Backend} from '../../services/backend';
 import * as d3 from 'd3';
 import {GraphLink, GraphNode} from '../../interfaces/graph';
-import {prepareGraphData} from '../../functions/graph-data';
-import {delay, from, map, mergeMap, Observable, of, Subscription, switchMap} from 'rxjs';
-import {Concept} from 'concepts-common/interfaces/concept';
+import {stringifyId, stringifyLinkId} from '../../functions/graph-data';
+import {delay, from, map, mergeMap, Observable, of, Subscription} from 'rxjs';
+import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
+
+/* STAND
+TODO next:
+- resize
+- pan
+- relation types / directions
+ */
 
 @Component({
   selector: 'app-concept-view-graph',
@@ -32,8 +38,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   private d3!: {
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
-    links: d3.Selection<SVGGElement, unknown, null, undefined>;
-    nodes: d3.Selection<SVGGElement, unknown, null, undefined>;
+    linksGroup: d3.Selection<SVGGElement, unknown, null, undefined>;
+    nodesGroup: d3.Selection<SVGGElement, unknown, null, undefined>;
 
     zoom: d3.ZoomBehavior<SVGSVGElement, unknown>;
     linkForce: d3.ForceLink<GraphNode, GraphLink>;
@@ -43,14 +49,17 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
 
   private readonly subscriptions: Subscription[] = [];
 
-  private readonly data = computed(() => prepareGraphData(this.concept()));
+  private graph = {
+    nodes: new Map<string, GraphNode>(),
+    links: new Map<string, GraphLink>()
+  };
 
   constructor() {
     super();
     effect(() => {
-      const data = this.data();
+      const concept = this.concept();
       if (!this.viewInitialized()) return;
-      this.update(data.links, data.nodes);
+      this.update(this.registerConceptRelations(concept, 0));
     });
   }
 
@@ -75,13 +84,11 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
 
     const viewport = svg.append("g");
 
-    const links = viewport.append("g")
+    const linksGroup = viewport.append("g")
       .classed("links", true);
 
-    const nodes = viewport.append("g")
+    const nodesGroup = viewport.append("g")
       .classed("nodes", true);
-
-
 
     const linkForce= d3.forceLink<GraphNode, GraphLink>();
     const simulation = d3.forceSimulation<GraphNode>([]);
@@ -92,12 +99,10 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .force("center", d3.forceCenter(width / 2, height / 2))
       .alpha(1)
       .on("tick", () => {
-        const nodeGroups = nodes
-          .selectAll<SVGGElement, GraphNode>("g.node");
-        nodeGroups.attr("transform", d =>
-          `translate(${d.x},${d.y})`
-        );
-        this.d3.links
+        this.d3.nodesGroup
+          .selectAll<SVGGElement, GraphNode>("g.node")
+          .attr("transform", d => `translate(${d.x},${d.y})`);
+        this.d3.linksGroup
           .selectAll<SVGLineElement, GraphLink>("line")
           .attr("x1", d => (d.source as GraphNode).x!)
           .attr("y1", d => (d.source as GraphNode).y!)
@@ -113,76 +118,138 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       });
     svg.call(zoom);
 
-    this.d3 = {svg, links, nodes, linkForce, simulation, zoom};
+    this.d3 = {svg, linksGroup, nodesGroup, linkForce, simulation, zoom};
 
     this.viewInitialized.set(true);
   }
 
-  private update(links: GraphLink[], nodes: GraphNode[]) {
-    console.log('update', {links, nodes})
+  private update(nodesDelta: GraphNode[]): void {
+    const allNodes = [...this.graph.nodes.values()];
+    const allLinks = [...this.graph.links.values()];
+
+    this.draw(allLinks, allNodes);
+    const loadAdjacentNodes = from(nodesDelta)
+      .pipe(
+        // delay(1500),
+        mergeMap((node: GraphNode) => this.getNodeData(node)),
+      )
+      .subscribe(([node, concept]) => {
+        if (!concept) {
+          return;
+        }
+        this.applyConceptData(node, concept);
+
+        if ((node.distance >= 7) || (this.graph.nodes.size >= 100)) {
+          return
+        }
+        const nodesDelta = this.registerConceptRelations(concept, node.distance);
+        this.update(nodesDelta);
+      });
+    this.subscriptions.push(loadAdjacentNodes);
+  }
+
+  private draw(links: GraphLink[], nodes: GraphNode[]): void {
     this.d3.linkForce.links(links);
     this.d3.simulation.nodes(nodes);
     this.d3.simulation.alpha(1).restart();
 
-    const nodeSelection = this.d3.nodes
+    this.d3.nodesGroup
       .selectAll<SVGCircleElement, GraphNode>("g.node")
-      .data(nodes, d => d.id);
-    nodeSelection.exit().remove();
+      .data(nodes, stringifyId)
+      .join(enter => {
+        const g = enter
+          .append("g")
+          .classed("node", true);
 
-    const nodeGroups = nodeSelection.enter()
-      .append("g")
-      .classed("node", true);
-    const circles = nodeGroups
-      .append("circle")
-      .attr("r", 18);
-    const texts = nodeGroups
-      .append("text")
-      .attr("text-anchor", "middle")
-      .attr("dy", "0.35em")
-      .text(d => d.id);
+        g.append("circle")
+          .attr("r", d => (d.distance ?  + 18 : 36));
 
-    const linkSelection = this.d3.links
-      .selectAll<SVGLineElement, GraphLink>("line")
-      .data(links);
-    linkSelection.exit().remove();
+        g.append("text")
+          .attr("text-anchor", "middle")
+          .attr("dy", "0.35em")
+          .text(d => d.id);
 
-    linkSelection.enter()
-      .append("line");
-
-    const loadNodes = from(nodes)
-      .pipe(
-        delay(500),
-        mergeMap((node: GraphNode) => this.getNodeData(node))
-      )
-      .subscribe(concept => {
-        this.applyData(concept);
+        return g;
       });
-    this.subscriptions.push(loadNodes);
+
+    this.d3.linksGroup
+      .selectAll<SVGLineElement, GraphLink>("line")
+      .data(links, stringifyLinkId)
+      .join("line");
   }
 
-  private getNodeData(node: GraphNode): Observable<Concept> {
-    console.log('> getNodeData', node.id);
-    const match = this.data().nodes
-      .find(n => node.id === n.id && node.type === n.type);
+  private getNodeData(node: GraphNode): Observable<[GraphNode, Concept]> {
+    const match = this.graph.nodes.get(stringifyId(node));
     if (match) {
-      console.log('already here', match, isLabelledConcept(match.concept))
-      if (isLabelledConcept(match.concept)) return of(match.concept);
+      if (isLabelledConcept(match.concept)) {
+        return of([node, match.concept]);
+      } else {
+      }
     }
-    console.log('> getConcept', node.id);
-    return this.bs.getConcept(node.type, node.id);
+    return this.bs.search({type: node.type, id: node.id, shards: ['labels', 'relations_to']})
+      .pipe(map(searchResult => [node, searchResult.results[0]]));
   }
 
-  private applyData(concept: Concept): void {
-    const node = this.d3.nodes
-      .selectAll<SVGCircleElement, GraphNode>("g.node")
-      .filter(t => t.id === concept.id.id && t.type === concept.id.type);
-    node.datum().concept = concept;
-    node
-      .attr("class", d => d.concept ? `node node-type-${d.concept.id.type} node-domain-${d.concept.domain}` : 'node');
-    node
+  private applyConceptData(node: GraphNode, concept: Concept): void {
+    if (!concept) return;
+
+    const nodeElem: d3.Selection<SVGGElement, GraphNode, SVGGElement, unknown> = this.d3.nodesGroup
+      .selectAll<SVGGElement, GraphNode>("g.node")
+      .filter(d => d === node);
+
+    if (nodeElem.empty()) return;
+
+    nodeElem.datum().concept = concept;
+    nodeElem
+      .attr("class", d => d.concept
+        ? `node node-type-${d.concept.id.type} node-domain-${d.concept.domain} node-${d.distance}`
+        : `node node-${d.distance}`);
+    nodeElem
+      .select('circle')
+      .attr("r", d => (d.distance ? 18 : 36));
+    nodeElem
       .select('text')
       .text(d => d?.concept?.title ?? `#${concept.id.id}`);
   }
 
-  // private getRelated(con)
+  private registerConceptRelations(concept: Concept, distance: number): GraphNode[] {
+    // note: object reference of concepts have to be kept, because D3 uses them to identify identity!
+    const newNodes: GraphNode[] = [];
+
+    const getGraphNode = (conceptId: ConceptId, distance: number): GraphNode => {
+      const sid = stringifyId(conceptId);
+      const node = this.graph.nodes.get(sid);
+      if (node) return node;
+      const newNode = {...conceptId, distance, concept: undefined};
+      this.graph.nodes.set(sid, newNode);
+      newNodes.push(newNode);
+      return newNode;
+    }
+
+    const protagonist: GraphNode = getGraphNode(concept.id, distance);
+
+    const links: GraphLink[] = [
+      ...(concept.relationsTo ?? [])
+        .flatMap(r => r.objects
+          .map(target => ({
+            source: getGraphNode(target, distance + 1),
+            relation: r.relation,
+            target: protagonist
+          }))
+        ),
+      ...(concept.relationsFrom ?? [])
+        .flatMap(r => r.objects
+          .map(target => ({
+            source: protagonist,
+            relation: r.relation,
+            target: getGraphNode(target, distance + 1)
+          }))
+        ),
+    ];
+    links
+      .forEach(link => {
+        this.graph.links.set(stringifyLinkId(link), link);
+      });
+    return newNodes;
+  }
 }
