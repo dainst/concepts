@@ -1,10 +1,22 @@
-import {AfterViewInit, Component, computed, effect, ElementRef, inject, signal, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  signal,
+  ViewChild
+} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {Backend} from '../../services/backend';
 import * as d3 from 'd3';
 import {GraphLink, GraphNode} from '../../interfaces/graph';
 import {prepareGraphData} from '../../functions/graph-data';
-import {from, map, mergeMap} from 'rxjs';
+import {delay, from, map, mergeMap, Observable, of, Subscription, switchMap} from 'rxjs';
+import {Concept} from 'concepts-common/interfaces/concept';
+import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
 
 @Component({
   selector: 'app-concept-view-graph',
@@ -12,7 +24,7 @@ import {from, map, mergeMap} from 'rxjs';
   templateUrl: './concept-view-graph.html',
   styleUrl: './concept-view-graph.css',
 })
-export class ConceptViewGraph extends ConceptViewComponent implements AfterViewInit {
+export class ConceptViewGraph extends ConceptViewComponent implements AfterViewInit, OnDestroy {
   @ViewChild('graph', { static: true }) graphContainer!: ElementRef;
   private readonly bs = inject(Backend);
   private viewInitialized = signal(false);
@@ -29,6 +41,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     simulation: d3.Simulation<GraphNode, undefined>;
   }
 
+  private readonly subscriptions: Subscription[] = [];
+
   private readonly data = computed(() => prepareGraphData(this.concept()));
 
   constructor() {
@@ -38,6 +52,11 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       if (!this.viewInitialized()) return;
       this.update(data.links, data.nodes);
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions
+      .forEach(subscription => subscription.unsubscribe());
   }
 
   ngAfterViewInit() {
@@ -108,7 +127,6 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     const nodeSelection = this.d3.nodes
       .selectAll<SVGCircleElement, GraphNode>("g.node")
       .data(nodes, d => d.id);
-
     nodeSelection.exit().remove();
 
     const nodeGroups = nodeSelection.enter()
@@ -126,26 +144,45 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     const linkSelection = this.d3.links
       .selectAll<SVGLineElement, GraphLink>("line")
       .data(links);
-
     linkSelection.exit().remove();
 
     linkSelection.enter()
       .append("line");
 
-    // TODO sich selbst nicht noch mal laden bitte
-    // TODO load next relations as well
-    from(nodes).pipe(
-      mergeMap(node =>
-        this.bs.getConcept(node.type, node.id)
-          .pipe(
-            map(label => ({ node, label }))
-          )
+    const loadNodes = from(nodes)
+      .pipe(
+        delay(500),
+        mergeMap((node: GraphNode) => this.getNodeData(node))
       )
-    )
-      .subscribe(labelUpdate => {
-        texts
-          .filter(t => t.id === labelUpdate.label.id.id && t.type === labelUpdate.label.id.type)
-          .text(labelUpdate.label.title ?? labelUpdate.label.id.id)
-      })
+      .subscribe(concept => {
+        this.applyData(concept);
+      });
+    this.subscriptions.push(loadNodes);
   }
+
+  private getNodeData(node: GraphNode): Observable<Concept> {
+    console.log('> getNodeData', node.id);
+    const match = this.data().nodes
+      .find(n => node.id === n.id && node.type === n.type);
+    if (match) {
+      console.log('already here', match, isLabelledConcept(match.concept))
+      if (isLabelledConcept(match.concept)) return of(match.concept);
+    }
+    console.log('> getConcept', node.id);
+    return this.bs.getConcept(node.type, node.id);
+  }
+
+  private applyData(concept: Concept): void {
+    const node = this.d3.nodes
+      .selectAll<SVGCircleElement, GraphNode>("g.node")
+      .filter(t => t.id === concept.id.id && t.type === concept.id.type);
+    node.datum().concept = concept;
+    node
+      .attr("class", d => d.concept ? `node node-type-${d.concept.id.type} node-domain-${d.concept.domain}` : 'node');
+    node
+      .select('text')
+      .text(d => d?.concept?.title ?? `#${concept.id.id}`);
+  }
+
+  // private getRelated(con)
 }
