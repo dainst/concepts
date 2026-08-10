@@ -10,7 +10,7 @@ aside {
 }
 
 section {
-  padding: 25px;
+  padding: 5px;
 }
 
 section:first-child {
@@ -32,4 +32,5 @@ section:first-child {
 
 .row {
   height: 100%;
+  --bs-gutter-x: 0;
 }

@@ -120,6 +120,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
 
     this.d3 = {svg, linksGroup, nodesGroup, linkForce, simulation, zoom};
 
+    d3.select(window).on('resize', () => this.resize());
+
     this.viewInitialized.set(true);
   }
 
@@ -176,6 +178,15 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .selectAll<SVGLineElement, GraphLink>("line")
       .data(links, stringifyLinkId)
       .join("line");
+  }
+
+  private resize(): void {
+    if (!this.d3) return;
+    const width = this.graphContainer.nativeElement.clientWidth;
+    const height = this.graphContainer.nativeElement.clientHeight;
+    this.d3.svg
+      .attr('width', width)
+      .attr('height', height);
   }
 
   private getNodeData(node: GraphNode): Observable<[GraphNode, Concept]> {
