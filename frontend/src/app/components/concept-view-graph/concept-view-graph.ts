@@ -227,7 +227,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       } else {
       }
     }
-    return this.bs.search({type: node.type, id: node.id, shards: ['labels', 'relations_to']})
+    return this.bs.search({type: node.type, id: node.id, shards: ['labels', 'relations_to', 'relations_from']})
       .pipe(map(searchResult => [node, searchResult.results[0]]));
   }
 
@@ -273,17 +273,17 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       ...(concept.relationsTo ?? [])
         .flatMap(r => r.objects
           .map(target => ({
-            source: getGraphNode(target, distance + 1),
+            source: protagonist,
             relation: r.relation,
-            target: protagonist
+            target: getGraphNode(target, distance + 1),
           }))
         ),
       ...(concept.relationsFrom ?? [])
         .flatMap(r => r.objects
           .map(target => ({
-            source: protagonist,
+            source: getGraphNode(target, distance + 1),
             relation: r.relation,
-            target: getGraphNode(target, distance + 1)
+            target: protagonist,
           }))
         ),
     ];

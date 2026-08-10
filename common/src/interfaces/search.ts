@@ -8,7 +8,13 @@ export interface SearchResult {
 }
 
 
-export const searchShards = ['labels', 'relations_to', 'geographical_extends', 'temporal_extends'] as const;
+export const searchShards = [
+  'labels',
+  'relations_to',
+  'relations_from',
+  'geographical_extends',
+  'temporal_extends'
+] as const;
 
 export type SearchShard = typeof searchShards[number];
 

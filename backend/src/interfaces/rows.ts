@@ -4,16 +4,15 @@ import {LabelType} from 'common/interfaces/concept';
 export interface ConceptRow {
   readonly id: string;
   readonly type: string;
-  readonly labels?: LabelsAgg[];
   readonly domain: string;
-  readonly geographical_extends?: GeographicalExtendsAgg[];
-  readonly temporal_extends?: TemporalExtendsAgg[];
-  readonly relations_to?: RelationsAgg[];
+  readonly labels?: LabelsAgg[] | null;
+  readonly geographical_extends?: GeographicalExtendsAgg[] | null;
+  readonly temporal_extends?: TemporalExtendsAgg[] | null;
+  readonly relations_to?: RelationsAgg[] | null;
+  readonly relations_from?: RelationsAgg[] | null;
 }
 
 export interface RelationsAgg {
-  readonly subject_id: string;
-  readonly subject_type: string;
   readonly predicate_id: string;
   readonly predicate_type: string;
   readonly object_id: string;
@@ -38,10 +37,10 @@ export interface GeographicalExtendsAgg {
 export interface TemporalExtendsAgg {
   readonly start_min: number;
   readonly start_max: number;
-  readonly start_precision: number;
-  readonly start_certainty: number;
-  readonly end_min: number;
-  readonly end_max: number;
-  readonly end_precision: number;
-  readonly end_certainty: number;
+  readonly start_precision: number | null;
+  readonly start_certainty: number | null;
+  readonly end_min: number | null;
+  readonly end_max: number | null;
+  readonly end_precision: number | null;
+  readonly end_certainty: number | null;
 }

@@ -87,7 +87,7 @@ export const convertRow  = (settings: Settings) => (row: ConceptRow): Concept =>
   const temporalExtends: TemporalExtend[] = (row.temporal_extends ?? []).map(convertTemporalExtend);
 
   const relationsTo: RelationSet[] = row.relations_to ? convertRelationAgg(row.relations_to) : [];
-  // TODO relationFrom
+  const relationsFrom: RelationSet[] = row.relations_from ? convertRelationAgg(row.relations_from) : [];
 
   const preferredLabels = getPreferredLabels(labels, settings);
 
@@ -97,6 +97,7 @@ export const convertRow  = (settings: Settings) => (row: ConceptRow): Concept =>
     ...preferredLabels,
     labels,
     ...(relationsTo.length && {relationsTo}),
+    ...(relationsFrom.length && {relationsFrom}),
     ...(geographicalExtends.length && {geographicalExtends}),
     ...(temporalExtends.length && {temporalExtends})
   }

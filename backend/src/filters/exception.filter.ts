@@ -10,40 +10,39 @@ import {ErrorResponse, ErrorResponseType} from 'common/interfaces/api';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
-    let status;
-    let responseContent: ErrorResponse = {
-      type: 'internal-server-error'
-    };
+    let status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    let type: ErrorResponseType = 'unknown-error'
+    let params: string[] = [];
+    let debug: string[] = [];
+
+    if (
+      typeof exception === 'object'
+      && exception != null
+      && ('stack' in exception)
+      && (typeof exception.stack === 'string')
+    ) {
+      debug = exception.stack.split('\n');
+    }
 
     if (exception instanceof ApiError) {
       status = HttpStatus.BAD_REQUEST;
-      responseContent = {
-        type: exception.type,
-        params: exception.params,
-        debug: exception.stack // TODO only on dev mode
-      };
+      type = exception.type;
+      params = exception.params;
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
-      responseContent = {
-        type: 'unknown-error',
-        params: [exception.message],
-        debug: exception.stack // TODO only on dev mode
-      };
+      type = 'framework-error';
+      params = [String(exception.getStatus()), exception.message];
     } else if (exception instanceof Error) {
-      status = HttpStatus.INTERNAL_SERVER_ERROR;
-      responseContent = {
-        type: 'internal-server-error',
-        params: [exception.name, exception.message],
-        debug: exception.stack // TODO only on dev mode
-      };
+      type = 'unpredicted-internal-server-error';
+      params = [exception.name, exception.message];
     }
 
     response
       .status(status)
-      .json(responseContent);
+      .json(<ErrorResponse>{type, params, debug});
   }
 }

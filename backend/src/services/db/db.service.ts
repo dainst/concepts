@@ -101,8 +101,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private async queryConcepts(selector: ConceptSelector): Promise<ConceptRow[]> {
     const query = this.buildQuery(selector);
     const res = await this.query(query, []);
-    return res.rows
-      .filter(isConceptRow); // TODO should we raise error here maybe?
+    const correctRows = res.rows.filter(isConceptRow);
+    if (correctRows.length < res.rows.length) throw new ApiError('internal-server-error', ['Not found']); // TODO better error
+    return correctRows;
   }
 
   async getSearchResultCount(selector: ConceptSelector): Promise<number> {
@@ -197,6 +198,17 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         from relations
         where concepts.id = relations.subject_id and concepts.type = relations.subject_type
       ) on true`,
+      relations_from: `left join lateral (
+        select
+          json_agg(json_build_object(
+            'predicate_id', relations2.predicate_id,
+            'predicate_type', relations2.predicate_type,
+            'object_id', relations2.subject_id,
+            'object_type', relations2.subject_type
+          )) as relations_from
+        from relations as relations2
+        where concepts.id = relations2.subject_id and concepts.type = relations2.subject_type
+      ) on true`,
       temporal_extends: `left join lateral (
         select
           json_agg(json_build_object(
@@ -229,7 +241,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       id,
       limit: 1,
       offset: 0,
-      shards: ['labels', 'relations_to', 'geographical_extends', 'temporal_extends']
+      shards: ['labels', 'relations_to', 'relations_from', 'geographical_extends', 'temporal_extends']
     });
 
     if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);
