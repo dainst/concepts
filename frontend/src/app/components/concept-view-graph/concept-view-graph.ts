@@ -13,16 +13,10 @@ import {Backend} from '../../services/backend';
 import * as d3 from 'd3';
 import {GraphLink, GraphNode} from '../../interfaces/graph';
 import {stringifyId, stringifyLinkId} from '../../functions/graph-data';
-import {delay, from, map, mergeMap, Observable, of, Subscription} from 'rxjs';
+import {from, map, mergeMap, Observable, of, Subscription} from 'rxjs';
 import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
-
-/* STAND
-TODO next:
-- resize
-- pan
-- relation types / directions
- */
+import {DragBehavior, SubjectPosition} from 'd3';
 
 @Component({
   selector: 'app-concept-view-graph',
@@ -103,11 +97,11 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
           .selectAll<SVGGElement, GraphNode>("g.node")
           .attr("transform", d => `translate(${d.x},${d.y})`);
         this.d3.linksGroup
-          .selectAll<SVGLineElement, GraphLink>("line")
-          .attr("x1", d => (d.source as GraphNode).x!)
-          .attr("y1", d => (d.source as GraphNode).y!)
-          .attr("x2", d => (d.target as GraphNode).x!)
-          .attr("y2", d => (d.target as GraphNode).y!);
+          .selectAll<SVGPathElement, GraphLink>("path")
+          .attr("d", d => `
+            M ${(d.source as GraphNode).x} ${(d.source as GraphNode).y}
+            L ${(d.target as GraphNode).x} ${(d.target as GraphNode).y}
+          `);
       })
     .restart();
 
@@ -118,9 +112,22 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       });
     svg.call(zoom);
 
-    this.d3 = {svg, linksGroup, nodesGroup, linkForce, simulation, zoom};
+    const defs = svg.append("defs");
+
+    defs.append("marker")
+      .attr("id", "arrow")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 26)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5");
 
     d3.select(window).on('resize', () => this.resize());
+
+    this.d3 = {svg, linksGroup, nodesGroup, linkForce, simulation, zoom};
 
     this.viewInitialized.set(true);
   }
@@ -171,13 +178,36 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
           .attr("dy", "0.35em")
           .text(d => d.id);
 
+        g.call(this.createDrag());
+
         return g;
       });
 
     this.d3.linksGroup
-      .selectAll<SVGLineElement, GraphLink>("line")
+      .selectAll<SVGPathElement, GraphLink>("g.link")
       .data(links, stringifyLinkId)
-      .join("line");
+      .join(enter => {
+        const g = enter
+          .append('g')
+          .attr("class", d =>`link link-${d.relation.type}`);
+
+        g.append('path')
+          .attr("class", "link-path")
+          .attr("fill", "none")
+          .attr("marker-end", "url(#arrow)")
+          .attr("id", d => `link-path-${stringifyLinkId(d)}`);
+
+        g.append('text')
+          .attr("dy", "-0.35em")
+          .append("textPath")
+          .attr("href", d => `#link-path-${stringifyLinkId(d)}`)
+          .attr("text-anchor", "middle")
+          .attr("startOffset", "50%")
+          .text(d => d.relation.id); // TODO label
+
+
+        return g;
+      });
   }
 
   private resize(): void {
@@ -262,5 +292,26 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         this.graph.links.set(stringifyLinkId(link), link);
       });
     return newNodes;
+  }
+
+  private createDrag(): DragBehavior<SVGGElement, GraphNode, GraphNode | SubjectPosition> {
+    return d3.drag<SVGGElement, GraphNode>()
+      .on("start", (event, d) => {
+        if (!event.active) {
+          this.d3.simulation.alphaTarget(0.3).restart();
+        }
+
+        d.fx = d.x;
+        d.fy = d.y;
+      })
+      .on("drag", (event, d) => {
+        d.fx = event.x;
+        d.fy = event.y;
+      })
+      .on("end", event => {
+        if (!event.active) {
+          this.d3.simulation.alphaTarget(0);
+        }
+      });
   }
 }
