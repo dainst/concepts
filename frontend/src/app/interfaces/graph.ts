@@ -7,7 +7,8 @@ export interface GraphNode extends ConceptId, d3.SimulationNodeDatum {
 }
 
 export interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
-  readonly relation: ConceptId
+  readonly relation: ConceptId;
+  readonly direction: '←' | '→';
 }
 
 export interface GraphData {
