@@ -207,7 +207,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
             'object_type', relations2.subject_type
           )) as relations_from
         from relations as relations2
-        where concepts.id = relations2.subject_id and concepts.type = relations2.subject_type
+        where concepts.id = relations2.object_id and concepts.type = relations2.object_type
       ) on true`,
       temporal_extends: `left join lateral (
         select

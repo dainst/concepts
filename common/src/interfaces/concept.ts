@@ -61,8 +61,8 @@ export interface Label {
 }
 
 export interface TemporalBound {
-  readonly precision: number;
-  readonly certainty: number;
+  readonly precision: number | null;
+  readonly certainty: number | null;
   readonly min: number;
   readonly max: number;
 }
