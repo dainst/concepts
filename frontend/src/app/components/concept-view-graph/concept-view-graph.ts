@@ -11,12 +11,33 @@ import {
 import {ConceptViewComponent} from '../concept-view';
 import {Backend} from '../../services/backend';
 import * as d3 from 'd3';
-import {GraphLink, GraphNode} from '../../interfaces/graph';
+import {GraphLink, GraphNode, GraphSettings, RelativeNodePosition} from '../../interfaces/graph';
 import {stringifyId, stringifyLinkId} from '../../functions/graph-data';
 import {from, map, mergeMap, Observable, of, Subscription} from 'rxjs';
 import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
 import {DragBehavior, SubjectPosition} from 'd3';
+import {SearchShard} from 'concepts-common/interfaces/search';
+
+const settings: GraphSettings = {
+  expand: {
+    backward: {
+      hasPeriodType: 1,
+      broader: 0
+    },
+    forward: {
+      hasPeriodType: 1
+    },
+    default: {
+      forward: 5,
+      backward: 5
+    }
+  },
+  linkForce: -1000
+}
+
+
+
 
 @Component({
   selector: 'app-concept-view-graph',
@@ -53,7 +74,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     effect(() => {
       const concept = this.concept();
       if (!this.viewInitialized()) return;
-      this.update(this.registerConceptRelations(concept, 0));
+      this.update(this.registerConceptRelations(concept, 0, 'o'));
     });
   }
 
@@ -89,7 +110,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     simulation
       .nodes([])
       .force("link", linkForce)
-      .force("charge", d3.forceManyBody().strength(-300))
+      .force("charge", d3.forceManyBody().strength(settings.linkForce))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .alpha(1)
       .on("tick", () => {
@@ -148,17 +169,17 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         }
         this.applyConceptData(node, concept);
 
-        if ((node.distance >= 7) || (this.graph.nodes.size >= 100)) {
+        if (this.graph.nodes.size >= 100) {
           return
         }
-        const nodesDelta = this.registerConceptRelations(concept, node.distance);
+
+        const nodesDelta = this.registerConceptRelations(concept, node.distance, node.relativePosition);
         this.update(nodesDelta);
       });
     this.subscriptions.push(loadAdjacentNodes);
   }
 
   private draw(links: GraphLink[], nodes: GraphNode[]): void {
-    console.log(links)
     this.d3.linkForce.links(links);
     this.d3.simulation.nodes(nodes);
     this.d3.simulation.alpha(1).restart();
@@ -224,11 +245,17 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     const match = this.graph.nodes.get(stringifyId(node));
     if (match) {
       if (isLabelledConcept(match.concept)) {
+        console.log(`[GET] ${node.type}/${node.id} : ALLREADY THERE`);
         return of([node, match.concept]);
       } else {
       }
     }
-    return this.bs.search({type: node.type, id: node.id, shards: ['labels', 'relations_to', 'relations_from']})
+
+    const shards: SearchShard[] = [node.relativePosition === '→' ? 'relations_to' : 'relations_from'];
+
+    console.log(`[GET] ${node.type}/${node.id} : ${shards.join('|')}`)
+
+    return this.bs.search({type: node.type, id: node.id, shards})
       .pipe(map(searchResult => [node, searchResult.results[0]]));
   }
 
@@ -254,38 +281,67 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .text(d => d?.concept?.title ?? `#${concept.id.id}`);
   }
 
-  private registerConceptRelations(concept: Concept, distance: number): GraphNode[] {
+  private registerConceptRelations(concept: Concept, distance: number, relativePosition: RelativeNodePosition): GraphNode[] {
     // note: object reference of concepts have to be kept, because D3 uses them to identify identity!
-    const newNodes: GraphNode[] = [];
+    const newNodes: GraphNode[] =[];
 
-    const getGraphNode = (conceptId: ConceptId, distance: number): GraphNode => {
+    const dub = !concept ? '(·)' : `→ ${concept.relationsTo?.length} / ← ${concept.relationsFrom?.length}`;
+
+    const getGraphNode = (
+      conceptId: ConceptId,
+      distance: number,
+      relativePosition: RelativeNodePosition,
+      concept: Concept|undefined = undefined,
+    ): GraphNode => {
       const sid = stringifyId(conceptId);
+
       const node = this.graph.nodes.get(sid);
-      if (node) return node;
-      const newNode = {...conceptId, distance, concept: undefined};
+      if (node) {
+        console.log(`R ${relativePosition} ${sid} OK ${dub}`);
+        return node;
+      }
+      const newNode: GraphNode = {
+        ...conceptId,
+        distance,
+        concept,
+        relativePosition
+      };
       this.graph.nodes.set(sid, newNode);
       newNodes.push(newNode);
+      console.log(`R ${relativePosition} ${sid} NEW ${dub}`);
       return newNode;
     }
 
-    const protagonist: GraphNode = getGraphNode(concept.id, distance);
-console.log('l', concept.relationsFrom );
+    const protagonist: GraphNode = getGraphNode(concept.id, distance, relativePosition, concept);
+
     const links: GraphLink[] = [
       ...(concept.relationsTo ?? [])
+        .filter(r =>
+          distance < (r.relation.id in settings.expand.forward
+            ? settings.expand.forward[r.relation.id]
+            : settings.expand.default.forward
+          )
+        )
         .flatMap(r => r.objects
           .map((target: ConceptId): GraphLink => ({
             source: protagonist,
             relation: r.relation,
-            target: getGraphNode(target, distance + 1),
+            target: getGraphNode(target, distance + 1, '→'),
             direction: '→'
           }))
         ),
       ...(concept.relationsFrom ?? [])
+        .filter(r =>
+          distance < (r.relation.id in settings.expand.forward
+            ? settings.expand.backward[r.relation.id]
+            : settings.expand.default.backward
+          )
+        )
         .flatMap(r => r.objects
           .map((target: ConceptId): GraphLink => ({
             source: protagonist,
             relation: r.relation,
-            target: getGraphNode(target, distance + 1),
+            target: getGraphNode(target, distance + 1, '←'),
             direction: '←'
           }))
         ),

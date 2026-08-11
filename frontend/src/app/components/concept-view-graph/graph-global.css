@@ -9,11 +9,18 @@
   stroke-width: 2;
 }
 
+#graph text {
+  fill: black;
+}
 
-#graph .links text {
+#graph .link→ text {
   fill: red;
 }
 
-#graph .link← {
+#graph .link← text {
+  fill: blue;
+}
+
+#graph .link← path {
   stroke: blue;
 }
