@@ -158,6 +158,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   }
 
   private draw(links: GraphLink[], nodes: GraphNode[]): void {
+    console.log(links)
     this.d3.linkForce.links(links);
     this.d3.simulation.nodes(nodes);
     this.d3.simulation.alpha(1).restart();
@@ -189,12 +190,13 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .join(enter => {
         const g = enter
           .append('g')
-          .attr("class", d =>`link link-${d.relation.type}`);
+          .attr("class", d =>`link link-${d.relation.type} link${d.direction}`);
 
         g.append('path')
           .attr("class", "link-path")
           .attr("fill", "none")
-          .attr("marker-end", "url(#arrow)")
+          .attr("marker-end", d => d.direction === "→" ? "url(#arrow)" : null)
+          .attr("marker-start", d => d.direction === "←" ? "url(#arrow)" : null)
           .attr("id", d => `link-path-${stringifyLinkId(d)}`);
 
         g.append('text')
@@ -204,7 +206,6 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
           .attr("text-anchor", "middle")
           .attr("startOffset", "50%")
           .text(d => d.relation.id); // TODO label
-
 
         return g;
       });
@@ -268,22 +269,24 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     }
 
     const protagonist: GraphNode = getGraphNode(concept.id, distance);
-
+console.log('l', concept.relationsFrom );
     const links: GraphLink[] = [
       ...(concept.relationsTo ?? [])
         .flatMap(r => r.objects
-          .map(target => ({
+          .map((target: ConceptId): GraphLink => ({
             source: protagonist,
             relation: r.relation,
             target: getGraphNode(target, distance + 1),
+            direction: '→'
           }))
         ),
       ...(concept.relationsFrom ?? [])
         .flatMap(r => r.objects
-          .map(target => ({
-            source: getGraphNode(target, distance + 1),
+          .map((target: ConceptId): GraphLink => ({
+            source: protagonist,
             relation: r.relation,
-            target: protagonist,
+            target: getGraphNode(target, distance + 1),
+            direction: '←'
           }))
         ),
     ];

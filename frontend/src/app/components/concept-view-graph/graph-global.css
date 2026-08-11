@@ -13,3 +13,7 @@
 #graph .links text {
   fill: red;
 }
+
+#graph .link← {
+  stroke: blue;
+}

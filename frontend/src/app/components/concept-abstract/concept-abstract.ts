@@ -42,7 +42,7 @@ export class ConceptAbstract extends ConceptViewComponent {
                 response.results
                   .forEach(result => {
                     if (!(result.id.type in map)) map[result.id.type] = {};
-                    map[result.id.type][result.id.id] = result.title ?? `#${result.id}`
+                    map[result.id.type][result.id.id] = result.title ?? `#${result.id.type}/${result.id.id}`
                   });
                 return map;
               },
