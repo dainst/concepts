@@ -39,8 +39,8 @@ export interface TemporalExtendsAgg {
   readonly start_max: number;
   readonly start_precision: number | null;
   readonly start_certainty: number | null;
-  readonly end_min: number | null;
-  readonly end_max: number | null;
+  readonly end_min: number;
+  readonly end_max: number;
   readonly end_precision: number | null;
   readonly end_certainty: number | null;
 }
