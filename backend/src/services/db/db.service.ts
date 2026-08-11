@@ -106,7 +106,15 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return correctRows;
   }
 
-  async getSearchResultCount(selector: ConceptSelector): Promise<number> {
+  private async getSearchResultCount(selector: ConceptSelector, found: number): Promise<number> {
+    if (!found) return 0;
+    if (selector.limit && (found > selector.limit)) return NaN;
+    if (selector.limit && (found < selector.limit)) return Number(selector.offset) + found;
+    if (selector.id && selector.type) return found; // 0 or 1
+    return this.getAvailableSearchResultCount(selector);
+  }
+
+  private async getAvailableSearchResultCount(selector: ConceptSelector): Promise<number> {
     const sql = `
       select
         count(*) as count
@@ -252,7 +260,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   async search(selector: ConceptSelector): Promise<SearchResult> {
     const results: Concept[] = (await this.queryConcepts(selector))
       .map(convertRow(settings));
-    const count = await this.getSearchResultCount(selector);
+    const count = await this.getSearchResultCount(selector, results.length);
     return {
       selector,
       results,
