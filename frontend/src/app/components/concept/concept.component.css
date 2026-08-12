@@ -34,3 +34,14 @@ section:first-child {
   height: 100%;
   --bs-gutter-x: 0;
 }
+
+#right-side-toggler {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.sideToggled {
+  width: 30px;
+  overflow: hidden;
+}
