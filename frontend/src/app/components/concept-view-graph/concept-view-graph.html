@@ -1,1 +1,14 @@
-<div #graph id="graph"></div>
+<div id="graph-container">
+  <div #graph id="graph"></div>
+  @if (hoveredNode(); as node) {
+    <div id="hovered-graph-node">
+      @if (node.concept; as concept) {
+        <h2>{{node.concept.title}}</h2>
+      } @else {
+        <h2>#{{node.type}}/{{node.id}}</h2>
+      }
+    </div>
+  }
+</div>
+
+

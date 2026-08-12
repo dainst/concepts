@@ -1,7 +1,28 @@
+#graph-container {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
 #graph {
   height: 100%;
   width: 100%;
   overflow: hidden;
 }
 
+#hovered-graph-node {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  padding: 3px;
+  background: rgba(0,0,0, 0.2);
+  border: 2px solid rgba(0,0,150, 0.5);
+  max-height: 50%;
+  overflow-y: scroll;
+}
+
+#hovered-graph-node h2 {
+  font-size: medium;
+}
 
