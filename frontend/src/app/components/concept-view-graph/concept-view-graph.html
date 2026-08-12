@@ -3,10 +3,9 @@
   @if (hoveredNode(); as node) {
     <div id="hovered-graph-node">
       @if (node.concept; as concept) {
-        <h2>{{node.concept.title}}</h2>
-      } @else {
-        <h2>#{{node.type}}/{{node.id}}</h2>
+        <h2>{{concept.title}}</h2>
       }
+      <h3>#{{node.type}}/{{node.id}}</h3>
     </div>
   }
 </div>

@@ -15,14 +15,25 @@
   position: absolute;
   bottom: 5px;
   right: 5px;
-  padding: 3px;
-  background: rgba(0,0,0, 0.2);
-  border: 2px solid rgba(0,0,150, 0.5);
+  padding: 1em;
+  background: var(--idai-blue-transparent);
+  border: 3px solid var(--light-grey);
+  border-radius: 4px;
   max-height: 50%;
   overflow-y: scroll;
 }
 
-#hovered-graph-node h2 {
+#hovered-graph-node h2,
+#hovered-graph-node h3 {
   font-size: medium;
+  margin: 0;
+}
+
+#hovered-graph-node h2 {
+  font-weight: bold;
+}
+
+#hovered-graph-node h3 {
+  color: var(--dark-grey);
 }
 

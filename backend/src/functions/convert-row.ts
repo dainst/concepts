@@ -70,7 +70,8 @@ const convertTemporalExtend = (cell: TemporalExtendsAgg): TemporalExtend => ({
 
 // convert the flatish structure a db query returns to the be/fe data interchange object
 // TODO later, if structures are more final we form the correct JSON syntax already with SQL command for more effectivity
-export const convertRow  = (settings: Settings) => (row: ConceptRow): Concept => {
+// TODO remove includeLabels as a parameter and treat title as proper shard
+export const convertRow  = (settings: Settings, includeLabels: boolean) => (row: ConceptRow): Concept => {
   const id = {
     id: row.id,
     type: row.type
@@ -89,13 +90,13 @@ export const convertRow  = (settings: Settings) => (row: ConceptRow): Concept =>
   const relationsTo: RelationSet[] = row.relations_to ? convertRelationAgg(row.relations_to) : [];
   const relationsFrom: RelationSet[] = row.relations_from ? convertRelationAgg(row.relations_from) : [];
 
-  const preferredLabels = getPreferredLabels(labels, settings);
+  const preferredLabels = getPreferredLabels(labels, settings); // TODO replace this by title
 
   return  {
     id,
     domain,
     ...preferredLabels,
-    labels,
+    ...(includeLabels ? labels : {}),
     ...(relationsTo.length && {relationsTo}),
     ...(relationsFrom.length && {relationsFrom}),
     ...(geographicalExtends.length && {geographicalExtends}),

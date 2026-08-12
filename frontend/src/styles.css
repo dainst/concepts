@@ -3,6 +3,7 @@
 :root {
   --dark-blue: #004c98;
   --idai-blue: #557ebb;
+  --idai-blue-transparent: rgba(85,126,185, 0.5);
   --light-grey: #d3d3cf;
   --grey: #a9a8a4;
   --dark-grey: #605e59;
@@ -10,7 +11,9 @@
   --dark-blue-fg: white;
 
   --header-background: linear-gradient(to right, rgba(106, 164, 184, 0.95) 0%, rgba(71, 123, 199, 0.66) 95%);
-  --header-height: 56px;
+  --header-height: 50px;
+
+
 
   /*--bs-primary: var(--light-grey);*/
   /*--bs-secondary: var(--grey);*/
@@ -22,11 +25,6 @@
   /*--bs-dark: #212529;*/
 }
 
-.navbar {
-  --bs-navbar-color: var(--dark-blue-fg);
-  --bs-navbar-active-color: var(--light-grey);
-  --bs-navbar-padding-y: 100;
-}
 
 
 body {
