@@ -159,6 +159,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
     const uniqueShard = selector.shards ?? [];
     if (selector.q) uniqueShard.push('labels');
+    if (selector.shards?.includes('title')) uniqueShard.push('labels');
     return [...new Set<SearchShard>(uniqueShard)];
   }
 
@@ -169,7 +170,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       `concepts.id as id`,
       `concepts.type as type`,
       `concepts.domain_id as domain`,
-      ...shards
+      ...shards.filter(s => s !== 'title')
     ];
     const shardJoinsMap: {[s in SearchShard]: string} = {
       geographical_extends: `left join lateral (
@@ -231,7 +232,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           )) as temporal_extends
         from temporal_extends
         where concepts.id = temporal_extends.concept_id and concepts.type = temporal_extends.concept_type
-      ) on true`
+      ) on true`,
+      title: `` // TODO select proper title by DB directly
     };
 
     return `select
@@ -249,17 +251,17 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       id,
       limit: 1,
       offset: 0,
-      shards: ['labels', 'relations_to', 'relations_from', 'geographical_extends', 'temporal_extends']
+      shards: ['labels', 'relations_to', 'relations_from', 'geographical_extends', 'temporal_extends', 'title']
     });
 
     if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);
 
-    return convertRow(settings)(conceptRows[0]);
+    return convertRow(settings, true)(conceptRows[0]);
   }
 
   async search(selector: ConceptSelector): Promise<SearchResult> {
     const results: Concept[] = (await this.queryConcepts(selector))
-      .map(convertRow(settings));
+      .map(convertRow(settings, selector.shards?.includes('labels') ?? false));
     const count = await this.getSearchResultCount(selector, results.length);
     return {
       selector,

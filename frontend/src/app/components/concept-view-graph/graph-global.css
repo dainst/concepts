@@ -1,5 +1,5 @@
 #graph .node circle {
-  fill: steelblue;
+  fill: var(--idai-blue);
   stroke: black;
   stroke-width: 2;
 }

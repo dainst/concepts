@@ -18,7 +18,6 @@ import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
 import {DragBehavior, SubjectPosition} from 'd3';
 import {SearchShard} from 'concepts-common/interfaces/search';
-import {JsonPipe} from '@angular/common';
 
 const settings: GraphSettings = {
   expand: {
@@ -44,7 +43,6 @@ const settings: GraphSettings = {
 @Component({
   selector: 'app-concept-view-graph',
   imports: [
-    JsonPipe
   ],
   templateUrl: './concept-view-graph.html',
   styleUrl: './concept-view-graph.css',
@@ -269,8 +267,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     }
 
     const shards: SearchShard[] = [node.relativePosition === '→' ? 'relations_to' : 'relations_from'];
-
-    console.log(`[GET] ${node.type}/${node.id} : ${shards.join('|')}`)
+    shards.push('title');
 
     return this.bs.search({type: node.type, id: node.id, shards})
       .pipe(map(searchResult => [node, searchResult.results[0]]));
@@ -284,7 +281,6 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .filter(d => d === node);
 
     if (nodeElem.empty()) return;
-
     nodeElem.datum().concept = concept;
     nodeElem
       .attr("class", d => d.concept
@@ -295,14 +291,12 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .attr("r", d => (d.distance ? 18 : 36));
     nodeElem
       .select('text')
-      .text(d => d?.concept?.title ?? `#${concept.id.id}`);
+      .text(d => d.concept?.title ?? `#${d.id}`);
   }
 
   private registerConceptRelations(concept: Concept, distance: number, relativePosition: RelativeNodePosition): GraphNode[] {
     // note: object reference of concepts have to be kept, because D3 uses them to identify identity!
     const newNodes: GraphNode[] =[];
-
-    const dub = !concept ? '(·)' : `→ ${concept.relationsTo?.length} / ← ${concept.relationsFrom?.length}`;
 
     const getGraphNode = (
       conceptId: ConceptId,
@@ -313,10 +307,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       const sid = stringifyId(conceptId);
 
       const node = this.graph.nodes.get(sid);
-      if (node) {
-        console.log(`R ${relativePosition} ${sid} OK ${dub}`);
-        return node;
-      }
+      if (node) return node;
+
       const newNode: GraphNode = {
         ...conceptId,
         distance,
@@ -325,7 +317,6 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       };
       this.graph.nodes.set(sid, newNode);
       newNodes.push(newNode);
-      console.log(`R ${relativePosition} ${sid} NEW ${dub}`);
       return newNode;
     }
 
