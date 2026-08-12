@@ -18,6 +18,7 @@ import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
 import {DragBehavior, SubjectPosition} from 'd3';
 import {SearchShard} from 'concepts-common/interfaces/search';
+import {JsonPipe} from '@angular/common';
 
 const settings: GraphSettings = {
   expand: {
@@ -42,7 +43,9 @@ const settings: GraphSettings = {
 
 @Component({
   selector: 'app-concept-view-graph',
-  imports: [],
+  imports: [
+    JsonPipe
+  ],
   templateUrl: './concept-view-graph.html',
   styleUrl: './concept-view-graph.css',
 })
@@ -70,6 +73,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     nodes: new Map<string, GraphNode>(),
     links: new Map<string, GraphLink>()
   };
+
+  protected readonly hoveredNode = signal<GraphNode|undefined>(undefined);
 
   constructor() {
     super();
@@ -196,7 +201,13 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .join(enter => {
         const g = enter
           .append("g")
-          .classed("node", true);
+          .classed("node", true)
+          .on("mouseenter", (_, d) => {
+            this.hoveredNode.set(d);
+          })
+          .on("mouseleave", () => {
+            this.hoveredNode.set(undefined);
+          });
 
         g.append("circle")
           .attr("r", d => (d.distance ?  + 18 : 36));
