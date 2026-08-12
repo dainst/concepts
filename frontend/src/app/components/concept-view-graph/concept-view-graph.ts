@@ -33,7 +33,8 @@ const settings: GraphSettings = {
       backward: 5
     }
   },
-  linkForce: -1000
+  linkForce: -1000,
+  maxNodes: 100
 }
 
 
@@ -62,6 +63,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     simulation: d3.Simulation<GraphNode, undefined>;
   }
 
+  private resizeObserver!: ResizeObserver;
   private readonly subscriptions: Subscription[] = [];
 
   private graph = {
@@ -81,6 +83,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   ngOnDestroy(): void {
     this.subscriptions
       .forEach(subscription => subscription.unsubscribe());
+    this.resizeObserver?.disconnect();
   }
 
   ngAfterViewInit() {
@@ -146,7 +149,10 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .append("path")
       .attr("d", "M0,-5L10,0L0,5");
 
-    d3.select(window).on('resize', () => this.resize());
+    this.resizeObserver = new ResizeObserver(() => {
+      this.resize();
+    });
+    this.resizeObserver.observe(this.graphContainer.nativeElement);
 
     this.d3 = {svg, linksGroup, nodesGroup, linkForce, simulation, zoom};
 
@@ -169,7 +175,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         }
         this.applyConceptData(node, concept);
 
-        if (this.graph.nodes.size >= 100) {
+        if (this.graph.nodes.size >= settings.maxNodes) {
           return
         }
 

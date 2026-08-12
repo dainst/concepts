@@ -66,9 +66,7 @@ export class ConceptComponent {
       (this.menu().find(e => e.id === this.currentViewId()) ?? this.menu()[0])
     );
 
-  menuChanged(newId: string) {
-    this.currentViewId.set(newId);
-  }
+  readonly rightSideOpen = signal(true);
 
   readonly concept = rxResource({
     params: () => this.params(),
@@ -89,4 +87,18 @@ export class ConceptComponent {
     ),
     { requireSync: true }
   );
+
+  constructor() {
+    this.rightSideOpen.set(localStorage.getItem("idai-concepts-concept-view-right-side-open") === 'false');
+  }
+
+  protected menuChanged(newId: string): void {
+    this.currentViewId.set(newId);
+  }
+
+  protected toggleRightSide(): void {
+    this.rightSideOpen.set(!this.rightSideOpen());
+    localStorage.setItem("idai-concepts-concept-view-right-side-open", String(this.rightSideOpen()));
+    // TODO use shard of URL to store view settings instead of localstorage
+  }
 }

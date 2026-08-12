@@ -24,4 +24,5 @@ export interface GraphSettings {
     }
   },
   readonly linkForce: number;
+  readonly maxNodes: number;
 }

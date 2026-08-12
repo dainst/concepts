@@ -17,15 +17,26 @@
         </app-concept-views>
       </aside>
 
+    <button
+      id="right-side-toggler"
+      type="button"
+      class="btn btn-primary btn-sm"
+      (click)="toggleRightSide()"
+    >
+      {{rightSideOpen() ? '»' : '«'}}
+    </button>
+
       <main class="flex-fill overflow-auto">
         <div class="row">
-          <section class="col-12 col-md-6">
+          <section class="col-12" [class.col-md-6]="rightSideOpen()">
             <ng-container *ngComponentOutlet="currentView().component; inputs: {concept: conceptValue}"></ng-container>
           </section>
 
-          <section class="col-12 col-md-6">
-            <app-concept-abstract [concept]="conceptValue"/>
-          </section>
+          @if (rightSideOpen()) {
+            <section class="col-12 col-md-6" [class.sideToggled]="!rightSideOpen()">
+              <app-concept-abstract [concept]="conceptValue"/>
+            </section>
+          }
         </div>
       </main>
   </div>
