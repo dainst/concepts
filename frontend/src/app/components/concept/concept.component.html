@@ -12,7 +12,7 @@
       <aside class="flex-shrink-0">
         <app-concept-views
           [items]="menu()"
-          [selectedId]="currentViewId()"
+          [selectedId]="currentView().id"
           (selectedChange)="menuChanged($event)">
         </app-concept-views>
       </aside>

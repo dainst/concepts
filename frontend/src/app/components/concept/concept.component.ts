@@ -28,7 +28,7 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
   },
   graph: {
     id: 'graph',
-    label: 'Relationen',
+    label: 'Graph',
     component: ConceptViewGraph
   },
   raw: {
@@ -60,10 +60,10 @@ export class ConceptComponent {
        .map(view => Object.assign({}, viewsMap[view]))
      );
 
-  readonly currentViewId = signal<string>('map');
+  readonly selectedViewId = signal<string>('map');
   readonly currentView: Signal<ConceptMenuEntry> =
     computed(() =>
-      (this.menu().find(e => e.id === this.currentViewId()) ?? this.menu()[0])
+      (this.menu().find(e => e.id === this.selectedViewId()) ?? this.menu()[0])
     );
 
   readonly rightSideOpen = signal(true);
@@ -90,10 +90,15 @@ export class ConceptComponent {
 
   constructor() {
     this.rightSideOpen.set(localStorage.getItem("idai-concepts-concept-view-right-side-open") === 'false');
+    const storedView = localStorage.getItem("idai-concepts-concept-view");
+    if (storedView) {
+      this.selectedViewId.set(storedView);
+    }
   }
 
   protected menuChanged(newId: string): void {
-    this.currentViewId.set(newId);
+    this.selectedViewId.set(newId);
+    localStorage.setItem("idai-concepts-concept-view", newId);
   }
 
   protected toggleRightSide(): void {
