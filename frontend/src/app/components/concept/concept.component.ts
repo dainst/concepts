@@ -89,8 +89,11 @@ export class ConceptComponent {
   );
 
   constructor() {
-    this.rightSideOpen.set(localStorage.getItem("idai-concepts-concept-view-right-side-open") === 'false');
+
     const storedView = localStorage.getItem("idai-concepts-concept-view");
+    const storedRightSideOpen = localStorage.getItem("idai-concepts-concept-view-right-side-open");
+    console.log({storedRightSideOpen})
+    this.rightSideOpen.set(!storedRightSideOpen || storedRightSideOpen === 'true');
     if (storedView) {
       this.selectedViewId.set(storedView);
     }

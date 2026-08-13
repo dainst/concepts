@@ -1,7 +1,6 @@
 #graph .node circle {
-  fill: var(--idai-blue);
   stroke: black;
-  stroke-width: 2;
+  stroke-width: 1;
 }
 
 #graph .links path {

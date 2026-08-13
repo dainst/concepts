@@ -1,13 +1,73 @@
 <div id="graph-container">
   <div #graph id="graph"></div>
-  @if (hoveredNode(); as node) {
-    <div id="hovered-graph-node">
-      @if (node.concept; as concept) {
-        <h2>{{concept.title}}</h2>
-      }
-      <h3>#{{node.type}}/{{node.id}}</h3>
-    </div>
-  }
+  <div id="graph-controls">
+    <i
+      class="bi"
+      [class.bi-gear]="!settingsPaneOpen()"
+      [class.bi-gear-fill]="settingsPaneOpen()"
+      (click)="toggleSettings()"
+    ></i>
+    <i
+      class="bi"
+      [class.bi-info-square]="!infoPaneOpen()"
+      [class.bi-info-square-fill]="infoPaneOpen()"
+      (click)="toggleInfo()"
+    ></i>
+    @if (infoPaneOpen()) {
+      <div id="graph-info-pane">
+        @if (graphInfo(); as info) {
+          <table>
+            <tr><td>Nodes</td><td>{{info.nodes.count}}/{{info.nodes.max}}</td></tr>
+            @for (class of info.nodes.classes | keyvalue; track class.key) {
+              <tr [style.background]="`var(--${class.value.color})`">
+                <td>{{class.key}}</td>
+                <td>{{class.value.count}}</td>
+              </tr>
+            }
+          </table>
+        }
+      </div>
+    }
+    @if (settingsPaneOpen()) {
+      <div id="graph-settings-pane">
+        <form [formGroup]="settingsForm">
+          <select class="form-select" formControlName="colors">
+            @for (colorProfile of profiles.colors | keyvalue; track colorProfile.key) {
+              <option [value]="colorProfile.key">{{colorProfile.key}}</option>
+            }
+          </select>
+
+          <label for="graph-settings-max-nodes">Max Nodes</label>
+          <input
+            id="graph-settings-max-nodes"
+            type="number"
+            min="1"
+            max="1000"
+            formControlName="maxNodes"
+          >
+          <br />
+          <label for="graph-settings-force">Link force</label>
+          <input
+            id="graph-settings-force"
+            type="number"
+            min="-2000"
+            max="1000"
+            formControlName="linkForce"
+          >
+          <br />
+          <button class="btn btn-primary btn-sm" type="submit" (click)="changeSettings()">redraw</button>
+        </form>
+      </div>
+    }
+    @if (hoveredNode(); as node) {
+      <div id="hovered-graph-node">
+        @if (node.concept; as concept) {
+          <h2>{{concept.title}}</h2>
+        }
+        <h3>#{{node.type}}/{{node.id}}</h3>
+      </div>
+    }
+  </div>
 </div>
 
 
