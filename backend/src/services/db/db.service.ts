@@ -62,13 +62,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async query(sql: string, params: any[] = [], useCache: boolean = false): Promise<QueryResult> {
-    console.log(sql, params);
+    // console.log(sql, params);
 
     if (!useCache) return this.pool.query(sql, params);
 
     const cached = this.cs.get('result', sql + params?.join());
-    const result = cached.result;
-    if (cached.result) console.log(`from cache ${cached.hash}, ${cached.storeCount}`);
     if (cached.result) return cached.result;
 
     const res =  await this.pool.query(sql, params);
@@ -101,7 +99,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private async queryConcepts(selector: ConceptSelector): Promise<ConceptRow[]> {
     const query = this.buildQuery(selector);
     const res = await this.query(query, []);
-    const correctRows = res.rows.filter(isConceptRow);
+    const correctRows = res.rows
+      // .filter(isConceptRow);
     if (correctRows.length < res.rows.length) throw new ApiError('internal-server-error', ['Not found']); // TODO better error
     return correctRows;
   }
