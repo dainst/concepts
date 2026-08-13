@@ -11,38 +11,31 @@ import {
 import {ConceptViewComponent} from '../concept-view';
 import {Backend} from '../../services/backend';
 import * as d3 from 'd3';
-import {GraphLink, GraphNode, GraphSettings, RelativeNodePosition} from '../../interfaces/graph';
+import {
+  GraphColorProfile,
+  GraphExpansionProfile, GraphInfo,
+  GraphLink,
+  GraphNode,
+  GraphSettings,
+  RelativeNodePosition
+} from '../../interfaces/graph';
 import {stringifyId, stringifyLinkId} from '../../functions/graph-data';
 import {from, map, mergeMap, Observable, of, Subscription} from 'rxjs';
 import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
 import {DragBehavior, SubjectPosition} from 'd3';
 import {SearchShard} from 'concepts-common/interfaces/search';
-
-const settings: GraphSettings = {
-  expand: {
-    backward: {
-      hasPeriodType: 1,
-      broader: 0
-    },
-    forward: {
-      hasPeriodType: 1
-    },
-    default: {
-      forward: 5,
-      backward: 5
-    }
-  },
-  linkForce: -1000,
-  maxNodes: 100
-}
-
+import {graphColorProfiles, graphExpansionProfiles} from './graph-profiles';
+import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
+import {KeyValuePipe} from '@angular/common';
 
 
 
 @Component({
   selector: 'app-concept-view-graph',
   imports: [
+    ReactiveFormsModule,
+    KeyValuePipe
   ],
   templateUrl: './concept-view-graph.html',
   styleUrl: './concept-view-graph.css',
@@ -50,9 +43,33 @@ const settings: GraphSettings = {
 export class ConceptViewGraph extends ConceptViewComponent implements AfterViewInit, OnDestroy {
   @ViewChild('graph', { static: true }) graphContainer!: ElementRef;
   private readonly bs = inject(Backend);
-  private viewInitialized = signal(false);
+  private readonly fb = inject(FormBuilder);
+  private viewInitialized = signal(false); // TODO make obsolete and replace by d3?
+  protected settingsPaneOpen = signal(false);
+  protected infoPaneOpen = signal(true);
 
-  private d3!: {
+
+  readonly settingsForm = this.fb.nonNullable.group({
+    expand: ['full'],
+    colors: ['types'],
+    linkForce: [-1000],
+    maxNodes: [1]
+  });
+  protected settings: GraphSettings = {
+    expand: graphExpansionProfiles["full"],
+    colors: graphColorProfiles["types"],
+    linkForce: -1000,
+    maxNodes: 1
+  };
+  protected readonly profiles: {
+    colors: Record<string, GraphColorProfile>;
+    expansion: Record<string, GraphExpansionProfile>;
+  } = {
+    colors: graphColorProfiles,
+    expansion: graphExpansionProfiles
+  };
+
+  private d3: {
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
     linksGroup: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -62,7 +79,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     linkForce: d3.ForceLink<GraphNode, GraphLink>;
 
     simulation: d3.Simulation<GraphNode, undefined>;
-  }
+  } | undefined = undefined;
 
   private resizeObserver!: ResizeObserver;
   private readonly subscriptions: Subscription[] = [];
@@ -71,6 +88,17 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     nodes: new Map<string, GraphNode>(),
     links: new Map<string, GraphLink>()
   };
+
+  protected graphInfo = signal<GraphInfo>({
+    nodes: {
+      classes: new Map(),
+      count: 0,
+      max: 0,
+      classification: 'none'
+    }
+  }, {
+    equal: () => false // classes can be big and mutating is cheaper than destructure and build map again
+  });
 
   protected readonly hoveredNode = signal<GraphNode|undefined>(undefined);
 
@@ -91,6 +119,29 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
 
   ngAfterViewInit() {
     this.initialize();
+  }
+
+  private clear(): void {
+    this.subscriptions
+      .forEach(subscription => subscription.unsubscribe());
+    this.resizeObserver?.disconnect();
+    if (this.d3) {
+      this.d3.simulation.stop();
+      this.d3.svg.remove();
+    }
+    this.d3 = undefined;
+    this.graph = {
+      nodes: new Map<string, GraphNode>(),
+      links: new Map<string, GraphLink>()
+    };
+    this.graphInfo.set({
+      nodes: {
+        classes: new Map(),
+        count: 0,
+        max: 0,
+        classification: 'none'
+      }
+    });
   }
 
   private initialize() {
@@ -116,10 +167,11 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     simulation
       .nodes([])
       .force("link", linkForce)
-      .force("charge", d3.forceManyBody().strength(settings.linkForce))
+      .force("charge", d3.forceManyBody().strength(this.settings.linkForce))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .alpha(1)
       .on("tick", () => {
+        if (!this.d3) return;
         this.d3.nodesGroup
           .selectAll<SVGGElement, GraphNode>("g.node")
           .attr("transform", d => `translate(${d.x},${d.y})`);
@@ -178,7 +230,12 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         }
         this.applyConceptData(node, concept);
 
-        if (this.graph.nodes.size >= settings.maxNodes) {
+        this.graphInfo().nodes.count = this.graph.nodes.size;
+        this.graphInfo().nodes.max = this.settings.maxNodes;
+        this.graphInfo().nodes.classification = this.settings.colors.colorizeNodesBy;
+        this.graphInfo.set(this.graphInfo()); // update view!
+
+        if (this.graph.nodes.size >= this.settings.maxNodes) {
           return
         }
 
@@ -189,6 +246,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   }
 
   private draw(links: GraphLink[], nodes: GraphNode[]): void {
+    if (!this.d3) return;
     this.d3.linkForce.links(links);
     this.d3.simulation.nodes(nodes);
     this.d3.simulation.alpha(1).restart();
@@ -208,7 +266,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
           });
 
         g.append("circle")
-          .attr("r", d => (d.distance ?  + 18 : 36));
+          .attr("r", d => (d.distance ?  + 18 : 36))
+          .attr("fill", 'var(--graph-color-loading)');
 
         g.append("text")
           .attr("text-anchor", "middle")
@@ -260,7 +319,6 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     const match = this.graph.nodes.get(stringifyId(node));
     if (match) {
       if (isLabelledConcept(match.concept)) {
-        console.log(`[GET] ${node.type}/${node.id} : ALLREADY THERE`);
         return of([node, match.concept]);
       } else {
       }
@@ -275,6 +333,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
 
   private applyConceptData(node: GraphNode, concept: Concept): void {
     if (!concept) return;
+    if (!this.d3) return;
 
     const nodeElem: d3.Selection<SVGGElement, GraphNode, SVGGElement, unknown> = this.d3.nodesGroup
       .selectAll<SVGGElement, GraphNode>("g.node")
@@ -288,7 +347,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         : `node node-${d.distance}`);
     nodeElem
       .select('circle')
-      .attr("r", d => (d.distance ? 18 : 36));
+      .attr("r", d => (d.distance ? 18 : 36))
+      .attr('fill', d => `var(--${this.getNodeClassColor(d)})`)
     nodeElem
       .select('text')
       .text(d => d.concept?.title ?? `#${d.id}`);
@@ -325,9 +385,9 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     const links: GraphLink[] = [
       ...(concept.relationsTo ?? [])
         .filter(r =>
-          distance < (r.relation.id in settings.expand.forward
-            ? settings.expand.forward[r.relation.id]
-            : settings.expand.default.forward
+          distance < (r.relation.id in this.settings.expand.forward
+            ? this.settings.expand.forward[r.relation.id]
+            : this.settings.expand.default.forward
           )
         )
         .flatMap(r => r.objects
@@ -340,9 +400,9 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         ),
       ...(concept.relationsFrom ?? [])
         .filter(r =>
-          distance < (r.relation.id in settings.expand.forward
-            ? settings.expand.backward[r.relation.id]
-            : settings.expand.default.backward
+          distance < (r.relation.id in this.settings.expand.forward
+            ? this.settings.expand.backward[r.relation.id]
+            : this.settings.expand.default.backward
           )
         )
         .flatMap(r => r.objects
@@ -364,6 +424,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   private createDrag(): DragBehavior<SVGGElement, GraphNode, GraphNode | SubjectPosition> {
     return d3.drag<SVGGElement, GraphNode>()
       .on("start", (event, d) => {
+        if (!this.d3) return;
         if (!event.active) {
           this.d3.simulation.alphaTarget(0.3).restart();
         }
@@ -376,9 +437,59 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         d.fy = event.y;
       })
       .on("end", event => {
+        if (!this.d3) return;
         if (!event.active) {
           this.d3.simulation.alphaTarget(0);
         }
       });
+  }
+
+  protected toggleSettings(): void {
+    this.settingsPaneOpen.set(!this.settingsPaneOpen())
+  }
+
+  protected toggleInfo(): void {
+    this.infoPaneOpen.set(!this.infoPaneOpen())
+  }
+
+  protected changeSettings(): void {
+    const settings = this.settingsForm.getRawValue();
+    this.settings = {
+      ...settings,
+      colors: graphColorProfiles[settings.colors] ?? graphColorProfiles['none'],
+      expand: graphExpansionProfiles[settings.expand] ?? graphColorProfiles['normal'],
+    };
+    this.clear();
+    this.initialize();
+    this.update(this.registerConceptRelations(this.concept(), 0, 'o'));
+  }
+
+  private getNodeClassColor(node: GraphNode): string {
+    const getClassName = (node: GraphNode) => {
+      switch (this.settings?.colors?.colorizeNodesBy) {
+        case "distance":
+          return String(node.distance);
+        case "domain":
+          return node.concept?.domain ?? '';
+        case "type":
+          return node.type;
+      }
+      return 'none';
+    }
+
+    if (!node.concept) return 'graph-color-loading';
+
+    const graphInfo = this.graphInfo();
+
+    let className = getClassName(node);
+    let entry = graphInfo.nodes.classes.get(className);
+    if (entry) {
+      entry.count += 1;
+      return entry.color;
+    }
+    const color = `graph-color-${graphInfo.nodes.classes.size}`;
+    graphInfo.nodes.classes.set(className, {color, count: 1});
+    console.log(className, color)
+    return color;
   }
 }

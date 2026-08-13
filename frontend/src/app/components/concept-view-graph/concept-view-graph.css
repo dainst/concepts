@@ -11,18 +11,6 @@
   overflow: hidden;
 }
 
-#hovered-graph-node {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  padding: 1em;
-  background: var(--idai-blue-transparent);
-  border: 3px solid var(--light-grey);
-  border-radius: 4px;
-  max-height: 50%;
-  overflow-y: scroll;
-}
-
 #hovered-graph-node h2,
 #hovered-graph-node h3 {
   font-size: medium;
@@ -37,3 +25,32 @@
   color: var(--dark-grey);
 }
 
+#graph-controls {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+#graph-controls .bi {
+  margin-right: 0.2em;
+  cursor: pointer;
+  display: inline-block;
+}
+
+#graph-info-pane,
+#graph-settings-pane,
+#hovered-graph-node {
+  padding: 1em;
+  background: var(--idai-blue-transparent);
+  border: 1px solid var(--light-grey);
+  border-radius: 4px;
+  margin-bottom: 1em;
+  font-size: x-small;
+  display: block;
+  width: fit-content;
+}
+
+#graph-info-pane {
+  max-height: 75%;
+  overflow-y: hidden;
+}

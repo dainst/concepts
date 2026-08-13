@@ -3,7 +3,7 @@
 :root {
   --dark-blue: #004c98;
   --idai-blue: #557ebb;
-  --idai-blue-transparent: rgba(85,126,185, 0.5);
+  --idai-blue-transparent: rgba(85,126,185, 0.7);
   --light-grey: #d3d3cf;
   --grey: #a9a8a4;
   --dark-grey: #605e59;
@@ -11,7 +11,7 @@
   --dark-blue-fg: white;
 
   --header-background: linear-gradient(to right, rgba(106, 164, 184, 0.95) 0%, rgba(71, 123, 199, 0.66) 95%);
-  --header-height: 50px;
+  --header-height: 54px;
 
 
 
@@ -23,6 +23,27 @@
   /*--bs-info: #0dcaf0;*/
   /*--bs-light: #f8f9fa;*/
   /*--bs-dark: #212529;*/
+
+  /* TODO: use them in timeline too !*/
+  --graph-color-loading: rgb(170, 170, 170);
+  --graph-color-0: var(--idai-blue);
+  --graph-color-1: rgb(170, 170, 42.5);
+  --graph-color-2: rgb(170, 42.5, 68);
+  --graph-color-3: rgb(93.5, 170, 42.5);
+  --graph-color-4: rgb(170, 93.5, 42.5);
+  --graph-color-5: rgb(42.5, 42.5, 170);
+  --graph-color-6: rgb(42.5, 170, 68);
+  --graph-color-7: rgb(170, 42.5, 144.5);
+  --graph-color-8: rgb(119, 42.5, 170);
+  --graph-color-9: rgb(42.5, 170, 144.5);
+  --graph-color-10: rgb(42.5, 119, 170);
+
+
+
+
+
+
+
 }
 
 

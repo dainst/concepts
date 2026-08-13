@@ -15,14 +15,35 @@ export interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
 }
 
 export interface GraphSettings {
-  readonly expand: {
-    readonly forward: {readonly [relationId: string]: number},
-    readonly backward: {readonly [relationId: string]: number}
-    readonly default: {
-      readonly forward: number;
-      readonly backward: number;
-    }
-  },
+  readonly expand: GraphExpansionProfile;
+  readonly colors: GraphColorProfile;
   readonly linkForce: number;
   readonly maxNodes: number;
+}
+
+export interface GraphExpansionProfile {
+  readonly forward: {readonly [relationId: string]: number},
+  readonly backward: {readonly [relationId: string]: number}
+  readonly default: {
+    readonly forward: number;
+    readonly backward: number;
+  }
+}
+
+export type GraphNodeClassType = 'type' | 'distance' | 'domain' | 'none';
+
+export interface GraphColorProfile {
+  readonly colorizeNodesBy: GraphNodeClassType;
+}
+
+export interface GraphInfo {
+  nodes: {
+    classes: Map<string, {
+      count: number;
+      color: string;
+    }>,
+    classification: GraphNodeClassType;
+    count: number;
+    max: number;
+  }
 }
