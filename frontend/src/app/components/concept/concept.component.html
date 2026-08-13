@@ -9,14 +9,26 @@
 
 @if(concept.value(); as conceptValue) {
   <div class="d-flex" id="concept">
-      <aside class="flex-shrink-0">
-        <app-concept-views
-          [items]="menu()"
-          [selectedId]="currentView().id"
-          (selectedChange)="menuChanged($event)">
-        </app-concept-views>
-      </aside>
+    <aside class="flex-shrink-0">
+      <app-concept-views
+        [items]="menu()"
+        [selectedId]="currentView().id"
+        (selectedChange)="menuChanged($event)">
+      </app-concept-views>
+    </aside>
+    <main class="flex-fill overflow-auto">
+      <div class="row">
+        <section class="col-12" [class.col-md-6]="rightSideOpen()">
+          <ng-container *ngComponentOutlet="currentView().component; inputs: {concept: conceptValue}"></ng-container>
+        </section>
 
+        @if (rightSideOpen()) {
+          <section class="col-12 col-md-6" [class.sideToggled]="!rightSideOpen()">
+            <app-concept-abstract [concept]="conceptValue"/>
+          </section>
+        }
+      </div>
+    </main>
     <button
       id="right-side-toggler"
       type="button"
@@ -25,20 +37,6 @@
     >
       {{rightSideOpen() ? '»' : '«'}}
     </button>
-
-      <main class="flex-fill overflow-auto">
-        <div class="row">
-          <section class="col-12" [class.col-md-6]="rightSideOpen()">
-            <ng-container *ngComponentOutlet="currentView().component; inputs: {concept: conceptValue}"></ng-container>
-          </section>
-
-          @if (rightSideOpen()) {
-            <section class="col-12 col-md-6" [class.sideToggled]="!rightSideOpen()">
-              <app-concept-abstract [concept]="conceptValue"/>
-            </section>
-          }
-        </div>
-      </main>
   </div>
 }
 
