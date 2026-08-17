@@ -46,15 +46,15 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   private readonly bs = inject(Backend);
   private readonly fb = inject(FormBuilder);
   private viewInitialized = signal(false); // TODO make obsolete and replace by d3?
-  protected settingsPaneOpen = signal(true);
+  protected settingsPaneOpen = signal(false);
   protected infoPaneOpen = signal(true);
 
 
   protected settings: GraphSettings = {
     expand: graphExpansionProfiles["full"],
     colors: graphColorProfiles["types"],
-    linkForce: -1000,
-    maxNodes: 1
+    linkForce: -500,
+    maxNodes: 10
   };
   readonly settingsForm = this.fb.nonNullable.group({
     expand: ['full'],
@@ -173,7 +173,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     const nodesGroup = viewport.append("g")
       .classed("nodes", true);
 
-    const linkForce= d3.forceLink<GraphNode, GraphLink>();
+    const linkForce= d3.forceLink<GraphNode, GraphLink>()
+      .distance(d => Math.max(100, 20 + d.relation.id.length * 7));
     const simulation = d3.forceSimulation<GraphNode>([]);
     simulation
       .nodes([])
