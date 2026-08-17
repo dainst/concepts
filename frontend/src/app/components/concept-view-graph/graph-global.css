@@ -50,6 +50,6 @@
   font-size: x-small;
 }
 
-#graph .graph-zoom-0 .node text {
+#graph .graph-zoom-0 .node foreignObject {
   display: none;
 }
