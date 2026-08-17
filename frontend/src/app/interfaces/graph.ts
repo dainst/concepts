@@ -45,5 +45,9 @@ export interface GraphInfo {
     classification: GraphNodeClassType;
     count: number;
     max: number;
+  },
+  profiles: {
+    expand: string;
+    colors: string;
   }
 }

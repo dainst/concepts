@@ -31,11 +31,30 @@
     @if (settingsPaneOpen()) {
       <div id="graph-settings-pane">
         <form [formGroup]="settingsForm">
-          <select class="form-select" formControlName="colors">
+          <label for="graph-settings-colors">Colors</label>
+          <select class="form-select-sm" formControlName="colors" id="graph-settings-colors">
             @for (colorProfile of profiles.colors | keyvalue; track colorProfile.key) {
-              <option [value]="colorProfile.key">{{colorProfile.key}}</option>
+              <option
+                [value]="colorProfile.key"
+                [selected]="graphInfo().profiles.colors"
+              >
+                {{colorProfile.key}}
+              </option>
             }
           </select>
+          <br>
+          <label for="graph-settings-expansion">Expansion</label>
+          <select class="form-select-sm" formControlName="expand" id="graph-settings-expansion">
+            @for (expansionProfile of profiles.expansion | keyvalue; track expansionProfile.key) {
+              <option
+                [value]="expansionProfile.key"
+                [selected]="graphInfo().profiles.expand"
+              >
+                {{expansionProfile.key}}
+              </option>
+            }
+          </select>
+          <br>
 
           <label for="graph-settings-max-nodes">Max Nodes</label>
           <input

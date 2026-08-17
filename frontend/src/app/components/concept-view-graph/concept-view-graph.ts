@@ -45,22 +45,22 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   private readonly bs = inject(Backend);
   private readonly fb = inject(FormBuilder);
   private viewInitialized = signal(false); // TODO make obsolete and replace by d3?
-  protected settingsPaneOpen = signal(false);
+  protected settingsPaneOpen = signal(true);
   protected infoPaneOpen = signal(true);
 
 
-  readonly settingsForm = this.fb.nonNullable.group({
-    expand: ['full'],
-    colors: ['types'],
-    linkForce: [-1000],
-    maxNodes: [1]
-  });
   protected settings: GraphSettings = {
     expand: graphExpansionProfiles["full"],
     colors: graphColorProfiles["types"],
     linkForce: -1000,
     maxNodes: 1
   };
+  readonly settingsForm = this.fb.nonNullable.group({
+    expand: ['full'],
+    colors: ['types'],
+    linkForce: [this.settings.linkForce],
+    maxNodes: [this.settings.maxNodes]
+  });
   protected readonly profiles: {
     colors: Record<string, GraphColorProfile>;
     expansion: Record<string, GraphExpansionProfile>;
@@ -95,6 +95,10 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       count: 0,
       max: 0,
       classification: 'none'
+    },
+    profiles: {
+      colors: 'types',
+      expand: 'full'
     }
   }, {
     equal: () => false // classes can be big and mutating is cheaper than destructure and build map again
@@ -140,6 +144,10 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         count: 0,
         max: 0,
         classification: 'none'
+      },
+      profiles: {
+        colors: this.graphInfo().profiles.colors,
+        expand: this.graphInfo().profiles.expand
       }
     });
   }
