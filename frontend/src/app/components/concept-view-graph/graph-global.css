@@ -10,6 +10,28 @@
 
 #graph text {
   fill: black;
+  font-size: x-small;
+}
+
+#graph .graph-node-label {
+  font-size: 4pt;
+  border-radius: 18px;
+  background: rgba(221, 160, 221 , 0.02);
+  line-height: 95%;
+  color: black;
+  border: 1px solid black;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+#graph .graph-node-label.graph-node-size-large {
+  font-size: x-small;
+  border-radius: 36px;
 }
 
 #graph .link→ text {
@@ -22,4 +44,12 @@
 
 #graph .link← path {
   stroke: blue;
+}
+
+#graph .node text {
+  font-size: x-small;
+}
+
+#graph .graph-zoom-0 .node text {
+  display: none;
 }

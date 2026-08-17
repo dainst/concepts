@@ -28,6 +28,7 @@ import {SearchShard} from 'concepts-common/interfaces/search';
 import {graphColorProfiles, graphExpansionProfiles} from './graph-profiles';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {KeyValuePipe} from '@angular/common';
+import {removeSuffices} from '../../functions/title';
 
 
 
@@ -162,7 +163,9 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .attr('width', width)
       .attr('height', height);
 
-    const viewport = svg.append("g");
+    const viewport = svg
+      .append("g")
+      .attr('class', 'graph-zoom-1');
 
     const linksGroup = viewport.append("g")
       .classed("links", true);
@@ -193,9 +196,11 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     .restart();
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.2, 5])
+      .scaleExtent([0.1, 4])
       .on("zoom", event => {
-        viewport.attr("transform", event.transform);
+        viewport
+          .attr("transform", event.transform)
+          .attr('class',`graph-zoom-${Math.floor(event.transform.k)}`);
       });
     svg.call(zoom);
 
@@ -274,13 +279,17 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
           });
 
         g.append("circle")
-          .attr("r", d => (d.distance ?  + 18 : 36))
+          .attr("r", d => (d.distance ? 18 : 36))
           .attr("fill", 'var(--graph-color-loading)');
 
-        g.append("text")
-          .attr("text-anchor", "middle")
-          .attr("dy", "0.35em")
-          .text(d => d.id);
+        g.append("foreignObject")
+          .attr("x", d => d.distance ? -18 : -36)
+          .attr("y",  d => d.distance ? -18 : -36)
+          .attr("width",  d => (d.distance ? 36 : 72))
+          .attr("height",  d => (d.distance ? 36 : 72))
+          .append("xhtml:div")
+          .attr("class", d => `graph-node-label graph-node-size-${d.distance ? 'normal' : 'large'}`)
+          .text(d => `#${d.id} `);
 
         g.call(this.createDrag());
 
@@ -358,8 +367,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .attr("r", d => (d.distance ? 18 : 36))
       .attr('fill', d => `var(--${this.getNodeClassColor(d)})`)
     nodeElem
-      .select('text')
-      .text(d => d.concept?.title ?? `#${d.id}`);
+      .select('foreignObject > div')
+      .text(d => removeSuffices(d.concept?.title ?? `#${d.id}`));
   }
 
   private registerConceptRelations(concept: Concept, distance: number, relativePosition: RelativeNodePosition): GraphNode[] {
