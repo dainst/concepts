@@ -1,0 +1,9 @@
+@if (errors().length) {
+  <div id="error-overlay">
+    @for (error of errors(); track $index) {
+      <ngb-alert type="danger" (closed)="es.remove($index)">
+        {{error.message}}
+      </ngb-alert>
+    }
+  </div>
+}

@@ -1,7 +1,6 @@
 import {AfterViewInit, Component, computed, inject, ResourceRef, signal} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {Timeline} from '../timeline/timeline';
-import {isTemporalConcept} from 'concepts-common/functions/concept.typeguards';
 import {rxResource} from '@angular/core/rxjs-interop';
 import {Backend} from '../../services/backend';
 import {map} from 'rxjs';

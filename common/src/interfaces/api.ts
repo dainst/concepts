@@ -9,8 +9,10 @@ export const errorResponseTypes = {
 
 export type ErrorResponseType = keyof typeof errorResponseTypes;
 
-export interface ErrorResponse {
-  readonly type: ErrorResponseType;
+export interface ErrorResponseBase<T> {
+  readonly type: T;
   readonly params?: string[];
   readonly debug?: string[];
 }
+
+export type ErrorResponse = ErrorResponseBase<ErrorResponseType>;

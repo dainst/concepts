@@ -1,0 +1,10 @@
+#error-overlay {
+  position: fixed;
+  z-index: 1000000000;
+  top: 0;
+  right: 0;
+  max-width: 400px;
+  padding: calc(var(--header-height) + 5px) 5px 0;
+  max-height: 50%;
+  overflow-y: scroll;
+}

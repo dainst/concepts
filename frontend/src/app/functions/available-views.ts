@@ -28,6 +28,5 @@ export const getAvailableViews = (concept: Concept|undefined): View[] => {
   if (isTemporalConcept(concept)) views.push('timeline');
   if (isRelationalConcept(concept) || isRelatedConcept(concept)) views.push('graph');
   views.push('raw');
-  console.log(views);
   return views;
 }
