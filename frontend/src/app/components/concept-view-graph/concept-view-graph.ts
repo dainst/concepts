@@ -507,7 +507,6 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     }
     const color = `graph-color-${graphInfo.nodes.classes.size}`;
     graphInfo.nodes.classes.set(className, {color, count: 1});
-    console.log(className, color)
     return color;
   }
 }

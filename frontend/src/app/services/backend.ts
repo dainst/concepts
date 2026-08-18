@@ -34,8 +34,6 @@ export class Backend {
           count: Infinity, // TODO change this in PROD
           delay: error=> {
             if (error.status >= 500) {
-              console.error(error);
-              // TODO collect error
               return timer(5000);
             }
             throw error;

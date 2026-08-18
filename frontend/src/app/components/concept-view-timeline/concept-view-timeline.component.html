@@ -1,9 +1,9 @@
 @if (data.error()) {
-  <div>No Timeline-Data erhalten</div>
+  <div class="alert alert-warning" role="alert">Could not receive data for timeline</div>
 }
 
 @if (data.isLoading()) {
-  <div>Time line loading</div>
+  <div>Timeline loading</div>
 }
 
 

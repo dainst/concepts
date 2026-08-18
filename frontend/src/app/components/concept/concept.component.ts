@@ -92,7 +92,6 @@ export class ConceptComponent {
 
     const storedView = localStorage.getItem("idai-concepts-concept-view");
     const storedRightSideOpen = localStorage.getItem("idai-concepts-concept-view-right-side-open");
-    console.log({storedRightSideOpen})
     this.rightSideOpen.set(!storedRightSideOpen || storedRightSideOpen === 'true');
     if (storedView) {
       this.selectedViewId.set(storedView);
@@ -107,6 +106,6 @@ export class ConceptComponent {
   protected toggleRightSide(): void {
     this.rightSideOpen.set(!this.rightSideOpen());
     localStorage.setItem("idai-concepts-concept-view-right-side-open", String(this.rightSideOpen()));
-    // TODO use shard of URL to store view settings instead of localstorage
+    // TODO use hash part of URL to store view settings instead of localstorage
   }
 }
