@@ -54,3 +54,13 @@
   max-height: 75%;
   overflow-y: hidden;
 }
+
+
+
+#graph-settings-pane .form-select-sm,
+#graph-settings-pane .form-control-sm {
+  font-size: x-small;
+  margin-left: 1em;
+  margin-bottom: 1em;
+  width: calc(100% - 2em);
+}
