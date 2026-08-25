@@ -210,7 +210,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     defs.append("marker")
       .attr("id", "arrow")
       .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 26)
+      .attr("refX", 24)
       .attr("refY", 0)
       .attr("markerWidth", 6)
       .attr("markerHeight", 6)
@@ -434,7 +434,14 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     ];
     links
       .forEach(link => {
-        this.graph.links.set(stringifyLinkId(link), link);
+        const lid =stringifyLinkId(link);
+        if (this.graph.links.has(lid)) {
+          console.log('X',  {
+            prev: this.graph.links.get(lid),
+            next: link
+          });
+        }
+        this.graph.links.set(lid, link);
       });
     return newNodes;
   }
