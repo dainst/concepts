@@ -87,8 +87,7 @@ export const convertRow  = (settings: Settings, includeLabels: boolean) => (row:
   // TODO distinguish between is not temporal at all and has no coordinates
   const temporalExtends: TemporalExtend[] = (row.temporal_extends ?? []).map(convertTemporalExtend);
 
-  const relationsTo: RelationSet[] = row.relations_to ? convertRelationAgg(row.relations_to) : [];
-  const relationsFrom: RelationSet[] = row.relations_from ? convertRelationAgg(row.relations_from) : [];
+  const relations: RelationSet[] = row.relations ? convertRelationAgg(row.relations) : [];
 
   const preferredLabels = getPreferredLabels(labels, settings); // TODO replace this by title
 
@@ -97,8 +96,7 @@ export const convertRow  = (settings: Settings, includeLabels: boolean) => (row:
     domain,
     ...preferredLabels,
     ...(includeLabels ? labels : {}),
-    ...(relationsTo.length && {relationsTo}),
-    ...(relationsFrom.length && {relationsFrom}),
+    ...(relations.length && {relations}),
     ...(geographicalExtends.length && {geographicalExtends}),
     ...(temporalExtends.length && {temporalExtends})
   }

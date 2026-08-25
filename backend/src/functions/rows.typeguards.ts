@@ -15,8 +15,7 @@ export const isConceptRow = (thing: unknown): thing is ConceptRow =>
 	&& ((!('labels' in thing)) || ('labels' in thing && (Array.isArray(thing.labels) && thing.labels.every(isLabelsAgg)) || (thing.labels == null)))
 	&& ((!('geographical_extends' in thing)) || ('geographical_extends' in thing && (Array.isArray(thing.geographical_extends) && thing.geographical_extends.every(isGeographicalExtendsAgg)) || (thing.geographical_extends == null)))
 	&& ((!('temporal_extends' in thing)) || ('temporal_extends' in thing && (Array.isArray(thing.temporal_extends) && thing.temporal_extends.every(isTemporalExtendsAgg)) || (thing.temporal_extends == null)))
-	&& ((!('relations_to' in thing)) || ('relations_to' in thing && (Array.isArray(thing.relations_to) && thing.relations_to.every(isRelationsAgg)) || (thing.relations_to == null)))
-	&& ((!('relations_from' in thing)) || ('relations_from' in thing && (Array.isArray(thing.relations_from) && thing.relations_from.every(isRelationsAgg)) || (thing.relations_from == null)));
+	&& ((!('relations' in thing)) || ('relations' in thing && (Array.isArray(thing.relations) && thing.relations.every(isRelationsAgg)) || (thing.relations == null)));
 
 export const isRelationsAgg = (thing: unknown): thing is RelationsAgg =>
   (typeof thing === 'object')

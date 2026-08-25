@@ -21,7 +21,7 @@ export class ConceptViewTimeline extends ConceptViewComponent implements AfterVi
   readonly data: ResourceRef<Concept[]|undefined> = rxResource({
     params: () => this.concept(),
     stream: ({ params }) =>
-      this.bs.search({domain: params.domain, limit: 10000, shards: ['temporal_extends', 'relations_to']})
+      this.bs.search({domain: params.domain, limit: 10000, shards: ['temporal_extends', 'relations']})
         .pipe(map(r => r.results))
   });
 

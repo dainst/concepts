@@ -8,8 +8,7 @@ export interface ConceptRow {
   readonly labels?: LabelsAgg[] | null;
   readonly geographical_extends?: GeographicalExtendsAgg[] | null;
   readonly temporal_extends?: TemporalExtendsAgg[] | null;
-  readonly relations_to?: RelationsAgg[] | null;
-  readonly relations_from?: RelationsAgg[] | null;
+  readonly relations?: RelationsAgg[] | null;
 }
 
 export interface RelationsAgg {

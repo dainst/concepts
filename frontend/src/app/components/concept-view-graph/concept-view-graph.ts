@@ -16,15 +16,13 @@ import {
   GraphExpansionProfile, GraphInfo,
   GraphLink,
   GraphNode,
-  GraphSettings,
-  RelativeNodePosition
+  GraphSettings
 } from '../../interfaces/graph';
 import {stringifyId, stringifyLinkId} from '../../functions/graph-data';
 import {from, map, mergeMap, Observable, of, Subscription} from 'rxjs';
 import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
 import {DragBehavior, SubjectPosition} from 'd3';
-import {SearchShard} from 'concepts-common/interfaces/search';
 import {graphColorProfiles, graphExpansionProfiles} from './graph-profiles';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {KeyValuePipe} from '@angular/common';
@@ -112,7 +110,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     effect(() => {
       const concept = this.concept();
       if (!this.viewInitialized()) return;
-      this.update(this.registerConceptRelations(concept, 0, 'o'));
+      this.update(this.registerConceptRelations(concept, 0));
     });
   }
 
@@ -253,7 +251,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
           return
         }
 
-        const nodesDelta = this.registerConceptRelations(concept, node.distance, node.relativePosition);
+        const nodesDelta = this.registerConceptRelations(concept, node.distance);
         this.update(nodesDelta);
       });
     this.subscriptions.push(loadAdjacentNodes);
@@ -303,13 +301,12 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .join(enter => {
         const g = enter
           .append('g')
-          .attr("class", d =>`link link-${d.relation.type} link${d.direction}`);
+          .attr("class", d =>`link link-${d.relation.type}`);
 
         g.append('path')
           .attr("class", "link-path")
           .attr("fill", "none")
-          .attr("marker-end", d => d.direction === "→" ? "url(#arrow)" : null)
-          .attr("marker-start", d => d.direction === "←" ? "url(#arrow)" : null)
+          .attr("marker-end", "url(#arrow)")
           .attr("id", d => `link-path-${stringifyLinkId(d)}`);
 
         g.append('text')
@@ -342,10 +339,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       }
     }
 
-    const shards: SearchShard[] = [node.relativePosition === '→' ? 'relations_to' : 'relations_from'];
-    shards.push('title');
-
-    return this.bs.search({type: node.type, id: node.id, shards})
+    return this.bs.search({type: node.type, id: node.id, shards: ['title', 'relations']})
       .pipe(map(searchResult => [node, searchResult.results[0]]));
   }
 
@@ -372,14 +366,13 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .text(d => removeSuffices(d.concept?.title ?? `#${d.id}`));
   }
 
-  private registerConceptRelations(concept: Concept, distance: number, relativePosition: RelativeNodePosition): GraphNode[] {
+  private registerConceptRelations(concept: Concept, distance: number): GraphNode[] {
     // note: object reference of concepts have to be kept, because D3 uses them to identify identity!
     const newNodes: GraphNode[] =[];
 
     const getGraphNode = (
       conceptId: ConceptId,
       distance: number,
-      relativePosition: RelativeNodePosition,
       concept: Concept|undefined = undefined,
     ): GraphNode => {
       const sid = stringifyId(conceptId);
@@ -390,58 +383,37 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       const newNode: GraphNode = {
         ...conceptId,
         distance,
-        concept,
-        relativePosition
+        concept
       };
       this.graph.nodes.set(sid, newNode);
       newNodes.push(newNode);
       return newNode;
     }
 
-    const protagonist: GraphNode = getGraphNode(concept.id, distance, relativePosition, concept);
+    const protagonist: GraphNode = getGraphNode(concept.id, distance, concept);
 
-    const links: GraphLink[] = [
-      ...(concept.relationsTo ?? [])
-        .filter(r =>
-          distance < (r.relation.id in this.settings.expand.forward
-            ? this.settings.expand.forward[r.relation.id]
-            : this.settings.expand.default.forward
-          )
-        )
-        .flatMap(r => r.objects
-          .map((target: ConceptId): GraphLink => ({
-            source: protagonist,
-            relation: r.relation,
-            target: getGraphNode(target, distance + 1, '→'),
-            direction: '→'
-          }))
-        ),
-      ...(concept.relationsFrom ?? [])
-        .filter(r =>
-          distance < (r.relation.id in this.settings.expand.forward
-            ? this.settings.expand.backward[r.relation.id]
-            : this.settings.expand.default.backward
-          )
-        )
-        .flatMap(r => r.objects
-          .map((target: ConceptId): GraphLink => ({
-            source: protagonist,
-            relation: r.relation,
-            target: getGraphNode(target, distance + 1, '←'),
-            direction: '←'
-          }))
-        ),
-    ];
+    const links: GraphLink[] = (concept.relations ?? [])
+      .map(r => {
+        console.log({
+          distance,
+          rid: r.relation.id,
+          allowedEx: this.settings.expand[r.relation.id],
+          allowedExFb: this.settings.expand[r.relation.id],
+          allowedExF: this.settings.expand[r.relation.id] ?? this.settings.expand.__default
+        })
+        return r;
+      })
+      .filter(r => distance < (this.settings.expand[r.relation.id] ?? this.settings.expand.__default))
+      .flatMap(r => r.objects
+        .map((target: ConceptId): GraphLink => ({
+          source: protagonist,
+          relation: r.relation,
+          target: getGraphNode(target, distance + 1),
+        }))
+      );
     links
       .forEach(link => {
-        const lid =stringifyLinkId(link);
-        if (this.graph.links.has(lid)) {
-          console.log('X',  {
-            prev: this.graph.links.get(lid),
-            next: link
-          });
-        }
-        this.graph.links.set(lid, link);
+        this.graph.links.set(stringifyLinkId(link), link);
       });
     return newNodes;
   }
@@ -486,7 +458,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     };
     this.clear();
     this.initialize();
-    this.update(this.registerConceptRelations(this.concept(), 0, 'o'));
+    this.update(this.registerConceptRelations(this.concept(), 0));
   }
 
   private getNodeClassColor(node: GraphNode): string {

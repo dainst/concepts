@@ -3,14 +3,12 @@ import {ConceptViewComponent} from '../concept-view';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {Backend} from '../../services/backend';
 import {forkJoin, map, Observable, of, switchMap} from 'rxjs';
-import {JsonPipe} from '@angular/common';
-import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
-import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
+import { ConceptId} from 'concepts-common/interfaces/concept';
+import {SearchResult} from 'concepts-common/interfaces/search';
 
 @Component({
   selector: 'app-concept-abstract',
-  imports: [
-    JsonPipe],
+  imports: [],
   templateUrl: './concept-abstract.html',
   styleUrl: './concept-abstract.css',
 })
@@ -30,7 +28,7 @@ export class ConceptAbstract extends ConceptViewComponent {
       .pipe(
         switchMap(concept =>
           forkJoin(
-            (concept.relationsTo ?? [])
+            (concept.relations ?? [])
               .flatMap(rel => [
                 this.getTitle(rel.relation),
                 ...rel.objects.map(obj => this.getTitle(obj))

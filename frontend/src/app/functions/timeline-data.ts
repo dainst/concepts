@@ -3,7 +3,7 @@ import {Concept, ConceptAbstract, ConceptId} from 'concepts-common/interfaces/co
 
 export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
   const getRelated = (concept: Concept, rId: string): ConceptId[] =>
-     (concept.relationsTo ?? [])
+     (concept.relations ?? [])
       .find(r => (r.relation.id === rId && r.relation.type === 'chronontology'))
       ?.objects ?? [];
   // TODO dont hardcode "chronontology"
