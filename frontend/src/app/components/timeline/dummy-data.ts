@@ -80,7 +80,7 @@ export function* dummyConceptGenerator(): Generator<Concept> {
           transliteration: ""
         }
       ],
-      relationsTo: [
+      relations: [
         {
           relation: {
             id: 'hasPart',

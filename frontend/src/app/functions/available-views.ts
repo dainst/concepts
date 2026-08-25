@@ -3,7 +3,6 @@ import {View, ViewMap, conceptViews} from '../interfaces/views';
 import {
   isGeographicalConcept,
   isRelatedConcept,
-  isRelationalConcept,
   isTemporalConcept
 } from 'concepts-common/functions/concept.typeguards';
 
@@ -26,7 +25,7 @@ export const getAvailableViews = (concept: Concept|undefined): View[] => {
   const views: View[] = [];
   if (isGeographicalConcept(concept)) views.push('map');
   if (isTemporalConcept(concept)) views.push('timeline');
-  if (isRelationalConcept(concept) || isRelatedConcept(concept)) views.push('graph');
+  if (isRelatedConcept(concept)) views.push('graph');
   views.push('raw');
   return views;
 }

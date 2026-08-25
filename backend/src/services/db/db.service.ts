@@ -62,7 +62,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async query(sql: string, params: any[] = [], useCache: boolean = false): Promise<QueryResult> {
-    // console.log(sql, params);
+    console.log(sql, params);
 
     if (!useCache) return this.pool.query(sql, params);
 
@@ -195,27 +195,17 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         from labels
         where concepts.id = labels.concept_id and concepts.type = labels.concept_type
       ) on true`,
-      relations_to: `left join lateral (
+      relations: `left join lateral (
         select
           json_agg(json_build_object(
-            'predicate_id', relations.predicate_id,
-            'predicate_type', relations.predicate_type,
-            'object_id', relations.object_id,
-            'object_type', relations.object_type
-          )) as relations_to
-        from relations
-        where concepts.id = relations.subject_id and concepts.type = relations.subject_type
-      ) on true`,
-      relations_from: `left join lateral (
-        select
-          json_agg(json_build_object(
-            'predicate_id', relations2.predicate_id,
-            'predicate_type', relations2.predicate_type,
-            'object_id', relations2.subject_id,
-            'object_type', relations2.subject_type
-          )) as relations_from
-        from relations as relations2
-        where concepts.id = relations2.object_id and concepts.type = relations2.object_type
+            'predicate_id', app_expanded_relations.predicate_id,
+            'predicate_type', app_expanded_relations.predicate_type,
+            'object_id', app_expanded_relations.object_id,
+            'object_type', app_expanded_relations.object_type
+          )) as relations
+        from app_expanded_relations
+        where
+          (concepts.id = app_expanded_relations.subject_id and concepts.type = app_expanded_relations.subject_type)
       ) on true`,
       temporal_extends: `left join lateral (
         select
@@ -250,7 +240,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       id,
       limit: 1,
       offset: 0,
-      shards: ['labels', 'relations_to', 'relations_from', 'geographical_extends', 'temporal_extends', 'title']
+      shards: ['labels', 'relations', 'geographical_extends', 'temporal_extends', 'title']
     });
 
     if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);

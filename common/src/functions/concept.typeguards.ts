@@ -1,6 +1,6 @@
 // generated with script/creates-typeguards.ts
 
-import {ConceptId, ConceptAbstract, RelationalConcept, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, Concept, RelationSet, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
+import {ConceptId, ConceptAbstract, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, Concept, RelationSet, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
 import {isPreferredLabels} from './labels.typeguards';
 
 export const isConceptId = (thing: unknown): thing is ConceptId =>
@@ -16,17 +16,11 @@ export const isConceptAbstract = (thing: unknown): thing is ConceptAbstract =>
 	&& ('id' in thing)
 	&& (isConceptId(thing.id));
 
-export const isRelationalConcept = (thing: unknown): thing is RelationalConcept =>
-  (isConceptAbstract(thing))
-	&& ('relationsTo' in thing)
-	&& (Array.isArray(thing.relationsTo))
-	&& (thing.relationsTo.every(isRelationSet));
-
 export const isRelatedConcept = (thing: unknown): thing is RelatedConcept =>
   (isConceptAbstract(thing))
-	&& ('relationsFrom' in thing)
-	&& (Array.isArray(thing.relationsFrom))
-	&& (thing.relationsFrom.every(isRelationSet));
+	&& ('relations' in thing)
+	&& (Array.isArray(thing.relations))
+	&& (thing.relations.every(isRelationSet));
 
 export const isLabelledConcept = (thing: unknown): thing is LabelledConcept =>
   (isConceptAbstract(thing))
@@ -53,8 +47,7 @@ export const isConcept = (thing: unknown): thing is Concept =>
 	&& ((!('temporalExtends' in thing)) || ('temporalExtends' in thing && Array.isArray(thing.temporalExtends) && thing.temporalExtends.every(isTemporalExtend)))
 	&& ((!('geographicalExtends' in thing)) || ('geographicalExtends' in thing && Array.isArray(thing.geographicalExtends) && thing.geographicalExtends.every(isGeographicalExtend)))
 	&& ((!('labels' in thing)) || ('labels' in thing && Array.isArray(thing.labels) && thing.labels.every(isLabel)))
-	&& ((!('relationsTo' in thing)) || ('relationsTo' in thing && Array.isArray(thing.relationsTo) && thing.relationsTo.every(isRelationSet)))
-	&& ((!('relationsFrom' in thing)) || ('relationsFrom' in thing && Array.isArray(thing.relationsFrom) && thing.relationsFrom.every(isRelationSet)));
+	&& ((!('relations' in thing)) || ('relations' in thing && Array.isArray(thing.relations) && thing.relations.every(isRelationSet)));
 
 export const isRelationSet = (thing: unknown): thing is RelationSet =>
   (typeof thing === 'object')

@@ -34,17 +34,6 @@
   border-radius: 36px;
 }
 
-#graph .link→ text {
-  fill: red;
-}
-
-#graph .link← text {
-  fill: blue;
-}
-
-#graph .link← path {
-  stroke: blue;
-}
 
 #graph .node text {
   font-size: x-small;

@@ -10,8 +10,7 @@ export interface SearchResult {
 
 export const searchShards = [
   'labels',
-  'relations_to',
-  'relations_from',
+  'relations',
   'geographical_extends',
   'temporal_extends',
   'title'

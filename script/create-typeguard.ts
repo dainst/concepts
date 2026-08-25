@@ -303,11 +303,11 @@ const createFunctionsFile = (filePath: string, outPath: string, type: keyof type
 
 // /home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts
 
-// createFunctionsFile(
-//  "/home/pfranck/IdeaProjects/concepts/backend/src/interfaces/rows.ts",
-//   "/home/pfranck/IdeaProjects/concepts/backend/src/functions/rows.typeguards.ts",
-//   'typeguard'
-// );
+createFunctionsFile(
+ "/home/pfranck/IdeaProjects/concepts/backend/src/interfaces/rows.ts",
+  "/home/pfranck/IdeaProjects/concepts/backend/src/functions/rows.typeguards.ts",
+  'typeguard'
+);
 
 createFunctionsFile(
   "/home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts",
