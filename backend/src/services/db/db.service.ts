@@ -158,7 +158,6 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
     const uniqueShard = selector.shards ?? [];
     if (selector.q) uniqueShard.push('labels');
-    if (selector.shards?.includes('title')) uniqueShard.push('labels');
     return [...new Set<SearchShard>(uniqueShard)];
   }
 
@@ -169,7 +168,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       `concepts.id as id`,
       `concepts.type as type`,
       `concepts.domain_id as domain`,
-      ...shards.filter(s => s !== 'title')
+      ...shards
     ];
     const shardJoinsMap: {[s in SearchShard]: string} = {
       geographical_extends: `left join lateral (
@@ -222,7 +221,20 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         from temporal_extends
         where concepts.id = temporal_extends.concept_id and concepts.type = temporal_extends.concept_type
       ) on true`,
-      title: `` // TODO select proper title by DB directly
+      title: `left join lateral (
+        select
+          label as title,
+          case
+            when language = '${settings.preferredLanguage}' then 2
+            when language = 'eng' then 1
+            else 0
+          end as rank
+        from labels
+        where concept_type = concepts.type and concept_id = concepts.id
+        and labels.type = 'title'
+        order by rank desc
+        limit 1
+      ) on true` // TODO use settings.preferTransliteration
     };
 
     return `select
@@ -245,12 +257,12 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
     if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);
 
-    return convertRow(settings, true)(conceptRows[0]);
+    return convertRow(conceptRows[0]);
   }
 
   async search(selector: ConceptSelector): Promise<SearchResult> {
     const results: Concept[] = (await this.queryConcepts(selector))
-      .map(convertRow(settings, selector.shards?.includes('labels') ?? false));
+      .map(convertRow);
     const count = await this.getSearchResultCount(selector, results.length);
     return {
       selector,

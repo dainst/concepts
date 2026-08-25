@@ -12,6 +12,7 @@ export const isConceptRow = (thing: unknown): thing is ConceptRow =>
 	&& (typeof thing.type === 'string')
 	&& ('domain' in thing)
 	&& (typeof thing.domain === 'string')
+	&& ((!('title' in thing)) || ('title' in thing && (typeof thing.title === 'string') || (thing.title == null)))
 	&& ((!('labels' in thing)) || ('labels' in thing && (Array.isArray(thing.labels) && thing.labels.every(isLabelsAgg)) || (thing.labels == null)))
 	&& ((!('geographical_extends' in thing)) || ('geographical_extends' in thing && (Array.isArray(thing.geographical_extends) && thing.geographical_extends.every(isGeographicalExtendsAgg)) || (thing.geographical_extends == null)))
 	&& ((!('temporal_extends' in thing)) || ('temporal_extends' in thing && (Array.isArray(thing.temporal_extends) && thing.temporal_extends.every(isTemporalExtendsAgg)) || (thing.temporal_extends == null)))
