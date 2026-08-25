@@ -2,8 +2,10 @@ import {Component, inject, Signal} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {Backend} from '../../services/backend';
-import {forkJoin, map, switchMap} from 'rxjs';
+import {forkJoin, map, Observable, of, switchMap} from 'rxjs';
 import {JsonPipe} from '@angular/common';
+import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
+import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
 
 @Component({
   selector: 'app-concept-abstract',
@@ -30,8 +32,8 @@ export class ConceptAbstract extends ConceptViewComponent {
           forkJoin(
             (concept.relationsTo ?? [])
               .flatMap(rel => [
-                this.bs.search({...rel.relation, shards: ['labels']}),
-                ...rel.objects.map(obj => this.bs.search({...obj, shards: ['labels']}))
+                this.getTitle(rel.relation),
+                ...rel.objects.map(obj => this.getTitle(obj))
               ])
           )
         ),
@@ -51,4 +53,18 @@ export class ConceptAbstract extends ConceptViewComponent {
         )
     )
   );
+
+  protected getTitle(id: ConceptId): Observable<SearchResult> {
+    if (id.type === 'url') return of<SearchResult>({
+      selector: id,
+      count: 1,
+      warnings: [],
+      results: [{
+        id,
+        domain: 'unknown',
+        title: decodeURIComponent(id.id).replaceAll('&#39;',"'")
+      }]
+    });
+    return this.bs.search({...id, shards: ['labels']})
+  }
 }
