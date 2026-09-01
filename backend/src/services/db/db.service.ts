@@ -157,7 +157,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
   private autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
     const uniqueShard = selector.shards ?? [];
-    if (selector.q) uniqueShard.push('labels');
+    if (selector.q) uniqueShard.push('labels', 'title');
     return [...new Set<SearchShard>(uniqueShard)];
   }
 

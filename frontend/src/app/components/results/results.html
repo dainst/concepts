@@ -10,11 +10,12 @@
 
 @if (result.value(); as result) {
   <h1>{{result.count}} results for "{{result.selector.q ?? ''}}"</h1>
-  @for (result of result.results; track result.id.id + result.id.type) {
-    <a href="concept/{{result.id.type}}/{{result.id.id}}">
+
+  @for (entry of result.results; track entry.id.id + entry.id.type) {
+
+    <a href="concept/{{entry.id.type}}/{{entry.id.id}}">
       <div>
-        <h2>{{result.title}}</h2>
-        <p>{{result.description}}</p>
+        <h2>{{entry.title}}</h2>
       </div>
     </a>
   }
