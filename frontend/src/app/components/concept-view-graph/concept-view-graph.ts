@@ -49,13 +49,13 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
 
 
   protected settings: GraphSettings = {
-    expand: graphExpansionProfiles["full"],
+    expand: graphExpansionProfiles["normal"],
     colors: graphColorProfiles["types"],
     linkForce: -500,
-    maxNodes: 10
+    maxNodes: 50
   };
   readonly settingsForm = this.fb.nonNullable.group({
-    expand: ['full'],
+    expand: ['normal'],
     colors: ['types'],
     linkForce: [this.settings.linkForce],
     maxNodes: [this.settings.maxNodes]
