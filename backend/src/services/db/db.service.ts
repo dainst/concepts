@@ -1,12 +1,11 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {Pool, PoolClient, QueryResult, types} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
-import {isConceptRow} from '../../functions/rows.typeguards';
 import {CacheService} from '../cache/cache.service';
 import {ApiError} from '../../classes/api-error';
 import {ConceptRow} from '../../interfaces/rows';
 import {convertRow} from '../../functions/convert-row';
-import {Concept, ConceptAbstract} from 'common/interfaces/concept';
+import {Concept} from 'common/interfaces/concept';
 import {Settings} from 'common/interfaces/settings';
 import {ConceptSelector, SearchResult, SearchShard} from 'common/interfaces/search';
 
