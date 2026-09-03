@@ -6,6 +6,7 @@ export class ErrorService {
   readonly errors = signal<AppError[]>([]);
 
   add(error: AppError) {
+    console.error(error);
     const errors = [...this.errors()];
     errors.push(error);
     queueMicrotask(() => { // important for error from rxResource (and others?)

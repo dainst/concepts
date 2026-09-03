@@ -11,7 +11,10 @@ export const graphExpansionProfiles: {[id: string]: GraphExpansionProfile} = {
     isSimilarTo: 1,
     lists: 0,
     narrower: 2,
-    __default: 10
+    broader: 2,
+    exactMatch: 5,
+    isSenseOf: 5,
+    __default: 3
   },
   full: {
     __default: 200

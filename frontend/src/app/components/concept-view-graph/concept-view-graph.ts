@@ -5,15 +5,18 @@ import {
   ElementRef,
   inject,
   OnDestroy,
-  signal, untracked,
+  signal,
+  untracked,
   ViewChild
 } from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {Backend} from '../../services/backend';
 import * as d3 from 'd3';
+import {DragBehavior, SubjectPosition} from 'd3';
 import {
   GraphColorProfile,
-  GraphExpansionProfile, GraphInfo,
+  GraphExpansionProfile,
+  GraphInfo,
   GraphLink,
   GraphNode,
   GraphSettings
@@ -22,12 +25,10 @@ import {stringifyId, stringifyLinkId} from '../../functions/graph-data';
 import {from, map, mergeMap, Observable, of, Subscription} from 'rxjs';
 import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {isLabelledConcept} from 'concepts-common/functions/concept.typeguards';
-import {DragBehavior, SubjectPosition} from 'd3';
 import {graphColorProfiles, graphExpansionProfiles} from './graph-profiles';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {KeyValuePipe} from '@angular/common';
 import {removeSuffices} from '../../functions/title';
-
 
 
 @Component({
@@ -114,7 +115,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       if (!this.viewInitialized()) return;
       // TODO reset graph
       untracked(() => { // enter the world of D3
-        this.loadAdjacentNodes(this.registerConceptRelations(concept, 0, '##'));
+        this.loadAdjacentNodes(this.registerConceptRelations(concept, 0));
       });
     });
   }
@@ -234,7 +235,6 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   private loadAdjacentNodes(nodesDelta: GraphNode[]): void {
     const loadAdjacentNodes = from(nodesDelta)
       .pipe(
-        // delay(1500),
         mergeMap((node: GraphNode) => this.getNodeData(node)),
       )
       .subscribe(([node, concept]) => {
@@ -245,15 +245,11 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
         this.graphInfo().nodes.classification = this.settings.colors.colorizeNodesBy;
         this.graphInfo.set(this.graphInfo()); // update view!
 
-        const nodesDelta = this.registerConceptRelations(concept, node.distance, concept.id.id);
+        const nodesDelta = this.registerConceptRelations(concept, node.distance);
 
         this.draw();
-
         this.applyConceptData(node, concept);
-
-        if (this.graph.nodes.size < this.settings.maxNodes) {
-          this.loadAdjacentNodes(nodesDelta);
-        }
+        this.loadAdjacentNodes(nodesDelta);
       });
     this.subscriptions.push(loadAdjacentNodes);
   }
@@ -262,9 +258,12 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     if (!this.d3) return;
     const nodes = [...this.graph.nodes.values()];
     const links = [...this.graph.links.values()];
+
     this.d3.linkForce.links(links);
     this.d3.simulation.nodes(nodes);
     this.d3.simulation.alpha(1).restart();
+
+    // if (!nodes.length) return;
 
     this.d3.nodesGroup
       .selectAll<SVGCircleElement, GraphNode>("g.node")
@@ -310,7 +309,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       });
 
     this.d3.linksGroup
-      .selectAll<SVGPathElement, GraphLink>("g.link")
+      .selectAll<SVGGElement, GraphLink>("g.link")
       .data(links, stringifyLinkId)
       .join(enter => {
         const g = enter
@@ -381,19 +380,24 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       .text(d => removeSuffices(d.concept?.title ?? `#${d.id}`));
   }
 
-  private registerConceptRelations(concept: Concept, distance: number, trace: string): GraphNode[] {
+  private registerConceptRelations(concept: Concept, distance: number): GraphNode[] {
     // note: object reference of concepts have to be kept, because D3 uses them to identify identity!
     const newNodes: GraphNode[] =[];
 
     const getOrCreateGraphNode = (
       conceptId: ConceptId,
       distance: number,
-      concept: Concept|undefined = undefined,
-    ): GraphNode => {
+      concept: Concept | undefined = undefined,
+      relation: ConceptId | undefined = undefined,
+    ): GraphNode | null => {
       const sid = stringifyId(conceptId);
 
       const node = this.graph.nodes.get(sid);
       if (node) return node;
+
+      if (this.graph.nodes.size >= this.settings.maxNodes) return null;
+      const distanceOkay = !relation || (distance < (this.settings.expand[relation.id] ?? this.settings.expand.__default));
+      if (!distanceOkay) return null;
 
       const newNode: GraphNode = {
         ...conceptId,
@@ -404,31 +408,20 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
       newNodes.push(newNode);
       return newNode;
     };
-    const graphNodeExists = (conceptId: ConceptId): boolean =>
-      !!this.graph.nodes.get(stringifyId(conceptId));
 
-    const protagonist: GraphNode = getOrCreateGraphNode(concept.id, distance, concept);
+    const protagonist = getOrCreateGraphNode(concept.id, distance, concept);
+    if (!protagonist) return [];
 
-    const links: GraphLink[] = (concept.relations ?? [])
-      .filter(r => distance < (this.settings.expand[r.relation.id] ?? this.settings.expand.__default))
+    (concept.relations ?? [])
       .flatMap(r => r.objects
-        // .filter(cid => {
-        // TODO why are some inversions not shown?
-        //   const distanceOkay = (distance < (this.settings.expand[r.relation.id] ?? this.settings.expand.__default));
-        //   const nodeExists = graphNodeExists(cid);
-        //   // if (nodeExists) console.log(` ### nodeExists ${cid.id}`); else console.log(` ### node MISSING ${cid.id}`);
-        //   const keepIn = distanceOkay || nodeExists;
-        //   // console.log(`[${concept.id.id}] ${r.relation.id} → ${cid.id} (:${!keepIn ? 'STOP|' : ''}${distanceOkay ? 'd' : ''}${nodeExists ? 'e' : ''})`)
-        //
-        //   return keepIn;
-        // })
-        .map((target: ConceptId): GraphLink => ({
+        .map(cid => getOrCreateGraphNode(cid, distance + 1, undefined, r.relation))
+        .filter(n => !!n)
+        .map((target: GraphNode): GraphLink => ({
           source: protagonist,
           relation: r.relation,
-          target: getOrCreateGraphNode(target, distance + 1),
+          target
         }))
-      );
-    links
+      )
       .forEach(link => {
         this.graph.links.set(stringifyLinkId(link), link);
       });
@@ -477,7 +470,7 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
     this.clear();
     this.initialize();
     this.draw();
-    this.loadAdjacentNodes(this.registerConceptRelations(this.concept(), 0, '#CS'));
+    this.loadAdjacentNodes(this.registerConceptRelations(this.concept(), 0));
   }
 
   private getNodeClassColor(node: GraphNode): string {
