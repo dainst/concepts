@@ -104,6 +104,8 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
   });
 
   protected readonly hoveredNode = signal<GraphNode|undefined>(undefined);
+  protected readonly selectedNode = signal<GraphNode|undefined>(undefined);
+  protected selectedNodeSelection: d3.Selection<SVGGElement, unknown, null, undefined>|undefined;
 
   constructor() {
     super();
@@ -276,6 +278,17 @@ export class ConceptViewGraph extends ConceptViewComponent implements AfterViewI
           })
           .on("mouseleave", () => {
             this.hoveredNode.set(undefined);
+          })
+          .on("click", (event, node) => {
+            event.stopPropagation();
+            if (this.selectedNodeSelection) this.selectedNodeSelection
+              .classed("selected", false);
+
+            this.selectedNode.set(node);
+            this.selectedNodeSelection = d3.select(event.currentTarget);
+
+            this.selectedNodeSelection
+              .classed("selected", true);
           });
 
         g.append("circle")

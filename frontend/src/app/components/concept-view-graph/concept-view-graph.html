@@ -94,7 +94,14 @@
         }
         <h3>#{{node.type}}/{{node.id}}</h3>
       </div>
-    }
+    } @else if (selectedNode(); as node) {
+    <div id="hovered-graph-node">
+      @if (node.concept; as concept) {
+        <h2>{{concept.title}}</h2>
+      }
+      <h3>#{{node.type}}/{{node.id}}</h3>
+    </div>
+  }
   </div>
 </div>
 
