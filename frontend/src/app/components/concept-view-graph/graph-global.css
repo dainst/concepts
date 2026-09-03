@@ -3,6 +3,11 @@
   stroke-width: 1;
 }
 
+#graph .node.selected circle {
+  stroke: greenyellow;
+  stroke-width: 6;
+}
+
 #graph .links path {
   stroke: black;
   stroke-width: 2;
