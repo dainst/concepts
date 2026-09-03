@@ -63,6 +63,6 @@ export class ConceptAbstract extends ConceptViewComponent {
         title: decodeURIComponent(id.id).replaceAll('&#39;',"'")
       }]
     });
-    return this.bs.search({...id, shards: ['labels']})
+    return this.bs.search({...id, shards: ['title']})
   }
 }
