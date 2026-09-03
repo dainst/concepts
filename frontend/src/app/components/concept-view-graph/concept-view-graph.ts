@@ -29,13 +29,15 @@ import {graphColorProfiles, graphExpansionProfiles} from './graph-profiles';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {KeyValuePipe} from '@angular/common';
 import {removeSuffices} from '../../functions/title';
+import {RouterLink} from '@angular/router';
 
 
 @Component({
   selector: 'app-concept-view-graph',
   imports: [
     ReactiveFormsModule,
-    KeyValuePipe
+    KeyValuePipe,
+    RouterLink
   ],
   templateUrl: './concept-view-graph.html',
   styleUrl: './concept-view-graph.css',

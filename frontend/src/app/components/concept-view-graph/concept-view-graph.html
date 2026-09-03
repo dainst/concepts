@@ -95,7 +95,7 @@
         <h3>#{{node.type}}/{{node.id}}</h3>
       </div>
     } @else if (selectedNode(); as node) {
-    <div id="hovered-graph-node">
+    <div id="hovered-graph-node" [routerLink]="`/concept/${node.type}/${node.id}`">
       @if (node.concept; as concept) {
         <h2>{{concept.title}}</h2>
       }
