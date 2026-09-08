@@ -3,11 +3,13 @@ import {Pool, PoolClient, QueryResult, types} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
 import {CacheService} from '../cache/cache.service';
 import {ApiError} from '../../classes/api-error';
-import {ConceptRow} from '../../interfaces/rows';
-import {convertRow} from '../../functions/convert-row';
+import {ConceptRow} from '../../interfaces/concept-row';
+import {convertConceptRow} from '../../functions/convert-concept-row';
 import {Concept} from 'common/interfaces/concept';
 import {Settings} from 'common/interfaces/settings';
 import {ConceptSelector, SearchResult, SearchShard} from 'common/interfaces/search';
+import {ConceptHistory} from 'common/interfaces/concept-history';
+import {convertHistoryRow} from '../../functions/convert-history-row';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -233,7 +235,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         and labels.type = 'title'
         order by rank desc
         limit 1
-      ) on true` // TODO use settings.preferTransliteration
+      ) on true`, // TODO use settings.preferTransliteration
+
     };
 
     return `select
@@ -256,12 +259,12 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
     if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);
 
-    return convertRow(conceptRows[0]);
+    return convertConceptRow(conceptRows[0]);
   }
 
   async search(selector: ConceptSelector): Promise<SearchResult> {
     const results: Concept[] = (await this.queryConcepts(selector))
-      .map(convertRow);
+      .map(convertConceptRow);
     const count = await this.getSearchResultCount(selector, results.length);
     return {
       selector,
@@ -269,5 +272,25 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       count,
       warnings: []
     };
+  }
+
+  async getConceptHistory(type: string, id: string): Promise<ConceptHistory> {
+    const sql =
+      `select
+        user_id,
+        users.name as user_name,
+        extract(epoch from timestamp) as timestamp,
+        event,
+        value,
+        comment
+      from
+        concept_history
+        left join users on users.id = concept_history.user_id
+      where
+        concept_type = $1 and concept_id = $2
+      order by timestamp`;
+    return (await this.query(sql, [type, id], true))
+      .rows
+      .map(convertHistoryRow)
   }
 }

@@ -5,10 +5,11 @@ import { DbService } from './services/db/db.service';
 import { ConceptController } from './controllers/concept/concept.controller';
 import { SearchController } from './controllers/search/search.controller';
 import { CacheService } from './services/cache/cache.service';
+import { HistoryController } from './controllers/history/history.controller';
 
 @Module({
   imports: [],
-  controllers: [AppController, StatusController, ConceptController, SearchController],
+  controllers: [AppController, StatusController, ConceptController, SearchController, HistoryController],
   providers: [DbService, CacheService],
 })
 export class AppModule {}

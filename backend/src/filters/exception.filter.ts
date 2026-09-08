@@ -32,6 +32,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       status = HttpStatus.BAD_REQUEST;
       type = exception.type;
       params = exception.params;
+      if (exception.debug) debug.push(...Array.isArray(exception.debug) ? exception.debug : [exception.debug]);
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       type = 'framework-error';

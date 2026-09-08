@@ -2,6 +2,7 @@ export const conceptViews = [
   'map',
   'timeline',
   'graph',
+  'history',
   'raw'
 ] as const;
 

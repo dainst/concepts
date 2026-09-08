@@ -8,7 +8,7 @@ import {
 import {
   ConceptRow, GeographicalExtendsAgg,
   LabelsAgg, RelationsAgg, TemporalExtendsAgg,
-} from '../interfaces/rows';
+} from '../interfaces/concept-row';
 import {getPreferredLabels} from './label';
 import {Settings} from 'common/interfaces/settings';
 
@@ -71,7 +71,7 @@ const convertTemporalExtend = (cell: TemporalExtendsAgg): TemporalExtend => ({
 // convert the flatish structure a db query returns to the be/fe data interchange object
 // TODO later, if structures are more final we form the correct JSON syntax already with SQL command for more effectivity
 // TODO remove includeLabels as a parameter and treat title as proper shard
-export const convertRow  = (row: ConceptRow): Concept => {
+export const convertConceptRow  = (row: ConceptRow): Concept => {
   const id = {
     id: row.id,
     type: row.type

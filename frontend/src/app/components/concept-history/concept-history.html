@@ -1,0 +1,35 @@
+@if(history.isLoading()) {
+  Lade History...
+}
+
+@if(history.error()) {
+  Fehler History laden!
+  <pre>{{history.error() | json}}</pre>
+}
+
+
+@if(history.value(); as historyValue) {
+  <div class="concept-history">
+    <h2>Concept History</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nutzer</th>
+          <th>Datum</th>
+          <th>Aktion</th>
+          <th>Kommentar</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (event of historyValue; track $index) {
+          <tr>
+            <td>{{event.userName}}</td>
+            <td>{{event.timestamp * 1000 | date : 'short' : undefined : 'de-DE'}}</td>
+            <td>{{event.event}}{{event.value ? ': ' + event.value : ''}}</td>
+            <td>{{event.comment}}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
