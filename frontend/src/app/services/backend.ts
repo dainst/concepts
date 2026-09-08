@@ -4,6 +4,7 @@ import {Observable, retry, timer} from 'rxjs';
 import {Concept} from 'concepts-common/interfaces/concept';
 import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
 import {searchToHttpParams} from '../functions/query-params';
+import {ConceptHistory} from 'concepts-common/interfaces/concept-history';
 
 @Service()
 export class Backend {
@@ -40,5 +41,9 @@ export class Backend {
           }
         })
       );
+  }
+
+  getHistory(type: string, id: string): Observable<ConceptHistory> {
+    return this.http.get<ConceptHistory>(this.api + `history/${type}/${id}`);
   }
 }

@@ -26,6 +26,6 @@ export const getAvailableViews = (concept: Concept|undefined): View[] => {
   if (isGeographicalConcept(concept)) views.push('map');
   if (isTemporalConcept(concept)) views.push('timeline');
   if (isRelatedConcept(concept)) views.push('graph');
-  views.push('raw');
+  views.push('raw', 'history');
   return views;
 }

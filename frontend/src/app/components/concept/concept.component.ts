@@ -14,6 +14,7 @@ import {ConceptViewMap} from '../concept-view-map/concept-view-map';
 import {ViewMap} from '../../interfaces/views';
 import {getAvailableViews} from '../../functions/available-views';
 import {ConceptViewGraph} from '../concept-view-graph/concept-view-graph';
+import {ConceptViewHistory} from '../concept-history/concept-history';
 
 const viewsMap: ViewMap<ConceptMenuEntry> = {
   map: {
@@ -30,6 +31,11 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
     id: 'graph',
     label: 'Graph',
     component: ConceptViewGraph
+  },
+  history: {
+    id: 'history',
+    label: 'history',
+    component: ConceptViewHistory
   },
   raw: {
     id: 'raw',
@@ -60,7 +66,7 @@ export class ConceptComponent {
        .map(view => Object.assign({}, viewsMap[view]))
      );
 
-  readonly selectedViewId = signal<string>('map');
+  readonly selectedViewId = signal<string>('history');
   readonly currentView: Signal<ConceptMenuEntry> =
     computed(() =>
       (this.menu().find(e => e.id === this.selectedViewId()) ?? this.menu()[0])

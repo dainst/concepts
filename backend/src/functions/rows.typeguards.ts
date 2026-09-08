@@ -1,6 +1,6 @@
 // generated with script/creates-typeguards.ts
 
-import {ConceptRow, RelationsAgg, LabelsAgg, GeographicalExtendsAgg, TemporalExtendsAgg} from '../interfaces/rows';
+import {ConceptRow, RelationsAgg, LabelsAgg, GeographicalExtendsAgg, TemporalExtendsAgg} from '../interfaces/concept-row';
 import {isLabelType} from 'common/functions/labels.typeguards';
 
 export const isConceptRow = (thing: unknown): thing is ConceptRow =>
