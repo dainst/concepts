@@ -99,7 +99,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
   private async queryConcepts(selector: ConceptSelector): Promise<ConceptRow[]> {
     const query = this.buildQuery(selector);
-    const res = await this.query(query, []);
+    const res = await this.query(query, [], selector.forceCache);
     const correctRows = res.rows
       // .filter(isConceptRow);
     if (correctRows.length < res.rows.length) throw new ApiError('internal-server-error', ['Not found']); // TODO better error
