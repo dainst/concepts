@@ -4,12 +4,14 @@ import {rxResource} from '@angular/core/rxjs-interop';
 import {Backend} from '../../services/backend';
 import {map} from 'rxjs';
 import {DatePipe, JsonPipe} from '@angular/common';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-concept-view-history',
   imports: [
     JsonPipe,
-    DatePipe
+    DatePipe,
+    RouterLink
   ],
   templateUrl: './concept-history.html',
   styleUrl: './concept-history.css',
