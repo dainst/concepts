@@ -3,7 +3,8 @@ export const conceptViews = [
   'timeline',
   'graph',
   'history',
-  'raw'
+  'raw',
+  'edit'
 ] as const;
 
 export type View = typeof conceptViews[number];

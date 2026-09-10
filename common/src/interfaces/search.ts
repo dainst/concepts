@@ -26,4 +26,5 @@ export interface ConceptSelector {
   limit?: number;
   offset?: number;
   shards?: SearchShard[];
+  forceCache?: boolean;
 }

@@ -1,0 +1,81 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div ngbAccordion>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Titel</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            @for (title of form.controls.title.controls; track title) {
+              <app-edit-label [form]="title" (remove)="removeTitle($index)" caption="Titel" />
+            }
+          </ng-template>
+          <div class="row">
+            <div class="col-11"></div>
+            <div class="col-1">
+              <input type="button" class="form-control form-control-sm" value="+" (click)="addTitle()" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Relationen</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            ... TODO
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Geografische Ausdehnung</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            ... TODO
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Zeitliche Ausdehnung</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            ... TODO
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Allgemein</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            ... TODO
+            * scope
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <input type="submit"/>
+
+</form>

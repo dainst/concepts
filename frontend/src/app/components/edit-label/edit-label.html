@@ -1,0 +1,36 @@
+<div class="row">
+  <div class="col-3">
+    <ng-template #rt let-r="result" let-t="term">
+      <ngb-highlight [result]="`[${r.id}] ${r.name}`" [term]="t" />
+    </ng-template>
+    <input
+      type="text"
+      class="form-control form-control-sm"
+      [formControl]="form().controls.language"
+      [ngbTypeahead]="searchLanguage"
+      [resultTemplate]="rt"
+      [editable]="false"
+      [inputFormatter]="formatter"
+      placeholder="Sprache"
+    >
+  </div>
+  <div class="col-8">
+    <input
+      type="text"
+      class="form-control form-control-sm"
+      [formControl]="form().controls.label"
+      [placeholder]="caption()"
+    />
+    @if (showTransliterationField()) {
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [formControl]="form().controls.transliteration"
+        placeholder="Transliteration"
+      />
+    }
+  </div>
+  <div class="col-1">
+    <input type="button" class="form-control form-control-sm" value="x" (click)="remove.emit()" />
+  </div>
+</div>
