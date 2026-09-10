@@ -25,7 +25,17 @@
           <tr>
             <td>{{event.userName}}</td>
             <td>{{event.timestamp * 1000 | date : 'short' : undefined : 'de-DE'}}</td>
-            <td>{{event.event}}{{event.value ? ': ' + event.value : ''}}</td>
+            <td>
+              {{event.event}}
+              @if (event.value) {
+                :
+                @if (event.event === 'replace') {
+                  <a [routerLink]="`/concept/${concept().id.type}/${event.value}`">{{event.value}}</a>
+                } @else {
+                {{event.value}}
+                }
+              }
+            </td>
             <td>{{event.comment}}</td>
           </tr>
         }

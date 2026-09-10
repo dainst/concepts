@@ -9,7 +9,13 @@ export const conceptHistoryEventTypes = [
   'set-status',
   'create',
   'update',
-  'edit'
+  'edit',
+  'transfer-ownership',
+  'change-domain',
+  'delete',
+  'merge',
+  'replace',
+  'duplicate'
 ] as const;
 
 export type ConceptHistoryEventType = typeof conceptHistoryEventTypes[number];
