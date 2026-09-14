@@ -10,6 +10,10 @@ import {
   NgbAccordionItem
 } from '@ng-bootstrap/ng-bootstrap';
 import {EditLabel} from '../edit-label/edit-label';
+import {isConcept} from 'concepts-common/functions/concept.typeguards';
+import {Backend} from '../../services/backend';
+import {Concept, Label} from 'concepts-common/interfaces/concept';
+import {lastValueFrom} from 'rxjs';
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -29,6 +33,7 @@ import {EditLabel} from '../edit-label/edit-label';
 })
 export class ConceptViewEdit extends ConceptViewComponent {
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly bs = inject(Backend);
 
   readonly form = this.fb.group({
     title: this.fb.array([this.createLabel()])
@@ -46,7 +51,7 @@ export class ConceptViewEdit extends ConceptViewComponent {
     this.form.controls.title.removeAt(index);
   }
 
-  protected save() {
+  protected async save() {
     if (this.form.invalid) {
       console.log('invalid')
       this.form.markAllAsTouched();
@@ -56,5 +61,21 @@ export class ConceptViewEdit extends ConceptViewComponent {
     const value = this.form.getRawValue();
 
     console.log(value);
+
+    const unsavedConcept: Concept = {
+      id: {
+        id: '',
+        type: '',
+      },
+      domain: '',
+      labels: [
+        ...value.title.map((l): Label => ({type: 'title', ...l}))
+      ]
+    };
+
+    console.log(unsavedConcept);
+    const newId = await lastValueFrom(this.bs.putConcept(unsavedConcept));
+    console.log(newId);
+    // yay
   }
 }

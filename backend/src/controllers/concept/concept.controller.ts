@@ -1,5 +1,5 @@
-import {Controller, Get, Param} from '@nestjs/common';
-import {Concept} from 'common/interfaces/concept';
+import {Body, Controller, Get, Param, Put, Query} from '@nestjs/common';
+import {Concept, ConceptId} from 'common/interfaces/concept';
 import {DbService} from '../../services/db/db.service';
 
 @Controller('concept')
@@ -15,5 +15,12 @@ export class ConceptController {
     @Param('id') id: string
   ): Promise<Concept> {
     return await this.db.getConcept(type, id);
+  }
+
+  @Put()
+  async put(
+    @Body() concept: Concept
+  ): Promise<ConceptId> {
+    return await this.db.insertConcept(concept)
   }
 }
