@@ -12,6 +12,7 @@ import {LanguagesService} from '../../services/languages';
 import {JsonPipe} from '@angular/common';
 import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-validation';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {Language} from '../../interfaces/forms';
 
 @Component({
   selector: 'app-edit-label',
@@ -31,7 +32,7 @@ export class EditLabel implements OnInit {
   readonly remove = output<void>();
   readonly form = input.required<
     FormGroup<{
-      language: FormControl<string>;
+      language: FormControl<{ id: string; name: string }>;
       label: FormControl<string>;
       transliteration: FormControl<string>;
     }>
@@ -71,7 +72,7 @@ export class EditLabel implements OnInit {
       EditLabel.hasNonLatin(control.value) ? {hasNonLatin: true} : null;
 
   static createLabelFormFieldDef = () => ({
-    language: ['', Validators.required],
+    language: [<Language>{}, Validators.required],
     label: ['', Validators.required],
     transliteration: ['', EditLabel.onlyLatinValidator]
   });
