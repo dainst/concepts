@@ -139,7 +139,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
 
 
-  async getConcept(type: string, id: string): Promise<Concept> {
+  async getConcept(type: string, id: string): Promise<Concept|null> {
     const conceptRows = await this.queryConcepts({
       type,
       id,
@@ -147,10 +147,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       offset: 0,
       shards: ['labels', 'relations', 'geographical_extends', 'temporal_extends', 'title']
     });
-
-    if (!conceptRows.length) throw new ApiError('not-found', ['concept', type, id]);
-
-    return convertConceptRow(conceptRows[0]);
+    return conceptRows[0] ? convertConceptRow(conceptRows[0]) : null;
   }
 
   async search(selector: ConceptSelector): Promise<SearchResult> {
@@ -171,20 +168,39 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       .map(convertHistoryRow)
   }
 
-  async insertConcept(concept: Concept) {
-    concept = {
-      ...concept,
-      id: {
-        id: uuidv7(),
-        type: 'concepts'
-      },
-      domain: 'default'
-    };
-    console.log(concept.id);
-    const commands: SqlCommand[] = [
+  async updateConcept(concept: Concept) {
+    const commands: SqlCommand[] = [['set constraints all deferred;']];
+    if (!concept.id.id) {
+      concept = {
+        ...concept,
+        id: {
+          id: uuidv7(),
+          type: 'concepts'
+        },
+        domain: 'default'
+      };
+      commands.push(insertSql.conceptHistory(concept.id, 'create'))
+    } else {
+      const currentVersion = await this.getConcept(concept.id.type, concept.id.id);
+      if (currentVersion) {
+        const eventSql = insertSql.conceptHistory(concept.id, 'edit');
+        commands.push(
+          eventSql,
+          insertSql.snapshot(eventSql[1], currentVersion, 1)
+        );
+      } else {
+        commands.push(insertSql.conceptHistory(concept.id, 'create'));
+      }
+    }
+
+    commands.push(
       insertSql.concept(concept),
-      insertSql.conceptHistory(concept.id, 'create')
-    ];
+      ...(concept.labels ?? [])
+        .map(label => insertSql.label(concept.id, label))
+    );
+
+    console.log(commands);
+
     const results = await this.transaction(commands);
     console.log(results);
     return concept.id;

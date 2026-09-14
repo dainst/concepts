@@ -1,5 +1,44 @@
 <form [formGroup]="form" (ngSubmit)="save()">
+
   <div ngbAccordion>
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Meta</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <div class="row">
+            <div class="col-6">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [formControl]="form.controls.id.controls.type"
+                [disabled]="true"
+              />
+            </div>
+            <div class="col-6">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [formControl]="form.controls.id.controls.id"
+                [disabled]="true"
+                placeholder="id"
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [formControl]="form.controls.domain"
+                [disabled]="true"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div ngbAccordionItem [collapsed]="false">
       <h2 ngbAccordionHeader>
