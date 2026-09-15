@@ -30,7 +30,10 @@
           <a class="nav-link" aria-current="page" href="#">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink="/pages/about">About</a>
+          <a class="nav-link" aria-current="page" routerLink="/concept">Neu</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/pages/about">Über</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" routerLink="/pages/status">Status</a>
@@ -38,7 +41,7 @@
       </ul>
       <form class="d-flex" role="search" (ngSubmit)="search()">
         <input class="form-control me-2" type="search" [(ngModel)]="queryParams.q" name="q" />
-        <button class="btn btn-primary" type="submit">Search</button>
+        <button class="btn btn-primary" type="submit">Suche</button>
       </form>
     </div>
   </div>

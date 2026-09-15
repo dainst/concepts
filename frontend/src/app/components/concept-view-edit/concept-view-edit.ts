@@ -12,6 +12,7 @@ import {EditLabel} from '../edit-label/edit-label';
 import {Backend} from '../../services/backend';
 import {Concept, Label} from 'concepts-common/interfaces/concept';
 import {lastValueFrom} from 'rxjs';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -31,10 +32,11 @@ import {lastValueFrom} from 'rxjs';
 export class ConceptViewEdit extends ConceptViewComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly bs = inject(Backend);
+  private router = inject(Router);
 
   readonly form = this.fb.group({
     id: this.fb.group({
-      type: ['concepts', Validators.required],
+      type: ['concepts'],
       id: [''],
     }),
     domain: ['default', Validators.required],
@@ -113,10 +115,8 @@ export class ConceptViewEdit extends ConceptViewComponent {
     };
 
     console.log(unsavedConcept);
-
-
     const newId = await lastValueFrom(this.bs.putConcept(unsavedConcept));
     console.log(newId);
-    // yay
+    this.router.navigate(['/concept', newId.type, newId.id]);
   }
 }
