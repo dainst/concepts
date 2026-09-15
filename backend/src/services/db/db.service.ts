@@ -100,11 +100,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         const params: string[] = [
           e.message,
           queryNr,
-          commands[queryNr][0],
+          (commands[queryNr] ?? ['unknown command'])[0],
           e.code
         ]
           .map(String);
-        throw new ApiError('db-transaction-error', params, commands[queryNr].slice(1));
+        throw new ApiError('db-transaction-error', params, (commands[queryNr] ?? ['']).slice(1));
       }
       throw e;
     } finally {
@@ -171,14 +171,16 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
   async updateConcept(concept: Concept) {
     const commands: SqlCommand[] = [['set constraints all deferred;']];
-    let conceptId: ConceptId;
     if (!concept.id.id) {
       const insertConcept = insertSql.concept(concept);
-      conceptId = {
-        id: insertConcept[1],
-        type: String(insertConcept[2])
+      concept = {
+        ...concept,
+        id: {
+          id: insertConcept[1],
+          type: String(insertConcept[2])
+        }
       };
-      commands.push(insertSql.conceptHistory(conceptId, 'create'))
+      commands.push(insertConcept, insertSql.conceptHistory(concept.id, 'create'))
     } else {
       const currentVersion = await this.getConcept(concept.id.type, concept.id.id);
       if (currentVersion) {
@@ -187,16 +189,20 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           eventSql,
           insertSql.snapshot(eventSql[1], currentVersion, 1)
         );
+
+        const deletedLabelIds = (currentVersion.labels || [])
+          .map(l => l.id)
+          .filter(l => typeof l !== 'undefined')
+          .filter(labelInCurrent =>
+            !(concept.labels || []).find(labelInNew => labelInCurrent && (labelInNew.id === labelInCurrent))
+          );
+        commands.push(...deletedLabelIds.map(deleteSql.label));
       } else {
-        commands.push(insertSql.conceptHistory(concept.id, 'create'));
-      }
-      const deletedLabelIds = (currentVersion?.labels || [])
-        .map(l => l.id)
-        .filter(l => typeof l !== 'undefined')
-        .filter(labelInCurrent =>
-          !(concept.labels || []).find(labelInNew => labelInCurrent && (labelInNew.id === labelInCurrent))
+        commands.push(
+          insertSql.concept(concept),
+          insertSql.conceptHistory(concept.id, 'create')
         );
-      commands.push(...deletedLabelIds.map(deleteSql.label));
+      }
     }
 
     commands.push(
