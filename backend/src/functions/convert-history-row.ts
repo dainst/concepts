@@ -11,6 +11,8 @@ export const convertHistoryRow  = (row: HistoryRow): ConceptHistoryEvent => {
     event: row.event,
     value: row.value,
     comment: row.comment,
-    timestamp: Number(row.timestamp)
+    timestamp: Number(row.timestamp),
+    snapshotId: row.snapshot_id,
+    icke: 'date'
   };
 }

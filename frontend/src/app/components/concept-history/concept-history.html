@@ -18,6 +18,7 @@
           <th>Datum</th>
           <th>Aktion</th>
           <th>Kommentar</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -37,6 +38,11 @@
               }
             </td>
             <td>{{event.comment}}</td>
+            <td>
+              @if (event.snapshotId) {
+                <i class="bi bi-eye-fill"></i>
+              }
+            </td>
           </tr>
         }
       </tbody>
