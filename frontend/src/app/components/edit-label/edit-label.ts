@@ -95,10 +95,14 @@ export class EditLabel implements OnInit {
     = (control: AbstractControl): ValidationErrors | null =>
       EditLabel.hasNonLatin(control.value) ? {hasNonLatin: true} : null;
 
+  private static validLangCode
+    = (control: AbstractControl<Language>): ValidationErrors | null =>
+    control.value && control.value.id && (control.value.id.length === 3) ? null : {invalidLangCode: true};
+
   static createLabelFormFieldDef = (label: Label | undefined) => ({
     language: [
       label ? <Language>{id: label.language, name: label.language} : <Language>{id: '', name: ''},
-      Validators.required
+      EditLabel.validLangCode
     ],
     label: [
       label?.label ?? '',
