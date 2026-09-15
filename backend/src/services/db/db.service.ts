@@ -14,6 +14,7 @@ import {searchCountSql, searchSql} from '../../functions/search-sql';
 import {getConceptHistorySql} from '../../functions/history-sql';
 import {insertSql} from '../../functions/insert-sql';
 import {SqlCommand} from '../../interfaces/sql';
+import {deleteSql} from '../../functions/delete-sql';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -189,6 +190,13 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       } else {
         commands.push(insertSql.conceptHistory(concept.id, 'create'));
       }
+      const deletedLabelIds = (currentVersion?.labels || [])
+        .map(l => l.id)
+        .filter(l => typeof l !== 'undefined')
+        .filter(labelInCurrent =>
+          !(concept.labels || []).find(labelInNew => labelInCurrent && (labelInNew.id === labelInCurrent))
+        );
+      commands.push(...deletedLabelIds.map(deleteSql.label));
     }
 
     commands.push(
