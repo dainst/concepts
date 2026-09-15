@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, OnInit, output, Signal, signal} from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -7,11 +7,9 @@ import {
 } from '@angular/forms';
 import {NgbHighlight, NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
 import {debounceTime, distinctUntilChanged, filter, map, Observable, OperatorFunction, withLatestFrom} from 'rxjs';
-import {Backend} from '../../services/backend';
 import {LanguagesService} from '../../services/languages';
-import {JsonPipe} from '@angular/common';
 import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-validation';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {Language} from '../../interfaces/forms';
 import {Label} from 'concepts-common/interfaces/concept';
 
@@ -21,15 +19,25 @@ import {Label} from 'concepts-common/interfaces/concept';
     BootstrapFormValidationDirective,
     ReactiveFormsModule,
     NgbTypeahead,
-    NgbHighlight,
-    JsonPipe
+    NgbHighlight
   ],
   templateUrl: './edit-label.html',
   styleUrl: './edit-label.css',
 })
 export class EditLabel implements OnInit {
   readonly ls = inject(LanguagesService);
-  private readonly languages = toSignal(this.ls.languages$, {initialValue: []});
+  private readonly languages: Signal<Language[]> = toSignal(
+    this.ls.languages$
+      .pipe(map(concepts => concepts.map(c => ({name: c.title || c.id.id, id: c.id.id}))))
+    ,
+    {
+      initialValue: [
+        {id: 'deu', name: 'German'},
+        {id: 'end', name: 'English'}
+      ]
+    }
+  );
+  private readonly l$ = toObservable(this.languages);
 
   readonly remove = output<void>();
   readonly form = input.required<
@@ -49,11 +57,9 @@ export class EditLabel implements OnInit {
       if (!this.languages().length) return;
       const v = this.form().controls.language.value;
       if (v.name !== v.id) return;
-      const fullLanguageConcept = this.languages()
-          .find(l => l.id.id === v.id);
-      const fullLanguage: Language = fullLanguageConcept
-        ? {id: fullLanguageConcept.id.id, name: fullLanguageConcept.title || ''}
-        : {id: '', name: ''};
+      const fullLanguage = this.languages()
+          .find(l => l.id === v.id)
+        ?? {id: '', name: ''};
       this.form().controls.language.setValue(fullLanguage);
     });
   }
@@ -70,16 +76,15 @@ export class EditLabel implements OnInit {
   private static hasNonLatin = (str: string): boolean =>
     [...str].some(c => /\p{L}/u.test(c) && !/\p{Script=Latin}/u.test(c));
 
-  protected searchLanguage: OperatorFunction<string, readonly { id: string; name: string }[]> =
+  protected searchLanguage: OperatorFunction<string, readonly Language[]> =
     (text$: Observable<string>) =>
       text$.pipe(
         debounceTime(200),
         distinctUntilChanged(),
         filter(term => term.length >= 2),
-        withLatestFrom(this.ls.languages$),
+        withLatestFrom(this.l$),
         map(([term, languages]) =>
           languages
-            .map(c => ({name: c.title || c.id.id, id: c.id.id}))
             .filter(lang => new RegExp(term.replaceAll(/[\W]+/g, ''), 'mi').test(lang.name + lang.id))
         ),
       );
