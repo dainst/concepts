@@ -53,6 +53,7 @@ export interface Label {
   readonly label: string;
   readonly language: string;
   readonly transliteration: string;
+  readonly id?: string;
 }
 
 export interface TemporalBound {
@@ -65,6 +66,7 @@ export interface TemporalBound {
 export interface TemporalExtend {
   readonly start: TemporalBound;
   readonly end: TemporalBound;
+  readonly id?: string;
 }
 
 export interface GeographicalExtend {
@@ -72,4 +74,5 @@ export interface GeographicalExtend {
   readonly shape: string | null;
   readonly certainty: number;
   readonly precision: number;
+  readonly id?: string;
 }

@@ -4,14 +4,16 @@ import {ConceptHistoryEventType} from 'common/interfaces/concept-history';
 import {SqlCommand, SqlCommandWithId} from '../interfaces/sql';
 
 export const insertSql = {
-  concept: (concept: Concept): SqlCommand =>
+  concept: (concept: Concept | null): SqlCommandWithId =>
     [
       `insert into concepts (
         id, type, domain_id
-      ) values ($1, $2, $3)`,
-      concept.id.id,
-      concept.id.type,
-      concept.domain
+      ) values ($1, $2, $3)
+      on conflict (id, type) do update set
+        domain_id = EXCLUDED.domain_id`,
+      concept?.id?.id || uuidv7(),
+      concept?.id?.type || 'concepts',
+      concept?.domain || 'default'
     ],
 
   label: (
@@ -27,8 +29,14 @@ export const insertSql = {
         label,
         language,
         transliteration
-      ) values ($1, $2, $3, $4, $5, $6, $7)`,
-      uuidv7(),
+      ) values ($1, $2, $3, $4, $5, $6, $7)
+      on conflict (id, concept_id, concept_type) do update set
+        type = EXCLUDED.type,
+        label = EXCLUDED.label,
+        language = EXCLUDED.language,
+        transliteration = EXCLUDED.transliteration
+      `,
+      label.id ?? uuidv7(),
       conceptId.id,
       conceptId.type,
       label.type,

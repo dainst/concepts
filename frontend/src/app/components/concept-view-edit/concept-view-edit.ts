@@ -1,6 +1,6 @@
 import {Component, effect, inject} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
-import {NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -12,8 +12,6 @@ import {EditLabel} from '../edit-label/edit-label';
 import {Backend} from '../../services/backend';
 import {Concept, Label} from 'concepts-common/interfaces/concept';
 import {lastValueFrom} from 'rxjs';
-import {LanguagesService} from '../../services/languages';
-import {toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -33,8 +31,6 @@ import {toSignal} from '@angular/core/rxjs-interop';
 export class ConceptViewEdit extends ConceptViewComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly bs = inject(Backend);
-  private readonly ls = inject(LanguagesService);
-  private readonly languages = toSignal(this.ls.languages$, {initialValue: []});
 
   readonly form = this.fb.group({
     id: this.fb.group({
@@ -47,31 +43,40 @@ export class ConceptViewEdit extends ConceptViewComponent {
 
   constructor() {
     super();
-    effect(() => {
-      const concept = this.concept();
-      if (!this.languages().length) return;
-      this.form.reset({
-        id: concept.id,
-        domain: concept.domain,
-        title: {
-          ...(concept.labels || [])
-            .filter(l => l.type === 'title')
-            .map(t => ({
-              language: {
-                id: t.language,
-                name: this.languages().find(l => l.id.id === t.language)?.title ?? 'xxx'
-              },
-              transliteration: t.transliteration,
-              label: t.label
-            }))
-        }
-      });
+    effect(() => this.setForm(this.concept()));
+  }
+
+  private setForm(concept: Concept): void {
+    const resetFormArray =  <T>(
+      array: FormArray,
+      items: T[],
+      factory: (item: T) => AbstractControl
+    ): void => {
+      array.clear();
+
+      for (const item of items) {
+        array.push(factory(item));
+      }
+    }
+
+    this.form.patchValue({
+      id: concept.id,
+      domain: concept.domain
     });
+
+    resetFormArray(
+      this.form.controls.title,
+      (concept.labels || []).filter(l => l.type === 'title'),
+      this.createLabel.bind(this)
+    );
+
+    this.form.markAsPristine();
+    this.form.markAsUntouched();
   }
 
 
-  private createLabel() {
-    return this.fb.group(EditLabel.createLabelFormFieldDef());
+  private createLabel(label: Label|undefined = undefined) {
+    return this.fb.group(EditLabel.createLabelFormFieldDef(label));
   }
 
   addTitle() {
@@ -98,14 +103,18 @@ export class ConceptViewEdit extends ConceptViewComponent {
       domain: value.domain,
       labels: [
         ...value.title.map((l): Label => ({
-          ...l,
           type: 'title',
-          language: l.language.id
+          transliteration: l.transliteration,
+          label: l.label,
+          language: l.language.id,
+          ...{id: l.id ? l.id : undefined}
         }))
       ]
     };
 
     console.log(unsavedConcept);
+
+
     const newId = await lastValueFrom(this.bs.putConcept(unsavedConcept));
     console.log(newId);
     // yay

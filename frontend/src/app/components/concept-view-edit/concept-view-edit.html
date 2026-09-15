@@ -7,13 +7,12 @@
       </h2>
       <div ngbAccordionCollapse>
         <div ngbAccordionBody>
-          <div class="row">
+          <fieldset class="row" [disabled]="true">
             <div class="col-6">
               <input
                 type="text"
                 class="form-control form-control-sm"
                 [formControl]="form.controls.id.controls.type"
-                [disabled]="true"
               />
             </div>
             <div class="col-6">
@@ -25,8 +24,8 @@
                 placeholder="id"
               />
             </div>
-          </div>
-          <div class="row">
+          </fieldset>
+          <fieldset class="row" [disabled]="true">
             <div class="col-12">
               <input
                 type="text"
@@ -35,7 +34,7 @@
                 [disabled]="true"
               />
             </div>
-          </div>
+          </fieldset>
         </div>
       </div>
     </div>
