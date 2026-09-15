@@ -38,6 +38,7 @@ const autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
 export const searchSql = (selector: ConceptSelector, settings: Settings) => {
   const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
   const shards = autoCompleteShards(selector);
+  const includeIds = settings.includeIds ? `, 'id', id` : '';
   const select= [
     `concepts.id as id`,
     `concepts.type as type`,
@@ -52,6 +53,7 @@ export const searchSql = (selector: ConceptSelector, settings: Settings) => {
             'shape', ${geoFn}(geographical_extends.shape),
             'certainty', certainty,
             'precision', precision
+            ${includeIds}
           )) as geographical_extends
         from geographical_extends
         where concepts.id = geographical_extends.concept_id and concepts.type = geographical_extends.concept_type
@@ -64,6 +66,7 @@ export const searchSql = (selector: ConceptSelector, settings: Settings) => {
             'language', labels.language,
             'transliteration', labels.transliteration,
             'is_preferred', labels.is_preferred
+            ${includeIds}
           )) as labels
         from labels
         where concepts.id = labels.concept_id and concepts.type = labels.concept_type
@@ -91,6 +94,7 @@ export const searchSql = (selector: ConceptSelector, settings: Settings) => {
             'end_precision', temporal_extends.end_precision,
             'start_certainty', temporal_extends.start_certainty,
             'end_certainty', temporal_extends.end_certainty
+            ${includeIds}
           )) as temporal_extends
         from temporal_extends
         where concepts.id = temporal_extends.concept_id and concepts.type = temporal_extends.concept_type

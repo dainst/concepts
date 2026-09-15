@@ -5,7 +5,7 @@ import {CacheService} from '../cache/cache.service';
 import {ApiError} from '../../classes/api-error';
 import {ConceptRow} from '../../interfaces/concept-row';
 import {convertConceptRow} from '../../functions/convert-concept-row';
-import {Concept} from 'common/interfaces/concept';
+import {Concept, ConceptId} from 'common/interfaces/concept';
 import {Settings} from 'common/interfaces/settings';
 import {ConceptSelector, SearchResult, SearchShard} from 'common/interfaces/search';
 import {ConceptHistory} from 'common/interfaces/concept-history';
@@ -14,13 +14,13 @@ import {searchCountSql, searchSql} from '../../functions/search-sql';
 import {getConceptHistorySql} from '../../functions/history-sql';
 import {insertSql} from '../../functions/insert-sql';
 import {SqlCommand} from '../../interfaces/sql';
-import {uuidv7} from '../../functions/uuid';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
   preferTransliteration: false,
   geoExportFormat: 'GeoJSON',
-}; // TODO extend by get parameters
+  includeIds: true
+}; // TODO extend by user settings
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
@@ -170,16 +170,14 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
   async updateConcept(concept: Concept) {
     const commands: SqlCommand[] = [['set constraints all deferred;']];
+    let conceptId: ConceptId;
     if (!concept.id.id) {
-      concept = {
-        ...concept,
-        id: {
-          id: uuidv7(),
-          type: 'concepts'
-        },
-        domain: 'default'
+      const insertConcept = insertSql.concept(concept);
+      conceptId = {
+        id: insertConcept[1],
+        type: String(insertConcept[2])
       };
-      commands.push(insertSql.conceptHistory(concept.id, 'create'))
+      commands.push(insertSql.conceptHistory(conceptId, 'create'))
     } else {
       const currentVersion = await this.getConcept(concept.id.type, concept.id.id);
       if (currentVersion) {
@@ -194,7 +192,6 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     }
 
     commands.push(
-      insertSql.concept(concept),
       ...(concept.labels ?? [])
         .map(label => insertSql.label(concept.id, label))
     );

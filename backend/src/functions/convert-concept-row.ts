@@ -9,8 +9,7 @@ import {
   ConceptRow, GeographicalExtendsAgg,
   LabelsAgg, RelationsAgg, TemporalExtendsAgg,
 } from '../interfaces/concept-row';
-import {getPreferredLabels} from './label';
-import {Settings} from 'common/interfaces/settings';
+
 
 const convertRelationAgg = (cell: RelationsAgg[]): RelationSet[] => cell
   .reduce(
@@ -43,14 +42,16 @@ const convertLabel = (cell: LabelsAgg): Label => ({
   label: cell.label,
   language: cell.language,
   transliteration: cell.transliteration,
-  type: cell.type
+  type: cell.type,
+  ...{id: cell.id}
 });
 
 const convertGeographicalExtend = (cell: GeographicalExtendsAgg): GeographicalExtend => ({
   center: cell.center,
   shape: cell.shape,
   certainty: parseFloat(cell.certainty),
-  precision: parseFloat(cell.precision)
+  precision: parseFloat(cell.precision),
+  ...{id: cell.id}
 });
 
 const convertTemporalExtend = (cell: TemporalExtendsAgg): TemporalExtend => ({
@@ -65,7 +66,8 @@ const convertTemporalExtend = (cell: TemporalExtendsAgg): TemporalExtend => ({
     certainty: cell.end_certainty,
     min: cell.end_min,
     max: cell.end_max
-  }
+  },
+  ...{id: cell.id}
 });
 
 // convert the flatish structure a db query returns to the be/fe data interchange object

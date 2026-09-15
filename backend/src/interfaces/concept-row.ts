@@ -25,6 +25,7 @@ export interface LabelsAgg {
   readonly language: string;
   readonly transliteration: string;
   readonly is_preferred: boolean;
+  readonly id?: string;
 }
 
 export interface GeographicalExtendsAgg {
@@ -32,6 +33,7 @@ export interface GeographicalExtendsAgg {
   readonly shape: string;
   readonly certainty: string;
   readonly precision: string;
+  readonly id?: string;
 }
 
 export interface TemporalExtendsAgg {
@@ -43,4 +45,5 @@ export interface TemporalExtendsAgg {
   readonly end_max: number;
   readonly end_precision: number | null;
   readonly end_certainty: number | null;
+  readonly id?: string;
 }

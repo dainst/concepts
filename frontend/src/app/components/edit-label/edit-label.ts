@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, OnInit, output, signal} from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -13,6 +13,7 @@ import {JsonPipe} from '@angular/common';
 import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-validation';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {Language} from '../../interfaces/forms';
+import {Label} from 'concepts-common/interfaces/concept';
 
 @Component({
   selector: 'app-edit-label',
@@ -28,16 +29,34 @@ import {Language} from '../../interfaces/forms';
 })
 export class EditLabel implements OnInit {
   readonly ls = inject(LanguagesService);
+  private readonly languages = toSignal(this.ls.languages$, {initialValue: []});
 
   readonly remove = output<void>();
   readonly form = input.required<
     FormGroup<{
-      language: FormControl<{ id: string; name: string }>;
+      language: FormControl<Language>;
       label: FormControl<string>;
       transliteration: FormControl<string>;
+      id: FormControl<string>;
     }>
   >();
   readonly caption = input<string>();
+
+  readonly showTransliterationField = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (!this.languages().length) return;
+      const v = this.form().controls.language.value;
+      if (v.name !== v.id) return;
+      const fullLanguageConcept = this.languages()
+          .find(l => l.id.id === v.id);
+      const fullLanguage: Language = fullLanguageConcept
+        ? {id: fullLanguageConcept.id.id, name: fullLanguageConcept.title || ''}
+        : {id: '', name: ''};
+      this.form().controls.language.setValue(fullLanguage);
+    });
+  }
 
   ngOnInit() {
     const labelControl = this.form().controls.label;
@@ -46,7 +65,7 @@ export class EditLabel implements OnInit {
       this.showTransliterationField.set(EditLabel.hasNonLatin(newLabel));
     });
   }
-  readonly showTransliterationField = signal(false);
+
 
   private static hasNonLatin = (str: string): boolean =>
     [...str].some(c => /\p{L}/u.test(c) && !/\p{Script=Latin}/u.test(c));
@@ -71,9 +90,21 @@ export class EditLabel implements OnInit {
     = (control: AbstractControl): ValidationErrors | null =>
       EditLabel.hasNonLatin(control.value) ? {hasNonLatin: true} : null;
 
-  static createLabelFormFieldDef = () => ({
-    language: [<Language>{}, Validators.required],
-    label: ['', Validators.required],
-    transliteration: ['', EditLabel.onlyLatinValidator]
+  static createLabelFormFieldDef = (label: Label | undefined) => ({
+    language: [
+      label ? <Language>{id: label.language, name: label.language} : <Language>{id: '', name: ''},
+      Validators.required
+    ],
+    label: [
+      label?.label ?? '',
+      Validators.required
+    ],
+    transliteration: [
+      label?.transliteration ?? '',
+      EditLabel.onlyLatinValidator
+    ],
+    id: [
+      label?.id ?? ''
+    ],
   });
 }
