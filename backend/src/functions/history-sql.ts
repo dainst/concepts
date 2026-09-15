@@ -6,7 +6,7 @@ export const getConceptHistorySql =
     event,
     value,
     comment,
-    public.app_concept_snapshots.id as snapshotId
+    app_concept_snapshots.id as snapshot_id
   from
     concept_history
     left join users on users.id = concept_history.user_id

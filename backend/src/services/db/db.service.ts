@@ -164,7 +164,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getConceptHistory(type: string, id: string): Promise<ConceptHistory> {
-    return (await this.query(getConceptHistorySql, [type, id], true))
+    return (await this.query(getConceptHistorySql, [type, id]))
       .rows
       .map(convertHistoryRow)
   }

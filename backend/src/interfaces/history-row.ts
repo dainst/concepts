@@ -6,4 +6,5 @@ export interface HistoryRow {
   event: string;
   value: string;
   comment: string;
+  snapshot_id: string | null;
 }
