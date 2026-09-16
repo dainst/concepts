@@ -14,7 +14,7 @@
       placeholder="Sprache"
     >
   </div>
-  <div class="col-8">
+  <div class="col">
     <input
       type="text"
       class="form-control form-control-sm"
@@ -30,7 +30,9 @@
       />
     }
   </div>
-  <div class="col-1">
-    <input type="button" class="form-control form-control-sm" value="x" (click)="remove.emit()" />
+  <div class="col-auto">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="remove.emit()">
+      <i class="bi bi-trash"></i>
+    </button>
   </div>
 </div>

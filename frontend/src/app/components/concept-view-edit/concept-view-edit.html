@@ -47,13 +47,15 @@
         <div ngbAccordionBody>
           <ng-template>
             @for (title of form.controls.title.controls; track title) {
-              <app-edit-label [form]="title" (remove)="removeTitle($index)" caption="Titel" />
+              <app-edit-label [form]="title" (remove)="remove('title', $index)" caption="Titel" />
             }
           </ng-template>
           <div class="row">
-            <div class="col-11"></div>
-            <div class="col-1">
-              <input type="button" class="form-control form-control-sm" value="+" (click)="addTitle()" />
+            <div class="col"></div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="add('title')">
+                <i class="bi bi-plus"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -80,8 +82,18 @@
       <div ngbAccordionCollapse>
         <div ngbAccordionBody>
           <ng-template>
-            ... TODO
+            @for (ge of form.controls.geographicalExtend.controls; track ge) {
+              <app-edit-geographic-extend [form]="ge" (remove)="remove('geographicalExtend', $index)"  />
+            }
           </ng-template>
+          <div class="row">
+            <div class="col"></div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="add('geographicalExtend')">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -115,5 +127,4 @@
 
   </div>
   <input type="submit" class="btn btn-primary"  value="Speichern"/>
-
 </form>
