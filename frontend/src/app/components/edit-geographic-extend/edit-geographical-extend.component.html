@@ -1,0 +1,47 @@
+<p>Mittelpunkt (WGS 1984)</p>
+<div class="row">
+  <div class="col-6">
+    <input
+      type="text"
+      class="form-control form-control-sm"
+      min="-90"
+      max="90"
+      [formControl]="form().controls.centerLat"
+    />
+  </div>
+  <div class="col-6">
+    <input
+      type="text"
+      class="form-control form-control-sm"
+      [formControl]="form().controls.centerLng"
+      [disabled]="true"
+      min="-180"
+      max="180"
+      placeholder="id"
+    />
+  </div>
+</div>
+<div class="row">
+  <div class="col-6">
+    <input
+      type="number"
+      min="0"
+      max="100"
+      class="form-control form-control-sm"
+      [formControl]="form().controls.precision"
+    />
+  </div>
+  <div class="col-6">
+    <input
+      type="number"
+      min="0"
+      max="100"
+      class="form-control form-control-sm"
+      [formControl]="form().controls.certainty"
+      [disabled]="true"
+      placeholder="id"
+    />
+  </div>
+</div>
+<p>Form</p>
+<textarea [formControl]="form().controls.shape"></textarea>

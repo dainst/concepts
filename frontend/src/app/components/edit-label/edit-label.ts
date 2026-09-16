@@ -2,7 +2,7 @@ import {Component, computed, effect, inject, input, OnInit, output, Signal, sign
 import {
   AbstractControl,
   FormControl,
-  FormGroup,
+  FormGroup, NonNullableFormBuilder,
   ReactiveFormsModule, ValidationErrors, Validators
 } from '@angular/forms';
 import {NgbHighlight, NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
@@ -99,7 +99,15 @@ export class EditLabel implements OnInit {
     = (control: AbstractControl<Language>): ValidationErrors | null =>
     control.value && control.value.id && (control.value.id.length === 3) ? null : {invalidLangCode: true};
 
-  static createLabelFormFieldDef = (label: Label | undefined) => ({
+  static form2Value = (l: ReturnType<ReturnType<typeof EditLabel.value2Form>['getRawValue']>): Label => ({
+    type: 'title',
+    transliteration: l.transliteration,
+    label: l.label,
+    language: l.language.id,
+    ...{id: l.id ? l.id : undefined}
+  });
+
+  static value2Form = (fb: NonNullableFormBuilder, label: Label | undefined = undefined) => fb.group({
     language: [
       label ? <Language>{id: label.language, name: label.language} : <Language>{id: '', name: ''},
       EditLabel.validLangCode

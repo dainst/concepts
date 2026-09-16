@@ -14,6 +14,7 @@ import {Concept, Label} from 'concepts-common/interfaces/concept';
 import {lastValueFrom} from 'rxjs';
 import {Router} from '@angular/router';
 import {MessageService} from '../../services/message.service';
+import {EditGeographicalExtend} from '../edit-geographic-extend/edit-geographical-extend.component';
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -25,7 +26,8 @@ import {MessageService} from '../../services/message.service';
     NgbAccordionButton,
     NgbAccordionHeader,
     NgbAccordionBody,
-    EditLabel
+    EditLabel,
+    EditGeographicalExtend
   ],
   templateUrl: './concept-view-edit.html',
   styleUrl: './concept-view-edit.css',
@@ -42,7 +44,8 @@ export class ConceptViewEdit extends ConceptViewComponent {
       id: [''],
     }),
     domain: ['default', Validators.required],
-    title: this.fb.array([this.createLabel()])
+    title: this.fb.array<ReturnType<typeof EditLabel.value2Form>>([]),
+    geographicalExtend: this.fb.array<ReturnType<typeof EditGeographicalExtend.value2Form>>([])
   });
 
   constructor() {
@@ -71,24 +74,34 @@ export class ConceptViewEdit extends ConceptViewComponent {
     resetFormArray(
       this.form.controls.title,
       (concept.labels || []).filter(l => l.type === 'title'),
-      this.createLabel.bind(this)
+      label => EditLabel.value2Form(this.fb, label)
+    );
+
+    resetFormArray(
+      this.form.controls.geographicalExtend,
+      concept.geographicalExtends || [],
+      ge => EditGeographicalExtend.value2Form(this.fb, ge)
     );
 
     this.form.markAsPristine();
     this.form.markAsUntouched();
   }
 
-
   private createLabel(label: Label|undefined = undefined) {
-    return this.fb.group(EditLabel.createLabelFormFieldDef(label));
+    return ;
   }
 
-  addTitle() {
-    this.form.controls.title.push(this.createLabel());
+  add(type: 'title' | 'geographicalExtend'): void {
+    switch (type) {
+      case 'title':
+        return this.form.controls.title.push(EditLabel.value2Form(this.fb));
+      case 'geographicalExtend':
+        return this.form.controls.geographicalExtend.push(EditGeographicalExtend.value2Form(this.fb))
+    }
   }
 
-  removeTitle(index: number) {
-    this.form.controls.title.removeAt(index);
+  remove(type: 'title' | 'geographicalExtend', index: number) {
+    this.form.controls[type].removeAt(index);
   }
 
   protected async save(): Promise<boolean> {
@@ -106,13 +119,10 @@ export class ConceptViewEdit extends ConceptViewComponent {
       id: value.id,
       domain: value.domain,
       labels: [
-        ...value.title.map((l): Label => ({
-          type: 'title',
-          transliteration: l.transliteration,
-          label: l.label,
-          language: l.language.id,
-          ...{id: l.id ? l.id : undefined}
-        }))
+        ...value.title.map(EditLabel.form2Value)
+      ],
+      geographicalExtends: [
+        ...value.geographicalExtend.map(EditGeographicalExtend.form2Value)
       ]
     };
 
