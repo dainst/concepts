@@ -169,7 +169,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       .map(convertHistoryRow)
   }
 
-  async updateConcept(concept: Concept) {
+  async upcertConcept(concept: Concept) {
     const commands: SqlCommand[] = [['set constraints all deferred;']];
     if (!concept.id.id) {
       const insertConcept = insertSql.concept(concept);
@@ -213,7 +213,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     console.log(commands);
 
     const results = await this.transaction(commands);
+
     console.log(results);
+
     return concept.id;
   }
 }

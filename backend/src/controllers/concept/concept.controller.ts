@@ -1,13 +1,15 @@
-import {Body, Controller, Get, Param, Put, Query} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, Res} from '@nestjs/common';
 import {Concept, ConceptId} from 'common/interfaces/concept';
 import {DbService} from '../../services/db/db.service';
-import {convertConceptRow} from '../../functions/convert-concept-row';
 import {ApiError} from '../../classes/api-error';
+import {HttpAdapterHost} from '@nestjs/core';
+import {ExpressAdapter} from '@nestjs/platform-express';
 
 @Controller('concept')
 export class ConceptController {
   constructor(
-    private readonly db: DbService
+    private readonly db: DbService,
+    private readonly httpAdapterHost: HttpAdapterHost<ExpressAdapter>
   ) {
   }
 
@@ -21,10 +23,14 @@ export class ConceptController {
     return c;
   }
 
-  @Put()
+  @Post()
   async put(
-    @Body() concept: Concept
+    @Body() concept: Concept,
+    @Res({passthrough: true}) res: Response
   ): Promise<ConceptId> {
-    return await this.db.updateConcept(concept)
+    const upcertedConceptId = await this.db.upcertConcept(concept);
+    const updated = (upcertedConceptId.id === concept.id.id) && (upcertedConceptId.type === concept.id.type);
+    this.httpAdapterHost.httpAdapter.status(res, updated ? 200 : 201);
+    return upcertedConceptId;   // TODO: make it return the whole object
   }
 }
