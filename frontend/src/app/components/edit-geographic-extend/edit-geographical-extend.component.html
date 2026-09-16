@@ -1,6 +1,14 @@
-<p>Mittelpunkt (WGS 1984)</p>
 <div class="row">
-  <div class="col-6">
+
+  <div class="col-auto">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="remove.emit()">
+      <i class="bi bi-trash"></i>
+    </button>
+  </div>
+</div>
+<div class="row">
+  <div class="col-4">Mittelpunkt (WGS 1984)</div>
+  <div class="col-4">
     <input
       type="text"
       class="form-control form-control-sm"
@@ -9,7 +17,7 @@
       [formControl]="form().controls.centerLat"
     />
   </div>
-  <div class="col-6">
+  <div class="col-4">
     <input
       type="text"
       class="form-control form-control-sm"
@@ -22,7 +30,10 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-6">
+  <div class="col-3">
+    Precision
+  </div>
+  <div class="col-9">
     <input
       type="number"
       min="0"
@@ -31,7 +42,9 @@
       [formControl]="form().controls.precision"
     />
   </div>
-  <div class="col-6">
+</div>
+<div class="row">
+  <div class="col-3">
     <input
       type="number"
       min="0"
@@ -43,5 +56,16 @@
     />
   </div>
 </div>
-<p>Form</p>
-<textarea [formControl]="form().controls.shape"></textarea>
+<div class="row">
+  <div class="col">
+    <textarea [formControl]="form().controls.shape"></textarea>
+    @if (form().controls.shape.errors?.['invalidGeoJSON']; as invalidGeoJSON) {
+      @for (error of invalidGeoJSON | keyvalue; track error) {
+        <ngb-alert [dismissible]="false">{{error.value}}</ngb-alert>
+      }
+    }
+  </div>
+  <div class="col-auto">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="formatJSON()">F</button>
+  </div>
+</div>
