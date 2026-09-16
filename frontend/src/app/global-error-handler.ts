@@ -1,6 +1,6 @@
 import {ErrorHandler, Injectable} from '@angular/core';
-import {ErrorService} from './services/error.service';
-import {AppError, AppErrorType} from './interfaces/error';
+import {MessageService} from './services/message.service';
+import {AppMessage, AppMessageType} from './interfaces/error';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ErrorResponseType, errorResponseTypes} from 'concepts-common/interfaces/api';
 import {isAppErrorType} from './functions/error.typeguards';
@@ -8,10 +8,10 @@ import {isAppErrorType} from './functions/error.typeguards';
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   constructor(
-    private readonly es: ErrorService,
+    private readonly es: MessageService,
   ) {}
 
-  private convertError(error: unknown): AppError {
+  private convertError(error: unknown): AppMessage {
     if (error instanceof Error) {
       // we found a generic error
 
@@ -29,7 +29,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
     if (error instanceof HttpErrorResponse) {
       // we found an api or http error
-      let type: AppErrorType = 'unknown-http-error';
+      let type: AppMessageType = 'unknown-http-error';
       let params: string[] = [];
       let debug: string[] = [];
 

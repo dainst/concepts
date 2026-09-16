@@ -13,6 +13,7 @@ import {Backend} from '../../services/backend';
 import {Concept, Label} from 'concepts-common/interfaces/concept';
 import {lastValueFrom} from 'rxjs';
 import {Router} from '@angular/router';
+import {MessageService} from '../../services/message.service';
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -32,7 +33,8 @@ import {Router} from '@angular/router';
 export class ConceptViewEdit extends ConceptViewComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly bs = inject(Backend);
-  private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly ms = inject(MessageService);
 
   readonly form = this.fb.group({
     id: this.fb.group({
@@ -89,11 +91,11 @@ export class ConceptViewEdit extends ConceptViewComponent {
     this.form.controls.title.removeAt(index);
   }
 
-  protected async save() {
+  protected async save(): Promise<boolean> {
     if (this.form.invalid) {
       console.log('invalid')
       this.form.markAllAsTouched();
-      return;
+      return false;
     }
 
     const value = this.form.getRawValue();
@@ -115,8 +117,23 @@ export class ConceptViewEdit extends ConceptViewComponent {
     };
 
     console.log(unsavedConcept);
-    const newId = await lastValueFrom(this.bs.putConcept(unsavedConcept));
-    console.log(newId);
-    this.router.navigate(['/concept', newId.type, newId.id]);
+
+    const saveResponse = await lastValueFrom(this.bs.upcertConcept(unsavedConcept));
+
+    console.log(saveResponse);
+
+    if (saveResponse.new) {
+      this.ms.add({
+        type: 'successful-created',
+        params: [saveResponse.id.type, saveResponse.id.id]
+      });
+      return this.router.navigate(['/concept', saveResponse.id.type, saveResponse.id.id]);
+    }
+
+    this.ms.add({
+      type: 'successful-updated',
+      params: [saveResponse.id.type, saveResponse.id.id]
+    });
+    return true;
   }
 }

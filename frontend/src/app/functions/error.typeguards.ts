@@ -1,4 +1,4 @@
-import {AppErrorType, appErrorTypes} from '../interfaces/error';
+import {AppMessageType, appMessageTypes} from '../interfaces/error';
 
-export const isAppErrorType = (thing: unknown): thing is AppErrorType =>
-  (typeof thing === 'string') && (thing in appErrorTypes);
+export const isAppErrorType = (thing: unknown): thing is AppMessageType =>
+  (typeof thing === 'string') && (thing in appMessageTypes);
