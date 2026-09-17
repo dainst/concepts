@@ -1,5 +1,5 @@
 import {uuidv7} from "./uuid";
-import {Concept, ConceptId, Label, LabelType} from 'common/interfaces/concept';
+import {Concept, ConceptId, GeographicalExtend, Label, LabelType} from 'common/interfaces/concept';
 import {ConceptHistoryEventType} from 'common/interfaces/concept-history';
 import {SqlCommand, SqlCommandWithId} from '../interfaces/sql';
 
@@ -73,5 +73,40 @@ export const insertSql = {
     eventId,
     formatVersion,
     JSON.stringify(concept)
+  ],
+
+  geographicalExtend: (
+    conceptId: ConceptId,
+    ge: GeographicalExtend
+  ): SqlCommandWithId => [
+    `insert into geographical_extends (
+      id,
+      concept_id,
+      concept_type,
+      center,
+      shape,
+      certainty,
+      precision
+    ) values (
+      $1,
+      $2,
+      $3,
+      ST_GeomFromGeoJSON($4),
+      ${!!ge.shape ? 'ST_GeomFromGeoJSON($5)' : '$5'},
+      $6,
+      $7
+    ) on conflict (id, concept_id, concept_type) do update set
+      center = EXCLUDED.center,
+      shape = EXCLUDED.shape,
+      certainty = EXCLUDED.certainty,
+      precision = EXCLUDED.precision
+    `,
+    ge.id ?? uuidv7(),
+    conceptId.id,
+    conceptId.type,
+    ge.center,
+    ge.shape || null,
+    ge.certainty,
+    ge.precision
   ]
 };
