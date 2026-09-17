@@ -105,8 +105,18 @@
       <div ngbAccordionCollapse>
         <div ngbAccordionBody>
           <ng-template>
-            ... TODO
+            @for (te of form.controls.temporalExtend.controls; track te) {
+              <app-edit-temporal-extend [form]="te" (remove)="remove('temporalExtend', $index)"  />
+            }
           </ng-template>
+          <div class="row">
+            <div class="col"></div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="add('temporalExtend')">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

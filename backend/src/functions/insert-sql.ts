@@ -1,5 +1,5 @@
 import {uuidv7} from "./uuid";
-import {Concept, ConceptId, GeographicalExtend, Label, LabelType} from 'common/interfaces/concept';
+import {Concept, ConceptId, GeographicalExtend, Label, LabelType, TemporalExtend} from 'common/interfaces/concept';
 import {ConceptHistoryEventType} from 'common/interfaces/concept-history';
 import {SqlCommand, SqlCommandWithId} from '../interfaces/sql';
 
@@ -108,5 +108,46 @@ export const insertSql = {
     ge.shape || null,
     ge.certainty,
     ge.precision
-  ]
+  ],
+
+  temporalExtend: (
+    conceptId: ConceptId,
+    te: TemporalExtend
+  ): SqlCommandWithId => [
+    `insert into temporal_extends (
+      id,
+      concept_id,
+      concept_type,
+      start_min,
+      start_max,
+      end_min,
+      end_max,
+      start_precision,
+      end_precision,
+      start_certainty,
+      end_certainty
+    ) values (
+      $1,  $2,  $3,  $4,  $5, $6,  $7,  $8,  $9,  $10, $11
+    ) on conflict (id, concept_id, concept_type) do update set
+      start_min = EXCLUDED.start_min,
+      start_max = EXCLUDED.start_max,
+      end_min = EXCLUDED.end_min,
+      end_max = EXCLUDED.end_max,
+      start_precision = EXCLUDED.start_precision,
+      end_precision = EXCLUDED.end_precision,
+      start_certainty = EXCLUDED.start_certainty,
+      end_certainty = EXCLUDED.end_certainty
+    `,
+    te.id ?? uuidv7(),
+    conceptId.id,
+    conceptId.type,
+    te.start.min,
+    te.start.max,
+    te.start.precision,
+    te.start.certainty,
+    te.end.min,
+    te.end.max,
+    te.end.precision,
+    te.end.certainty,
+  ],
 };
