@@ -4,6 +4,7 @@ import {NgbAlert} from '@ng-bootstrap/ng-bootstrap';
 import {AppMessageType, appMessageTypes} from '../../interfaces/error';
 
 const text: {[key in AppMessageType]: (params: string[]) => string} = {
+  "invalid-data": p => `Invalid Data: ${p.join(', ')}`,
   "successful-created": p => 'Successfully Created Concept',
   "successful-updated": p => 'Successfully Updated Concept',
   "framework-error": p => `Server Error: ${p[0]}`,

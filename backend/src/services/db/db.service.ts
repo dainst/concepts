@@ -15,6 +15,8 @@ import {getConceptHistorySql} from '../../functions/history-sql';
 import {insertSql} from '../../functions/insert-sql';
 import {SqlCommand} from '../../interfaces/sql';
 import {deleteSql} from '../../functions/delete-sql';
+import {validateConcept} from '../../functions/validate';
+import {conceptItemDiff, getItemId} from '../../functions/concept';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -138,8 +140,6 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return (await this.query(sql, [], true)).rows[0].count;
   }
 
-
-
   async getConcept(type: string, id: string): Promise<Concept|null> {
     const conceptRows = await this.queryConcepts({
       type,
@@ -190,13 +190,18 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           insertSql.snapshot(eventSql[1], currentVersion, 1)
         );
 
-        const deletedLabelIds = (currentVersion.labels || [])
-          .map(l => l.id)
-          .filter(l => typeof l !== 'undefined')
-          .filter(labelInCurrent =>
-            !(concept.labels || []).find(labelInNew => labelInCurrent && (labelInNew.id === labelInCurrent))
-          );
-        commands.push(...deletedLabelIds.map(deleteSql.label));
+        const röhr = conceptItemDiff('geographicalExtends', currentVersion, concept)
+          .map(getItemId)
+
+        console.log("WILL DELETE", röhr)
+
+        const deleteRemoved = [
+          ...conceptItemDiff('labels', currentVersion, concept)
+            .map(getItemId)
+            .map(deleteSql.label),
+          ...röhr          .map(deleteSql.geographicalExtend)
+          ];
+        commands.push(...deleteRemoved);
       } else {
         commands.push(
           insertSql.concept(concept),
@@ -204,10 +209,17 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         );
       }
     }
+    const issues = validateConcept(concept);
+    if (issues.length) throw new ApiError('invalid-data', issues);
 
     commands.push(
       ...(concept.labels ?? [])
         .map(label => insertSql.label(concept.id, label))
+    );
+
+    commands.push(
+      ...(concept.geographicalExtends ?? [])
+        .map(ge => insertSql.geographicalExtend(concept.id, ge))
     );
 
     console.log(commands);

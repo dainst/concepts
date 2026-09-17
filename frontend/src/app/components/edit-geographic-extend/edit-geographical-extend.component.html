@@ -1,71 +1,105 @@
-<div class="row">
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
 
-  <div class="col-auto">
-    <button type="button" class="btn btn-secondary btn-sm" (click)="remove.emit()">
-      <i class="bi bi-trash"></i>
-    </button>
-  </div>
-</div>
-<div class="row">
-  <div class="col-4">Mittelpunkt (WGS 1984)</div>
-  <div class="col-4">
-    <input
-      type="text"
-      class="form-control form-control-sm"
-      min="-90"
-      max="90"
-      [formControl]="form().controls.centerLat"
-    />
-  </div>
-  <div class="col-4">
-    <input
-      type="text"
-      class="form-control form-control-sm"
-      [formControl]="form().controls.centerLng"
-      [disabled]="true"
-      min="-180"
-      max="180"
-      placeholder="id"
-    />
-  </div>
-</div>
-<div class="row">
-  <div class="col-3">
-    Precision
-  </div>
-  <div class="col-9">
-    <input
-      type="number"
-      min="0"
-      max="100"
-      class="form-control form-control-sm"
-      [formControl]="form().controls.precision"
-    />
-  </div>
-</div>
-<div class="row">
-  <div class="col-3">
-    <input
-      type="number"
-      min="0"
-      max="100"
-      class="form-control form-control-sm"
-      [formControl]="form().controls.certainty"
-      [disabled]="true"
-      placeholder="id"
-    />
-  </div>
-</div>
-<div class="row">
-  <div class="col">
-    <textarea [formControl]="form().controls.shape"></textarea>
-    @if (form().controls.shape.errors?.['invalidGeoJSON']; as invalidGeoJSON) {
-      @for (error of invalidGeoJSON | keyvalue; track error) {
-        <ngb-alert [dismissible]="false">{{error.value}}</ngb-alert>
-      }
-    }
-  </div>
-  <div class="col-auto">
-    <button type="button" class="btn btn-secondary btn-sm" (click)="formatJSON()">F</button>
+      </div>
+      <div class="col-auto">
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="shapeCollapsed.update((v) => !v)"
+          [attr.aria-expanded]="!shapeCollapsed()"
+          placement="start"
+          ngbTooltip="Shape einfügen"
+        >
+          <i class="bi bi-pentagon"></i>
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="remove.emit()">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-2">Mittelpunkt (WGS 1984)</div>
+      <div class="col-5">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="-90"
+          max="90"
+          [formControl]="form().controls.centerLat"
+        />
+      </div>
+      <div class="col-5">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          [formControl]="form().controls.centerLng"
+          [disabled]="true"
+          min="-180"
+          max="180"
+          placeholder="id"
+        />
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-2 form-label" for="precision">
+        Precision
+      </label>
+      <div class="col-1">{{form().controls.precision.value}}</div>
+      <div class="col-9">
+        <input
+          id="precision"
+          type="range"
+          min="0"
+          max="100"
+          class="form-range"
+          [formControl]="form().controls.precision"
+        />
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-2 form-label" for="certainty">
+        Certainty
+      </label>
+      <div class="col-1">{{form().controls.certainty.value}}</div>
+      <div class="col-9">
+        <input
+          [id]="`certainty`"
+          type="range"
+          min="0"
+          max="100"
+          class="form-range"
+          [formControl]="form().controls.certainty"
+        />
+      </div>
+    </div>
+    <div class="row" [(ngbCollapse)]="shapeCollapsed">
+      <div class="col">
+        <p>Bitte hier valides GeoJSON einfügen (MultiPolygon)</p>
+        <textarea
+          [formControl]="form().controls.shape"
+          class="form-control form-control-sm"
+        >
+        </textarea>
+        @if (form().controls.shape.errors?.['invalidGeoJSON']; as invalidGeoJSON) {
+          @for (error of invalidGeoJSON | keyvalue; track error) {
+            <ngb-alert [dismissible]="false">{{error.value}}</ngb-alert>
+          }
+        }
+      </div>
+      <div class="col-auto">
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="formatJSON()"
+          placement="start"
+          ngbTooltip="JSON formatieren"
+        >
+          <i class="bi bi-code-slash"></i>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
