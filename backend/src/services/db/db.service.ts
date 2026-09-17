@@ -190,16 +190,16 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           insertSql.snapshot(eventSql[1], currentVersion, 1)
         );
 
-        const röhr = conceptItemDiff('geographicalExtends', currentVersion, concept)
-          .map(getItemId)
-
-        console.log("WILL DELETE", röhr)
-
         const deleteRemoved = [
           ...conceptItemDiff('labels', currentVersion, concept)
             .map(getItemId)
             .map(deleteSql.label),
-          ...röhr          .map(deleteSql.geographicalExtend)
+          ... conceptItemDiff('geographicalExtends', currentVersion, concept)
+            .map(getItemId)
+            .map(deleteSql.geographicalExtend),
+          ... conceptItemDiff('temporalExtends', currentVersion, concept)
+            .map(getItemId)
+            .map(deleteSql.temporalExtend)
           ];
         commands.push(...deleteRemoved);
       } else {
@@ -215,6 +215,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     commands.push(
       ...(concept.labels ?? [])
         .map(label => insertSql.label(concept.id, label))
+    );
+
+    commands.push(
+      ...(concept.temporalExtends ?? [])
+        .map(te => insertSql.temporalExtend(concept.id, te))
     );
 
     commands.push(

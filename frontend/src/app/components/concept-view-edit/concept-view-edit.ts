@@ -15,6 +15,7 @@ import {lastValueFrom} from 'rxjs';
 import {Router} from '@angular/router';
 import {MessageService} from '../../services/message.service';
 import {EditGeographicalExtend} from '../edit-geographic-extend/edit-geographical-extend.component';
+import {EditTemporalExtend} from '../edit-temporal-extend/edit-temporal-extend';
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -27,7 +28,8 @@ import {EditGeographicalExtend} from '../edit-geographic-extend/edit-geographica
     NgbAccordionHeader,
     NgbAccordionBody,
     EditLabel,
-    EditGeographicalExtend
+    EditGeographicalExtend,
+    EditTemporalExtend
   ],
   templateUrl: './concept-view-edit.html',
   styleUrl: './concept-view-edit.css',
@@ -45,7 +47,8 @@ export class ConceptViewEdit extends ConceptViewComponent {
     }),
     domain: ['default', Validators.required],
     title: this.fb.array<ReturnType<typeof EditLabel.value2Form>>([]),
-    geographicalExtend: this.fb.array<ReturnType<typeof EditGeographicalExtend.value2Form>>([])
+    geographicalExtend: this.fb.array<ReturnType<typeof EditGeographicalExtend.value2Form>>([]),
+    temporalExtend: this.fb.array<ReturnType<typeof EditTemporalExtend.value2Form>>([]),
   });
 
   constructor() {
@@ -83,24 +86,28 @@ export class ConceptViewEdit extends ConceptViewComponent {
       ge => EditGeographicalExtend.value2Form(this.fb, ge)
     );
 
+    resetFormArray(
+      this.form.controls.temporalExtend,
+      concept.temporalExtends || [],
+      te => EditTemporalExtend.value2Form(this.fb, te)
+    );
+
     this.form.markAsPristine();
     this.form.markAsUntouched();
   }
 
-  private createLabel(label: Label|undefined = undefined) {
-    return ;
-  }
-
-  add(type: 'title' | 'geographicalExtend'): void {
+  add(type: 'title' | 'geographicalExtend' | 'temporalExtend'): void {
     switch (type) {
       case 'title':
         return this.form.controls.title.push(EditLabel.value2Form(this.fb));
       case 'geographicalExtend':
         return this.form.controls.geographicalExtend.push(EditGeographicalExtend.value2Form(this.fb))
+      case 'temporalExtend':
+        return this.form.controls.temporalExtend.push(EditTemporalExtend.value2Form(this.fb))
     }
   }
 
-  remove(type: 'title' | 'geographicalExtend', index: number) {
+  remove(type: 'title' | 'geographicalExtend' | 'temporalExtend', index: number) {
     this.form.controls[type].removeAt(index);
   }
 
@@ -123,6 +130,9 @@ export class ConceptViewEdit extends ConceptViewComponent {
       ],
       geographicalExtends: [
         ...value.geographicalExtend.map(EditGeographicalExtend.form2Value)
+      ],
+      temporalExtends: [
+        ...value.temporalExtend.map(EditTemporalExtend.form2Value)
       ]
     };
 

@@ -1,0 +1,102 @@
+<div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+      </div>
+      <div class="col-auto">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="remove.emit()">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">!</div>
+      <div class="col-2">Min</div>
+      <div class="col-2">Max</div>
+      <div class="col-2">Precision</div>
+      <div class="col-2">Certainty</div>
+    </div>
+    <div class="row">
+      <div class="col-4">Beginn</div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="-100000"
+          max="3000"
+          [formControl]="form().controls.startMin"
+        />
+      </div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="-100000"
+          max="3000"
+          [formControl]="form().controls.startMax"
+        />
+      </div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="0"
+          max="100"
+          step="10"
+          [formControl]="form().controls.startPrecision"
+        />
+      </div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="0"
+          max="100"
+          step="10"
+          [formControl]="form().controls.startCertainty"
+        />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-4">Ende</div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="-100000"
+          max="3000"
+          [formControl]="form().controls.endMin"
+        />
+      </div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="-100000"
+          max="3000"
+          [formControl]="form().controls.endMax"
+        />
+      </div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="0"
+          max="100"
+          step="10"
+          [formControl]="form().controls.endPrecision"
+        />
+      </div>
+      <div class="col-2">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          min="0"
+          max="100"
+          step="10"
+          [formControl]="form().controls.endCertainty"
+        />
+      </div>
+    </div>
+  </div>
+</div>
