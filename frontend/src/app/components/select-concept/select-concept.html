@@ -1,0 +1,21 @@
+<div class="basic-input">
+  <ng-template #rt let-r="result" let-t="term">
+    <ngb-highlight [result]="r.title ?? `#${r.id.type}\\${r.id.id}`" [term]="t" />
+  </ng-template>
+  <input
+    type="text"
+    class="form-control form-control-sm"
+    [ngbTypeahead]="searchConcept"
+    [(ngModel)]="value"
+    [resultTemplate]="rt"
+    [inputFormatter]="formatter"
+  />
+
+  @if (searching) {
+    <small class="form-text text-muted">searching...</small>
+  }
+  @if (searchFailed) {
+    <div class="invalid-feedback">Sorry, suggestions could not be loaded.</div>
+  }
+  <pre>{{value()|json}}</pre>
+</div>

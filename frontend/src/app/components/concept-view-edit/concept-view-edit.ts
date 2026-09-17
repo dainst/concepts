@@ -16,6 +16,8 @@ import {Router} from '@angular/router';
 import {MessageService} from '../../services/message.service';
 import {EditGeographicalExtend} from '../edit-geographic-extend/edit-geographical-extend.component';
 import {EditTemporalExtend} from '../edit-temporal-extend/edit-temporal-extend';
+import {EditRelation} from '../edit-relation/edit-relation.component';
+import {packRelationSets, unpackRelationSet} from '../../functions/relation-set';
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -29,7 +31,8 @@ import {EditTemporalExtend} from '../edit-temporal-extend/edit-temporal-extend';
     NgbAccordionBody,
     EditLabel,
     EditGeographicalExtend,
-    EditTemporalExtend
+    EditTemporalExtend,
+    EditRelation
   ],
   templateUrl: './concept-view-edit.html',
   styleUrl: './concept-view-edit.css',
@@ -49,6 +52,7 @@ export class ConceptViewEdit extends ConceptViewComponent {
     title: this.fb.array<ReturnType<typeof EditLabel.value2Form>>([]),
     geographicalExtend: this.fb.array<ReturnType<typeof EditGeographicalExtend.value2Form>>([]),
     temporalExtend: this.fb.array<ReturnType<typeof EditTemporalExtend.value2Form>>([]),
+    relation: this.fb.array<ReturnType<typeof EditRelation.value2Form>>([]),
   });
 
   constructor() {
@@ -92,11 +96,17 @@ export class ConceptViewEdit extends ConceptViewComponent {
       te => EditTemporalExtend.value2Form(this.fb, te)
     );
 
+    resetFormArray(
+      this.form.controls.relation,
+      (concept.relations || []).flatMap(unpackRelationSet),
+      r => EditRelation.value2Form(this.fb, r)
+    );
+
     this.form.markAsPristine();
     this.form.markAsUntouched();
   }
 
-  add(type: 'title' | 'geographicalExtend' | 'temporalExtend'): void {
+  add(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation'): void {
     switch (type) {
       case 'title':
         return this.form.controls.title.push(EditLabel.value2Form(this.fb));
@@ -104,10 +114,12 @@ export class ConceptViewEdit extends ConceptViewComponent {
         return this.form.controls.geographicalExtend.push(EditGeographicalExtend.value2Form(this.fb))
       case 'temporalExtend':
         return this.form.controls.temporalExtend.push(EditTemporalExtend.value2Form(this.fb))
+      case 'relation':
+        return this.form.controls.relation.push(EditRelation.value2Form(this.fb))
     }
   }
 
-  remove(type: 'title' | 'geographicalExtend' | 'temporalExtend', index: number) {
+  remove(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation', index: number) {
     this.form.controls[type].removeAt(index);
   }
 
@@ -125,21 +137,16 @@ export class ConceptViewEdit extends ConceptViewComponent {
     const unsavedConcept: Concept = {
       id: value.id,
       domain: value.domain,
-      labels: [
-        ...value.title.map(EditLabel.form2Value)
-      ],
-      geographicalExtends: [
-        ...value.geographicalExtend.map(EditGeographicalExtend.form2Value)
-      ],
-      temporalExtends: [
-        ...value.temporalExtend.map(EditTemporalExtend.form2Value)
-      ]
+      labels: value.title.map(EditLabel.form2Value),
+      geographicalExtends: value.geographicalExtend.map(EditGeographicalExtend.form2Value),
+      temporalExtends: value.temporalExtend.map(EditTemporalExtend.form2Value),
+      relations: packRelationSets(value.relation)
     };
 
     console.log(unsavedConcept);
 
     const saveResponse = await lastValueFrom(this.bs.upcertConcept(unsavedConcept));
-
+return true;
     console.log(saveResponse);
 
     if (saveResponse.new) {

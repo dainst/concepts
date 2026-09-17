@@ -69,8 +69,18 @@
       <div ngbAccordionCollapse>
         <div ngbAccordionBody>
           <ng-template>
-            ... TODO
+            @for (relation of form.controls.relation.controls; track relation) {
+              <app-edit-relation [form]="relation" (remove)="remove('relation', $index)" />
+            }
           </ng-template>
+          <div class="row">
+            <div class="col"></div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="add('relation')">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -117,20 +127,6 @@
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div ngbAccordionItem [collapsed]="false">
-      <h2 ngbAccordionHeader>
-        <button ngbAccordionButton>Allgemein</button>
-      </h2>
-      <div ngbAccordionCollapse>
-        <div ngbAccordionBody>
-          <ng-template>
-            ... TODO
-            * scope
-          </ng-template>
         </div>
       </div>
     </div>
