@@ -1,5 +1,13 @@
 import {uuidv7} from "./uuid";
-import {Concept, ConceptId, GeographicalExtend, Label, LabelType, TemporalExtend} from 'common/interfaces/concept';
+import {
+  Concept,
+  ConceptId,
+  GeographicalExtend,
+  Label,
+  LabelType,
+  Relation,
+  TemporalExtend
+} from 'common/interfaces/concept';
 import {ConceptHistoryEventType} from 'common/interfaces/concept-history';
 import {SqlCommand, SqlCommandWithId} from '../interfaces/sql';
 
@@ -150,4 +158,21 @@ export const insertSql = {
     te.end.precision,
     te.end.certainty,
   ],
+
+  relation: (
+    conceptId: ConceptId,
+    r: Relation
+  ): SqlCommandWithId => [
+    `insert into relations (
+      subject_type, subject_id, predicate_type, predicate_id, object_type, object_id
+    ) values (
+      $1,  $2,  $3,  $4,  $5, $6
+    ) on conflict do nothing`,
+    conceptId.type,
+    conceptId.id,
+    r.predicate.type,
+    r.predicate.id,
+    r.object.type,
+    r.object.id
+  ]
 };

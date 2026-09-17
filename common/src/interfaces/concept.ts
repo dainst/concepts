@@ -43,9 +43,22 @@ export interface Concept extends ConceptAbstract {
   readonly relations?: RelationSet[];
 }
 
-export interface RelationSet { // TODO better naming of properties
+export interface RelationSet { // TODO better naming of properties, maybe remove this at all?
   readonly relation: ConceptId;
-  readonly objects: ConceptId[];
+  readonly objects: RelationSetObject[];
+}
+
+export interface RelationSetObject extends ConceptId {
+  readonly relationId?: string;
+}
+
+export interface RelationWithOutSubject {
+  readonly predicate: ConceptId;
+  readonly object: ConceptId;
+}
+
+export interface Relation extends RelationWithOutSubject {
+  readonly subject: ConceptId;
 }
 
 export interface Label {

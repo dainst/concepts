@@ -31,7 +31,6 @@ export class EditTemporalExtend {
   >();
 
   static value2Form = (fb: NonNullableFormBuilder, te: TemporalExtend|undefined = undefined) => {
-    console.log({te})
     return fb.group({
       startMin: [te?.start.min || 100],
       startMax: [te?.start.max || 100],

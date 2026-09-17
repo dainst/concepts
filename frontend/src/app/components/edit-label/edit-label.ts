@@ -33,7 +33,7 @@ export class EditLabel implements OnInit {
     {
       initialValue: [
         {id: 'deu', name: 'German'},
-        {id: 'end', name: 'English'}
+        {id: 'eng', name: 'English'},
       ]
     }
   );
@@ -54,12 +54,13 @@ export class EditLabel implements OnInit {
 
   constructor() {
     effect(() => {
+      console.log('l', this.languages().length)
       if (!this.languages().length) return;
       const v = this.form().controls.language.value;
       if (v.name !== v.id) return;
       const fullLanguage = this.languages()
           .find(l => l.id === v.id)
-        ?? {id: '', name: ''};
+        ?? v;
       this.form().controls.language.setValue(fullLanguage);
     });
   }

@@ -1,5 +1,6 @@
 import {ConceptSelector, SearchShard} from 'common/interfaces/search';
 import {Settings} from 'common/interfaces/settings';
+import {findConceptIdInString} from 'common/functions/concept-id';
 
 const buildWhere = (selector: ConceptSelector): string => {
   const existsCond = (agg: string, where: string): string => `exists (
@@ -10,6 +11,14 @@ const buildWhere = (selector: ConceptSelector): string => {
       switch (cond) {
         case 'q':
           return existsCond('labels', `label ilike '%${selector.q}%'`);
+        case 'quickConcept':
+          const id = findConceptIdInString(val);
+          const matchTitleOrId = [
+            existsCond('labels', `label ilike '%${id[1]}%'`), // TODO auf title beschränken?
+            `concepts.id ilike '%${id[1]}%'`
+          ].join(' or ');
+          if (!id[0]) return matchTitleOrId;
+          return [matchTitleOrId, `type = ${id[0]}`];
         case 'id':
           return `concepts.id = '${selector.id}'`;
         case 'type':
@@ -19,10 +28,10 @@ const buildWhere = (selector: ConceptSelector): string => {
         case 'limit':
         case 'offset':
         default:
-          return undefined;
+          return [];
       }
     })
-    .filter(a => !!a);
+      .flatMap(s => Array.isArray(s) ? s : [s]);
   return (conditions.length ? 'where ' : '')
     + conditions
       .map(e => `(${e})`)

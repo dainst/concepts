@@ -1,0 +1,33 @@
+<ng-template #rt let-r="result" let-t="term">
+  <ngb-highlight [result]="r | title | async" [term]="t" />
+</ng-template>
+
+@if (value()?.id) {
+  <div (click)="deselect()" class="d-flex">
+    <span class="text-truncate flex-grow-1"> {{ value() | title | async }} </span>
+    <button type="button" class="btn btn-link btn-sm p-0 ms-auto">
+      <i class="bi bi-pencil"></i>
+    </button>
+  </div>
+} @else {
+  <div>
+    <input
+      #input
+      type="text"
+      class="form-control form-control-sm"
+      style="width: 100%"
+      [ngbTypeahead]="searchConcept"
+      [(ngModel)]="value"
+      [resultTemplate]="rt"
+      [inputFormatter]="inputFormatter"
+      [editable]="false"
+      (selectItem)="select($event)"
+      (blur)="reselect()"
+      (keydown.escape)="reselect()"
+    />
+
+    @if (searching()) {
+      <small class="form-text text-muted">searching...</small>
+    }
+  </div>
+}

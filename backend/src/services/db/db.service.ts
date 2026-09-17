@@ -1,11 +1,11 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
-import {DatabaseError, Pool, PoolClient, QueryResult, types} from 'pg';
+import {DatabaseError, Pool, QueryResult, types} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
 import {CacheService} from '../cache/cache.service';
 import {ApiError} from '../../classes/api-error';
 import {ConceptRow} from '../../interfaces/concept-row';
 import {convertConceptRow} from '../../functions/convert-concept-row';
-import {Concept, ConceptId} from 'common/interfaces/concept';
+import {Concept, ConceptId, Relation} from 'common/interfaces/concept';
 import {Settings} from 'common/interfaces/settings';
 import {ConceptSelector, SearchResult, SearchShard} from 'common/interfaces/search';
 import {ConceptHistory} from 'common/interfaces/concept-history';
@@ -16,7 +16,8 @@ import {insertSql} from '../../functions/insert-sql';
 import {SqlCommand} from '../../interfaces/sql';
 import {deleteSql} from '../../functions/delete-sql';
 import {validateConcept} from '../../functions/validate';
-import {conceptItemDiff, getItemId} from '../../functions/concept';
+import {conceptItemDiff, getItemId, relationsDiff} from '../../functions/concept';
+import {unpackRelationSet, unpackRelationSets} from 'common/functions/relation-set';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -71,7 +72,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async query(sql: string, params: any[] = [], useCache: boolean = false): Promise<QueryResult> {
-    // console.log(sql, params);
+    console.log(sql);
+    console.log(params);
 
     if (!useCache) return this.pool.query(sql, params);
 
@@ -199,7 +201,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
             .map(deleteSql.geographicalExtend),
           ... conceptItemDiff('temporalExtends', currentVersion, concept)
             .map(getItemId)
-            .map(deleteSql.temporalExtend)
+            .map(deleteSql.temporalExtend),
+          ... relationsDiff(currentVersion, concept)
+            .map(deleteSql.relation)
           ];
         commands.push(...deleteRemoved);
       } else {
@@ -225,6 +229,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     commands.push(
       ...(concept.geographicalExtends ?? [])
         .map(ge => insertSql.geographicalExtend(concept.id, ge))
+    );
+
+    commands.push(
+      ...unpackRelationSets(concept.id, concept.relations ?? [])
+        .map(r => insertSql.relation(concept.id, r))
     );
 
     console.log(commands);
