@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ConceptViewTimeline } from './concept-view-timeline.component';
+import {ConceptViewTimeline} from './concept-view-timeline.component';
 
 describe('ConceptViewExample', () => {
   let component: ConceptViewTimeline;
@@ -8,7 +8,7 @@ describe('ConceptViewExample', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConceptViewTimeline],
+      imports: [ConceptViewTimeline]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConceptViewTimeline);

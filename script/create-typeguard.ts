@@ -1,4 +1,5 @@
-import ts, {Program, SourceFile} from "typescript";
+/* eslint-disable no-console */
+import ts, {Program, SourceFile} from 'typescript';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -27,18 +28,18 @@ interface ImportCollection {
 const moduleSpecifier = (from: string, to: string): string => {
   let rel = path.relative(path.dirname(to), from);
 
-  rel = rel.replace(/\\/g, "/");
-  rel = rel.replace(/\.[^.]+$/, "");   // .ts, .tsx, ...
+  rel = rel.replace(/\\/g, '/');
+  rel = rel.replace(/\.[^.]+$/, '');   // .ts, .tsx, ...
 
-  if (!rel.startsWith(".")) {
-    rel = "./" + rel;
+  if (!rel.startsWith('.')) {
+    rel = './' + rel;
   }
 
   return rel;
-}
+};
 
 
-const getImports = (source: SourceFile) => {
+const getImports = (source: SourceFile): Import[] => {
   const imports: Import[] = [];
   source.forEachChild(node => {
     if (!ts.isImportDeclaration(node)) {
@@ -59,7 +60,7 @@ const getImports = (source: SourceFile) => {
 
         imports.push({
           name: localName,
-          module,
+          module
         });
       }
     }
@@ -70,7 +71,7 @@ const getImports = (source: SourceFile) => {
 
       imports.push({
         name: localName,
-        module,
+        module
       });
     }
 
@@ -80,18 +81,18 @@ const getImports = (source: SourceFile) => {
 
       imports.push({
         name: localName,
-        module,
+        module
       });
     }
   });
   return imports;
-}
+};
 
 const getInterfaces = (program: Program, source: SourceFile): Interface[] => {
   const checker = program.getTypeChecker();
   const interfaces: Interface[] = [];
 
-  const visit = (node: ts.Node) => {
+  const visit = (node: ts.Node): void => {
     if (ts.isInterfaceDeclaration(node)) {
       const iface: Interface = {
         name: node.name.text,
@@ -100,15 +101,15 @@ const getInterfaces = (program: Program, source: SourceFile): Interface[] => {
           node.heritageClauses
             ?.filter(h => h.token === ts.SyntaxKind.ExtendsKeyword)
             .flatMap(h => h.types.map(t => t.expression.getText()))
-          ?? [],
-      }
+          ?? []
+      };
 
       for (const member of node.members) {
         if (!ts.isPropertySignature(member) || !member.name) {
           continue;
         }
         const name = member.name.getText();
-        let type = "unknown";
+        let type = 'unknown';
         let optional = !!member.questionToken;
         if (member.type) {
           const t = checker.getTypeFromTypeNode(member.type);
@@ -120,7 +121,7 @@ const getInterfaces = (program: Program, source: SourceFile): Interface[] => {
       interfaces.push(iface);
     }
     ts.forEachChild(node, visit);
-  }
+  };
 
   source.forEachChild(visit);
 
@@ -136,7 +137,7 @@ const analyzeInterfaceFile = (input: string, target: string): {interfaces: Inter
   const module = moduleSpecifier(input, target);
   imports.push(...interfaces.map((iface: Interface): Import => ({name: iface.name, module})));
   return {interfaces, imports};
-}
+};
 
 const wrap = (s: string): string => `(${s})`;
 
@@ -218,16 +219,16 @@ const createTypeCheck = (member: Member, overrideName: string = ''): string[] =>
   return [
     `'${member.name}' in thing`,
     `is${member.type}(${objectName})`
-  ]
-}
+  ];
+};
 
 const collectConditions = (iface: Interface): string[] => {
   const rows = [];
-  if (!iface.extends.length) rows.push(`typeof thing === 'object'`, `thing != null`)
-  rows.push(...iface.extends.map(ex => `is${ex}(thing)`))
+  if (!iface.extends.length) rows.push(`typeof thing === 'object'`, `thing != null`);
+  rows.push(...iface.extends.map(ex => `is${ex}(thing)`));
   rows.push(...iface.members.flatMap(member => createTypeCheck(member)));
   return rows;
-}
+};
 
 const createImport = (imp: ImportCollection): string =>
   `import {${imp.names.join(', ')}} from '${imp.module}'`;
@@ -270,7 +271,7 @@ ${rows.map(strCond).map(l => `\t${l};\n`).join('')}
   return true;
 }`;
   }
-}
+};
 
 
 const createFunctionsFile = (filePath: string, outPath: string, type: keyof typeof functionCreators)=> {
@@ -292,23 +293,23 @@ const createFunctionsFile = (filePath: string, outPath: string, type: keyof type
       <ImportCollection[]>[]
     )
     .map(createImport)
-    .join(";\n");
+    .join(';\n');
   const typeguards = r.interfaces
     .map(functionCreators[type])
-    .join(";\n\n");
-  fs.writeFileSync(outPath, header + imports + ";\n\n" + typeguards, 'utf8');
+    .join(';\n\n');
+  fs.writeFileSync(outPath, header + imports + ';\n\n' + typeguards, 'utf8');
   console.log('done.');
 };
 
 
 createFunctionsFile(
- "/home/pfranck/IdeaProjects/concepts/backend/src/interfaces/concept-row.ts",
-  "/home/pfranck/IdeaProjects/concepts/backend/src/functions/rows.typeguards.ts",
+ '/home/pfranck/IdeaProjects/concepts/backend/src/interfaces/concept-row.ts',
+  '/home/pfranck/IdeaProjects/concepts/backend/src/functions/rows.typeguards.ts',
   'typeguard'
 );
 
 createFunctionsFile(
-  "/home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts",
-  "/home/pfranck/IdeaProjects/concepts/common/src/functions/concept.typeguards.ts",
+  '/home/pfranck/IdeaProjects/concepts/common/src/interfaces/concept.ts',
+  '/home/pfranck/IdeaProjects/concepts/common/src/functions/concept.typeguards.ts',
   'typeguard'
 );

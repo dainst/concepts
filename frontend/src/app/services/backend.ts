@@ -6,13 +6,12 @@ import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
 import {searchToHttpParams} from '../functions/query-params';
 import {ConceptHistory} from 'concepts-common/interfaces/concept-history';
 import {RetryConfig} from 'rxjs/internal/operators/retry';
-import {AppMessage} from '../interfaces/error';
 import {isConceptId} from 'concepts-common/functions/concept.typeguards';
 
 @Service()
 export class Backend {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:3000/'
+  private readonly api = 'http://localhost:3000/';
 
   static retryConfig: RetryConfig = {
     count: Infinity, // TODO change this in PROD
@@ -40,7 +39,7 @@ export class Backend {
   }
 
   upcertConcept(concept: Concept): Observable<{new: boolean, id: ConceptId}> {
-    return this.http.post<ConceptId>(this.api + `concept`, concept, {observe: "response"})
+    return this.http.post<ConceptId>(this.api + `concept`, concept, {observe: 'response'})
       .pipe(map(res => {
         if (![200, 201].includes(res.status)) throw new Error(`Invalid response code: ${res.status}`);
         const cId = res.body;

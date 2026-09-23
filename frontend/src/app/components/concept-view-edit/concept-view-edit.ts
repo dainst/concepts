@@ -10,7 +10,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {EditLabel} from '../edit-label/edit-label';
 import {Backend} from '../../services/backend';
-import {Concept, Label} from 'concepts-common/interfaces/concept';
+import {Concept} from 'concepts-common/interfaces/concept';
 import {lastValueFrom} from 'rxjs';
 import {Router} from '@angular/router';
 import {MessageService} from '../../services/message.service';
@@ -35,7 +35,7 @@ import {packRelationSets, unpackRelationSet} from 'concepts-common/functions/rel
     EditRelation
   ],
   templateUrl: './concept-view-edit.html',
-  styleUrl: './concept-view-edit.css',
+  styleUrl: './concept-view-edit.css'
 })
 export class ConceptViewEdit extends ConceptViewComponent {
   private readonly fb = inject(NonNullableFormBuilder);
@@ -46,13 +46,13 @@ export class ConceptViewEdit extends ConceptViewComponent {
   readonly form = this.fb.group({
     id: this.fb.group({
       type: ['concepts'],
-      id: [''],
+      id: ['']
     }),
     domain: ['default', Validators.required],
     title: this.fb.array<ReturnType<typeof EditLabel.value2Form>>([]),
     geographicalExtend: this.fb.array<ReturnType<typeof EditGeographicalExtend.value2Form>>([]),
     temporalExtend: this.fb.array<ReturnType<typeof EditTemporalExtend.value2Form>>([]),
-    relation: this.fb.array<ReturnType<typeof EditRelation.value2Form>>([]),
+    relation: this.fb.array<ReturnType<typeof EditRelation.value2Form>>([])
   });
 
   constructor() {
@@ -71,7 +71,7 @@ export class ConceptViewEdit extends ConceptViewComponent {
       for (const item of items) {
         array.push(factory(item));
       }
-    }
+    };
 
     this.form.patchValue({
       id: concept.id,
@@ -111,21 +111,21 @@ export class ConceptViewEdit extends ConceptViewComponent {
       case 'title':
         return this.form.controls.title.push(EditLabel.value2Form(this.fb));
       case 'geographicalExtend':
-        return this.form.controls.geographicalExtend.push(EditGeographicalExtend.value2Form(this.fb))
+        return this.form.controls.geographicalExtend.push(EditGeographicalExtend.value2Form(this.fb));
       case 'temporalExtend':
-        return this.form.controls.temporalExtend.push(EditTemporalExtend.value2Form(this.fb))
+        return this.form.controls.temporalExtend.push(EditTemporalExtend.value2Form(this.fb));
       case 'relation':
-        return this.form.controls.relation.push(EditRelation.value2Form(this.fb))
+        return this.form.controls.relation.push(EditRelation.value2Form(this.fb));
     }
   }
 
-  remove(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation', index: number) {
+  remove(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation', index: number): void {
     this.form.controls[type].removeAt(index);
   }
 
   protected async save(): Promise<boolean> {
     if (this.form.invalid) {
-      console.log('invalid')
+      console.log('invalid');
       this.form.markAllAsTouched();
       return false;
     }

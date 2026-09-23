@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, OnInit, output, Signal, signal} from '@angular/core';
+import {Component, effect, inject, input, OnInit, output, Signal, signal} from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -22,18 +22,17 @@ import {Label} from 'concepts-common/interfaces/concept';
     NgbHighlight
   ],
   templateUrl: './edit-label.html',
-  styleUrl: './edit-label.css',
+  styleUrl: './edit-label.css'
 })
 export class EditLabel implements OnInit {
   readonly ls = inject(LanguagesService);
   private readonly languages: Signal<Language[]> = toSignal(
     this.ls.languages$
-      .pipe(map(concepts => concepts.map(c => ({name: c.title || c.id.id, id: c.id.id}))))
-    ,
+      .pipe(map(concepts => concepts.map(c => ({name: c.title || c.id.id, id: c.id.id})))),
     {
       initialValue: [
         {id: 'deu', name: 'German'},
-        {id: 'eng', name: 'English'},
+        {id: 'eng', name: 'English'}
       ]
     }
   );
@@ -54,7 +53,6 @@ export class EditLabel implements OnInit {
 
   constructor() {
     effect(() => {
-      console.log('l', this.languages().length)
       if (!this.languages().length) return;
       const v = this.form().controls.language.value;
       if (v.name !== v.id) return;
@@ -65,7 +63,7 @@ export class EditLabel implements OnInit {
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     const labelControl = this.form().controls.label;
     this.showTransliterationField.set(EditLabel.hasNonLatin(labelControl.value));
     labelControl.valueChanges.subscribe(newLabel => {
@@ -87,10 +85,10 @@ export class EditLabel implements OnInit {
         map(([term, languages]) =>
           languages
             .filter(lang => new RegExp(term.replaceAll(/[\W]+/g, ''), 'mi').test(lang.name + lang.id))
-        ),
+        )
       );
 
-  protected formatter = (x: { name: string, id: string }) => x.name;
+  protected formatter = (x: { name: string, id: string }): string => x.name;
 
   private static onlyLatinValidator
     = (control: AbstractControl): ValidationErrors | null =>
@@ -108,6 +106,7 @@ export class EditLabel implements OnInit {
     ...{id: l.id ? l.id : undefined}
   });
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   static value2Form = (fb: NonNullableFormBuilder, label: Label | undefined = undefined) => fb.group({
     language: [
       label ? <Language>{id: label.language, name: label.language} : <Language>{id: '', name: ''},
@@ -123,6 +122,6 @@ export class EditLabel implements OnInit {
     ],
     id: [
       label?.id ?? ''
-    ],
+    ]
   });
 }

@@ -9,12 +9,12 @@ import {dummyConceptGenerator} from '../../timeline/dummy-data';
     Timeline
   ],
   templateUrl: './about.html',
-  styleUrl: './about.css',
+  styleUrl: './about.css'
 })
 export class About implements OnInit {
   ngOnInit(): void {
-    setTimeout(() => {this.pumpData();},100)
-    setTimeout(() => {this.pumpData();},1000)
+    setTimeout(() => {this.pumpData();},100);
+    setTimeout(() => {this.pumpData();},1000);
   }
   protected data = signal<Concept[]>([]);
   protected selected = signal<string | undefined>(undefined);
@@ -23,14 +23,14 @@ export class About implements OnInit {
 
   private gen = dummyConceptGenerator();
 
-  protected pumpData() {
+  protected pumpData(): void {
     this.data.set([
       ...this.data(),
       ...Array.from({length: 3}).map(_ => this.gen.next().value)
     ]);
   }
 
-  protected select(what: number = 1) {
+  protected select(what: number = 1): void {
     if (!this.data().length) {
       this.selected.set(undefined);
       return;
@@ -40,11 +40,11 @@ export class About implements OnInit {
   };
 
 
-  protected increaseAxisTicks() {
+  protected increaseAxisTicks(): void {
     this.axisTicks.set(this.axisTicks() + 1);
   }
 
-  protected toggleInactive() {
+  protected toggleInactive(): void {
     this.inactive.set(!this.inactive());
   }
 }

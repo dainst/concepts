@@ -1,4 +1,4 @@
-const flatEntries = (input: object): [string, any][] =>
+const flatEntries = (input: object): [string, unknown][] =>
   Object.entries(input ?? {})
     .map(e => ((typeof e[1] === 'object') ? flatEntries(e[1]) : [e]))
     .flat();

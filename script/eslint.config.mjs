@@ -1,4 +1,3 @@
-import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import { rules } from '../eslint.mjs';
 
@@ -7,10 +6,7 @@ export default tseslint.config(
     files: ['**/*.ts'],
 
     languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
+
       parser: tseslint.parser,
       sourceType: 'commonjs',
       parserOptions: {

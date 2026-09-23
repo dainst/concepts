@@ -1,5 +1,5 @@
-import { Directive, HostBinding, inject } from '@angular/core';
-import { NgControl } from '@angular/forms';
+import {Directive, HostBinding, inject} from '@angular/core';
+import {NgControl} from '@angular/forms';
 
 @Directive({
   selector: '[formControlName].form-control, [formControl].form-control'

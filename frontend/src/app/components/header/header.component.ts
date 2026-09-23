@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from "@angular/router";
+import {Component, inject} from '@angular/core';
+import {Router, RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap/dropdown';
 import {NgOptimizedImage} from '@angular/common';
@@ -15,14 +15,14 @@ import {NgOptimizedImage} from '@angular/common';
     NgOptimizedImage
   ],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+  styleUrl: './header.component.css'
 })
 export class Header {
   protected queryParams: { q: string} = {q: ''};
   private router = inject(Router);
 
-  search() {
-    this.router.navigate(['search'], {
+  async search(): Promise<void> {
+    await this.router.navigate(['search'], {
       queryParams: this.queryParams,
       queryParamsHandling: 'merge'
     });

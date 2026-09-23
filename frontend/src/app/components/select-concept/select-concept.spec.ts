@@ -1,17 +1,17 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { SelectConcept } from './select-concept';
+import {SelectConceptComponent} from './select-concept';
 
 describe('SelectConcept', () => {
-  let component: SelectConcept;
-  let fixture: ComponentFixture<SelectConcept>;
+  let component: SelectConceptComponent;
+  let fixture: ComponentFixture<SelectConceptComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SelectConcept],
+      imports: [SelectConceptComponent]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SelectConcept);
+    fixture = TestBed.createComponent(SelectConceptComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

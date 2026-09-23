@@ -56,17 +56,17 @@ export class SelectConceptComponent implements FormValueControl<ConceptId> {
                 return c.id;
               })
             )
-          ),
+          )
       ),
       tap(() => {
-        this.searching.set(false)
-      }),
+        this.searching.set(false);
+      })
     );
 
   protected inputFormatter = (cId: ConceptId | undefined): string =>
     (!cId || !cId.id || !cId.type) ? '' : stringifyId(cId);
 
-  protected async select(event: NgbTypeaheadSelectItemEvent<ConceptId>) {
+  protected async select(event: NgbTypeaheadSelectItemEvent<ConceptId>): Promise<void> {
     this.selected.set(event.item);
   }
 

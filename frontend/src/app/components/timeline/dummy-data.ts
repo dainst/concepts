@@ -17,7 +17,7 @@ const generateNumbers = (nr: number): GeneratedNumbers => {
     a: NaN,
     b: NaN,
     parent: NaN
-  }
+  };
 
   r.a = (nr * 50 + ((nr % 3) * 5 - (nr % 5) * 3) + (nr >= 0 ? generateNumbers(nr - 1).b : -2500)) % 2500;
   r.b = (r.a + (nr % 7) * 50 + nr * (nr % 4)) % 2500;
@@ -27,22 +27,22 @@ const generateNumbers = (nr: number): GeneratedNumbers => {
     b: r.a
   };
 
-  if ((nr % 4 === 0) && (nr != 0)) {
+  if ((nr % 4 === 0) && (nr !== 0)) {
     r.children.push(nr - 1, nr - 2, nr - 3);
     r.successor = nr + 4;
   }
   if ((nr % 4 === 0) || (nr % 4 === 1) || (nr % 4 === 2)) {
     r.successor = nr + 1;
-    r.parent = Math.ceil(nr / 4) * 4
+    r.parent = Math.ceil(nr / 4) * 4;
   }
 
-  return r
-}
+  return r;
+};
 
 export function* dummyConceptGenerator(): Generator<Concept> {
   const makeObj = (i: number): ConceptId => ({
     id: String(i),
-    type: "dummy"
+    type: 'dummy'
   });
 
   let index = 0;
@@ -68,16 +68,16 @@ export function* dummyConceptGenerator(): Generator<Concept> {
       domain: 'dummy',
       labels: [
         {
-          type: "title",
+          type: 'title',
           label: `Title #${index}`,
-          language: "eng",
-          transliteration: ""
+          language: 'eng',
+          transliteration: ''
         },
         {
-          type: "description",
+          type: 'description',
           label: `Description #${index}`,
-          language: "eng",
-          transliteration: ""
+          language: 'eng',
+          transliteration: ''
         }
       ],
       relations: [
@@ -105,7 +105,7 @@ export function* dummyConceptGenerator(): Generator<Concept> {
       ],
       id: {
         id: String(index),
-        type: "dummy"
+        type: 'dummy'
       }
     };
   }

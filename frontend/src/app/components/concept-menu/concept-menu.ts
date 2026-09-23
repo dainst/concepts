@@ -25,7 +25,7 @@ export class ConceptMenu {
     this.selectedId() ?? this.internalSelection()
   );
 
-  protected select(item: ConceptMenuEntry) {
+  protected select(item: ConceptMenuEntry): void {
     if (item.disabled) {
       return;
     }
@@ -34,7 +34,7 @@ export class ConceptMenu {
     this.selectedChange.emit(item.id);
   }
 
-  isSelected(id: string) {
+  isSelected(id: string): boolean {
     return this.activeId() === id;
   }
 }

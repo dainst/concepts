@@ -1,10 +1,9 @@
-import {uuidv7} from "./uuid";
+import {uuidv7} from './uuid';
 import {
   Concept,
   ConceptId,
   GeographicalExtend,
   Label,
-  LabelType,
   Relation,
   TemporalExtend
 } from 'common/interfaces/concept';
@@ -156,7 +155,7 @@ export const insertSql = {
     te.end.min,
     te.end.max,
     te.end.precision,
-    te.end.certainty,
+    te.end.certainty
   ],
 
   relation: (

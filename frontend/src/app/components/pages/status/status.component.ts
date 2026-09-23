@@ -7,7 +7,7 @@ import {Status} from 'concepts-common/interfaces/default';
   selector: 'app-status',
   imports: [],
   templateUrl: './status.component.html',
-  styleUrl: './status.component.css',
+  styleUrl: './status.component.css'
 })
 export class StatusComponent implements OnInit {
   constructor(
@@ -23,7 +23,11 @@ export class StatusComponent implements OnInit {
     version: '0.0.0'
   });
 
-  async ngOnInit() {
+  private async getStatus(): Promise<void> {
     this.status.set(await lastValueFrom(this.http.get<Status>('http://localhost:3000')));
+  }
+
+  ngOnInit(): void {
+    void this.getStatus();
   }
 }

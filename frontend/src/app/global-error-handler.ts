@@ -2,13 +2,13 @@ import {ErrorHandler, Injectable} from '@angular/core';
 import {MessageService} from './services/message.service';
 import {AppMessage, AppMessageType} from './interfaces/error';
 import {HttpErrorResponse} from '@angular/common/http';
-import {ErrorResponseType, errorResponseTypes} from 'concepts-common/interfaces/api';
+import {errorResponseTypes} from 'concepts-common/interfaces/api';
 import {isAppErrorType} from './functions/error.typeguards';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   constructor(
-    private readonly es: MessageService,
+    private readonly es: MessageService
   ) {}
 
   private convertError(error: unknown): AppMessage {

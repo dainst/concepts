@@ -15,4 +15,4 @@ export const convertHistoryRow  = (row: HistoryRow): ConceptHistoryEvent => {
     snapshotId: row.snapshot_id,
     icke: 'date'
   };
-}
+};

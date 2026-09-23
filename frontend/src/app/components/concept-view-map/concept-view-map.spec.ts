@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ConceptViewMap } from './concept-view-map';
+import {ConceptViewMap} from './concept-view-map';
 
 describe('ConceptViewMap', () => {
   let component: ConceptViewMap;
@@ -8,7 +8,7 @@ describe('ConceptViewMap', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConceptViewMap],
+      imports: [ConceptViewMap]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConceptViewMap);

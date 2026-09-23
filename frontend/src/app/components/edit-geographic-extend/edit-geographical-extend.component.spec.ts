@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { EditGeographicalExtend } from './edit-geographical-extend.component';
+import {EditGeographicalExtend} from './edit-geographical-extend.component';
 
 describe('EditGeographicExtend', () => {
   let component: EditGeographicalExtend;
@@ -8,7 +8,7 @@ describe('EditGeographicExtend', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditGeographicalExtend],
+      imports: [EditGeographicalExtend]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EditGeographicalExtend);

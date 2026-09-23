@@ -1,17 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { ConceptHistory } from './concept-history';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ConceptViewHistory} from './concept-history';
 
 describe('ConceptHistory', () => {
-  let component: ConceptHistory;
-  let fixture: ComponentFixture<ConceptHistory>;
+  let component: ConceptViewHistory;
+  let fixture: ComponentFixture<ConceptViewHistory>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConceptHistory],
+      imports: [ConceptViewHistory]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConceptHistory);
+    fixture = TestBed.createComponent(ConceptViewHistory);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

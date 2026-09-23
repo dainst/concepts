@@ -1,13 +1,13 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
-import {DatabaseError, Pool, QueryResult, types} from 'pg';
+import {DatabaseError, Pool, QueryResult, QueryResultRow, types} from 'pg';
 import {DBStatus} from 'common/interfaces/default';
 import {CacheService} from '../cache/cache.service';
 import {ApiError} from '../../classes/api-error';
 import {ConceptRow} from '../../interfaces/concept-row';
 import {convertConceptRow} from '../../functions/convert-concept-row';
-import {Concept, ConceptId, Relation} from 'common/interfaces/concept';
+import {Concept, ConceptId} from 'common/interfaces/concept';
 import {Settings} from 'common/interfaces/settings';
-import {ConceptSelector, SearchResult, SearchShard} from 'common/interfaces/search';
+import {ConceptSelector, SearchResult} from 'common/interfaces/search';
 import {ConceptHistory} from 'common/interfaces/concept-history';
 import {convertHistoryRow} from '../../functions/convert-history-row';
 import {searchCountSql, searchSql} from '../../functions/search-sql';
@@ -16,8 +16,19 @@ import {insertSql} from '../../functions/insert-sql';
 import {SqlCommand} from '../../interfaces/sql';
 import {deleteSql} from '../../functions/delete-sql';
 import {validateConcept} from '../../functions/validate';
-import {conceptItemDiff, getItemId, relationsDiff} from '../../functions/concept';
-import {unpackRelationSet, unpackRelationSets} from 'common/functions/relation-set';
+import {
+  conceptItemDiff,
+  getItemId,
+  relationsDiff
+} from '../../functions/concept';
+import {unpackRelationSets} from 'common/functions/relation-set';
+import {isConceptRow} from '../../functions/rows.typeguards';
+import {
+  CachedObjectType,
+  CacheServiceResponse,
+  CacheServiceStoreKey
+} from '../../interfaces/cache';
+import {HistoryRow} from '../../interfaces/history-row';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -28,25 +39,23 @@ const settings: Settings = {
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
-  private readonly pool: Pool
+  private readonly pool: Pool;
   private status: DBStatus = {
     status: null,
     version: null
   };
 
-  constructor(
-    private readonly cs: CacheService
-  ) {
+  constructor(private readonly cs: CacheService) {
     this.pool = new Pool({
       user: 'app_user',
       password: 'secret_password',
       host: 'localhost',
       port: 5432,
-      database: 'app_db',
+      database: 'app_db'
     }); // TODO from env
   }
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     try {
       types.setTypeParser(types.builtins.INT8, Number);
       await this.pool.connect();
@@ -55,7 +64,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         status: 'online',
         version: null
       };
-      const result = await this.pool.query("select * from meta where key = 'schema-version'");
+      const result = await this.pool.query<{ val: string }>(
+        "select * from meta where key = 'schema-version'"
+      );
       this.status = {
         status: 'online',
         version: result.rows[0]?.val || null
@@ -67,21 +78,34 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async onModuleDestroy() {
+  async onModuleDestroy(): Promise<void> {
     await this.pool.end();
   }
 
-  async query(sql: string, params: any[] = [], useCache: boolean = false): Promise<QueryResult> {
-    console.log(sql);
-    console.log(params);
+  async query<T extends QueryResultRow>(
+    sql: string,
+    params: (string | number | boolean | null)[] = [],
+    cacheId: CacheServiceStoreKey | null = null
+  ): Promise<QueryResult<T>> {
+    // console.log(sql);
+    // console.log(params);
 
-    if (!useCache) return this.pool.query(sql, params);
+    if (cacheId == null) return this.pool.query<T>(sql, params);
 
-    const cached = this.cs.get('result', sql + params?.join());
-    if (cached.result) return cached.result;
+    const cached: CacheServiceResponse<typeof cacheId> = this.cs.get<
+      typeof cacheId
+    >(cacheId, sql + params?.join());
+    if (cached.result) return cached.result as unknown as QueryResult<T>;
 
-    const res =  await this.pool.query(sql, params);
-    this.cs.store('result', sql + params?.join(), res, cached.hash);
+    const res: QueryResult<T> = await this.pool.query<T>(sql, params);
+
+    this.cs.store(
+      cacheId,
+      sql + params?.join(),
+      res as unknown as CachedObjectType<typeof cacheId>, // TODO get rid of type assertion
+      cached.hash
+    );
+
     return res;
   }
 
@@ -92,7 +116,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     try {
       await client.query('BEGIN');
       const results = [];
-      for (const command of commands) { // oldschool loop to keep it sync
+      for (const command of commands) {
+        // oldschool loop to keep it sync
         results.push(await client.query(command[0], command.slice(1)));
         queryNr++;
       }
@@ -106,9 +131,12 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           queryNr,
           (commands[queryNr] ?? ['unknown command'])[0],
           e.code
-        ]
-          .map(String);
-        throw new ApiError('db-transaction-error', params, (commands[queryNr] ?? ['']).slice(1));
+        ].map(String);
+        throw new ApiError(
+          'db-transaction-error',
+          params,
+          (commands[queryNr] ?? ['']).slice(1)
+        );
       }
       throw e;
     } finally {
@@ -120,42 +148,62 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return this.status;
   }
 
-  private async queryConcepts(selector: ConceptSelector): Promise<ConceptRow[]> {
+  private async queryConcepts(
+    selector: ConceptSelector
+  ): Promise<ConceptRow[]> {
     const query = searchSql(selector, settings);
-    const res = await this.query(query, [], selector.forceCache);
-    const correctRows = res.rows
-      // .filter(isConceptRow);
-    if (correctRows.length < res.rows.length) throw new ApiError('internal-server-error', ['Not found']); // TODO better error
+    const res = await this.query<ConceptRow>(
+      query,
+      [],
+      selector.forceCache ? 'concepts' : null
+    );
+    const correctRows = res.rows.filter(isConceptRow);
+    if (correctRows.length < res.rows.length)
+      throw new ApiError('internal-server-error', ['Not found']); // TODO better error
     return correctRows;
   }
 
-  private async getSearchResultCount(selector: ConceptSelector, found: number): Promise<number> {
+  private async getSearchResultCount(
+    selector: ConceptSelector,
+    found: number
+  ): Promise<number> {
     if (!found) return 0;
-    if (selector.limit && (found > selector.limit)) return NaN;
-    if (selector.limit && (found < selector.limit)) return Number(selector.offset) + found;
+    if (selector.limit && found > selector.limit) return NaN;
+    if (selector.limit && found < selector.limit)
+      return Number(selector.offset) + found;
     if (selector.id && selector.type) return found; // 0 or 1
     return this.getAvailableSearchResultCount(selector);
   }
 
-  private async getAvailableSearchResultCount(selector: ConceptSelector): Promise<number> {
+  private async getAvailableSearchResultCount(
+    selector: ConceptSelector
+  ): Promise<number> {
     const sql = searchCountSql(selector);
-    return (await this.query(sql, [], true)).rows[0].count;
+    const res = await this.query<{ count: number }>(sql, [], 'count');
+    return res.rows[0].count;
   }
 
-  async getConcept(type: string, id: string): Promise<Concept|null> {
+  async getConcept(type: string, id: string): Promise<Concept | null> {
     const conceptRows = await this.queryConcepts({
       type,
       id,
       limit: 1,
       offset: 0,
-      shards: ['labels', 'relations', 'geographical_extends', 'temporal_extends', 'title']
+      shards: [
+        'labels',
+        'relations',
+        'geographical_extends',
+        'temporal_extends',
+        'title'
+      ]
     });
     return conceptRows[0] ? convertConceptRow(conceptRows[0]) : null;
   }
 
   async search(selector: ConceptSelector): Promise<SearchResult> {
-    const results: Concept[] = (await this.queryConcepts(selector))
-      .map(convertConceptRow);
+    const results: Concept[] = (await this.queryConcepts(selector)).map(
+      convertConceptRow
+    );
     const count = await this.getSearchResultCount(selector, results.length);
     return {
       selector,
@@ -166,12 +214,12 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getConceptHistory(type: string, id: string): Promise<ConceptHistory> {
-    return (await this.query(getConceptHistorySql, [type, id]))
-      .rows
-      .map(convertHistoryRow)
+    return (
+      await this.query<HistoryRow>(getConceptHistorySql, [type, id])
+    ).rows.map(convertHistoryRow);
   }
 
-  async upcertConcept(concept: Concept) {
+  async upcertConcept(concept: Concept): Promise<ConceptId> {
     const commands: SqlCommand[] = [['set constraints all deferred;']];
     if (!concept.id.id) {
       const insertConcept = insertSql.concept(concept);
@@ -182,9 +230,15 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           type: String(insertConcept[2])
         }
       };
-      commands.push(insertConcept, insertSql.conceptHistory(concept.id, 'create'))
+      commands.push(
+        insertConcept,
+        insertSql.conceptHistory(concept.id, 'create')
+      );
     } else {
-      const currentVersion = await this.getConcept(concept.id.type, concept.id.id);
+      const currentVersion = await this.getConcept(
+        concept.id.type,
+        concept.id.id
+      );
       if (currentVersion) {
         const eventSql = insertSql.conceptHistory(concept.id, 'edit');
         commands.push(
@@ -196,15 +250,14 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           ...conceptItemDiff('labels', currentVersion, concept)
             .map(getItemId)
             .map(deleteSql.label),
-          ... conceptItemDiff('geographicalExtends', currentVersion, concept)
+          ...conceptItemDiff('geographicalExtends', currentVersion, concept)
             .map(getItemId)
             .map(deleteSql.geographicalExtend),
-          ... conceptItemDiff('temporalExtends', currentVersion, concept)
+          ...conceptItemDiff('temporalExtends', currentVersion, concept)
             .map(getItemId)
             .map(deleteSql.temporalExtend),
-          ... relationsDiff(currentVersion, concept)
-            .map(deleteSql.relation)
-          ];
+          ...relationsDiff(currentVersion, concept).map(deleteSql.relation)
+        ];
         commands.push(...deleteRemoved);
       } else {
         commands.push(
@@ -217,30 +270,25 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     if (issues.length) throw new ApiError('invalid-data', issues);
 
     commands.push(
-      ...(concept.labels ?? [])
-        .map(label => insertSql.label(concept.id, label))
+      ...(concept.labels ?? []).map((label) =>
+        insertSql.label(concept.id, label)
+      ),
+      ...(concept.temporalExtends ?? []).map((te) =>
+        insertSql.temporalExtend(concept.id, te)
+      ),
+      ...(concept.geographicalExtends ?? []).map((ge) =>
+        insertSql.geographicalExtend(concept.id, ge)
+      ),
+      ...unpackRelationSets(concept.id, concept.relations ?? []).map((r) =>
+        insertSql.relation(concept.id, r)
+      )
     );
 
-    commands.push(
-      ...(concept.temporalExtends ?? [])
-        .map(te => insertSql.temporalExtend(concept.id, te))
-    );
+    // console.log(commands);
 
-    commands.push(
-      ...(concept.geographicalExtends ?? [])
-        .map(ge => insertSql.geographicalExtend(concept.id, ge))
-    );
+    await this.transaction(commands);
 
-    commands.push(
-      ...unpackRelationSets(concept.id, concept.relations ?? [])
-        .map(r => insertSql.relation(concept.id, r))
-    );
-
-    console.log(commands);
-
-    const results = await this.transaction(commands);
-
-    console.log(results);
+    // console.log(results);
 
     return concept.id;
   }

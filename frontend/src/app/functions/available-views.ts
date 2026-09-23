@@ -1,24 +1,10 @@
 import {Concept} from 'concepts-common/interfaces/concept';
-import {View, ViewMap, conceptViews} from '../interfaces/views';
+import {View} from '../interfaces/views';
 import {
   isGeographicalConcept,
   isRelatedConcept,
   isTemporalConcept
 } from 'concepts-common/functions/concept.typeguards';
-
-export const availableViews = (concepts: Concept[]): ViewMap<number> =>
-  concepts
-    .reduce(
-      (agg, concept) => {
-        getAvailableViews(concept)
-          .forEach(view => {
-            if (!agg[view]) agg[view] = 0;
-            agg[view]++;
-          });
-        return agg;
-      },
-      <ViewMap<number>>{}
-    );
 
 export const getAvailableViews = (concept: Concept|undefined): View[] => {
   if (!concept) return [];
@@ -28,4 +14,4 @@ export const getAvailableViews = (concept: Concept|undefined): View[] => {
   if (isRelatedConcept(concept)) views.push('graph');
   views.push('raw', 'history', 'edit');
   return views;
-}
+};

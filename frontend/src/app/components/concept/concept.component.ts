@@ -59,7 +59,7 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
     ConceptAbstract
   ],
   templateUrl: './concept.component.html',
-  styleUrl: './concept.component.css',
+  styleUrl: './concept.component.css'
 })
 export class ConceptComponent {
   private readonly route = inject(ActivatedRoute);
@@ -81,7 +81,7 @@ export class ConceptComponent {
 
   readonly concept = rxResource({
     params: () => this.params(),
-    stream: ({ params }) => this.bs.getConcept(params.type, params.id)
+    stream: ({params}) => this.bs.getConcept(params.type, params.id)
   });
 
   private params: Signal<ConceptId> = toSignal(
@@ -93,16 +93,16 @@ export class ConceptComponent {
         if (!id) throw new Error('id missing');
         if (!type) throw new Error('type missing');
 
-        return { id, type };
+        return {id, type};
       })
     ),
-    { requireSync: true }
+    {requireSync: true}
   );
 
   constructor() {
 
-    const storedView = localStorage.getItem("idai-concepts-concept-view");
-    const storedRightSideOpen = localStorage.getItem("idai-concepts-concept-view-right-side-open");
+    const storedView = localStorage.getItem('idai-concepts-concept-view');
+    const storedRightSideOpen = localStorage.getItem('idai-concepts-concept-view-right-side-open');
     this.rightSideOpen.set(!storedRightSideOpen || storedRightSideOpen === 'true');
     if (storedView) {
       this.selectedViewId.set(storedView);
@@ -111,12 +111,12 @@ export class ConceptComponent {
 
   protected menuChanged(newId: string): void {
     this.selectedViewId.set(newId);
-    localStorage.setItem("idai-concepts-concept-view", newId);
+    localStorage.setItem('idai-concepts-concept-view', newId);
   }
 
   protected toggleRightSide(): void {
     this.rightSideOpen.set(!this.rightSideOpen());
-    localStorage.setItem("idai-concepts-concept-view-right-side-open", String(this.rightSideOpen()));
+    localStorage.setItem('idai-concepts-concept-view-right-side-open', String(this.rightSideOpen()));
     // TODO use hash part of URL to store view settings instead of localstorage
   }
 }

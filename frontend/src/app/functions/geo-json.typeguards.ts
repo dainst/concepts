@@ -1,9 +1,9 @@
-import * as geojson from "geojson";
+import * as geojson from 'geojson';
 
 export const geoJSONGeometryTypes = [
- "Feature", "Point", "MultiPoint",
-  "LineString", "MultiLineString", "Polygon",
-  "MultiPolygon", "GeometryCollection", "FeatureCollection"
+ 'Feature', 'Point', 'MultiPoint',
+  'LineString', 'MultiLineString', 'Polygon',
+  'MultiPolygon', 'GeometryCollection', 'FeatureCollection'
 ] as const;
 
 export type GeoJSONGeometryType = typeof geoJSONGeometryTypes[number];

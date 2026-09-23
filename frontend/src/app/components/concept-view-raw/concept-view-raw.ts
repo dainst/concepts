@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {JsonPipe} from '@angular/common';
 
@@ -8,7 +8,7 @@ import {JsonPipe} from '@angular/common';
     JsonPipe
   ],
   templateUrl: './concept-view-raw.html',
-  styleUrl: './concept-view-raw.css',
+  styleUrl: './concept-view-raw.css'
 })
 export class ConceptViewRaw extends ConceptViewComponent {
 

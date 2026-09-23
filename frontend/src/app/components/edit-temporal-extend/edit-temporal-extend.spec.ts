@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { EditTemporalExtend } from './edit-temporal-extend';
+import {EditTemporalExtend} from './edit-temporal-extend';
 
 describe('EditTemporalExtend', () => {
   let component: EditTemporalExtend;
@@ -8,7 +8,7 @@ describe('EditTemporalExtend', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditTemporalExtend],
+      imports: [EditTemporalExtend]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EditTemporalExtend);

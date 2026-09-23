@@ -3,7 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
-  HttpStatus,
+  HttpStatus
 } from '@nestjs/common';
 import {ApiError} from '../classes/api-error';
 import {ErrorResponse, ErrorResponseType} from 'common/interfaces/api';
@@ -15,7 +15,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse();
 
     let status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-    let type: ErrorResponseType = 'unknown-error'
+    let type: ErrorResponseType = 'unknown-error';
     let params: string[] = [];
     let debug: string[] = [];
 

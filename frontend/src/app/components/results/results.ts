@@ -30,7 +30,7 @@ export class Results {
 
   readonly result: ResourceRef<SearchResult|undefined> = rxResource({
     params: () => this.searchQuery(),
-    stream: ({ params }) => this.bs.search(params)
+    stream: ({params}) => this.bs.search(params)
   });
 
   readonly searchQuery: Signal<ConceptSelector> = toSignal(
@@ -46,10 +46,10 @@ export class Results {
         };
       })
     ),
-    { requireSync: true }
+    {requireSync: true}
   );
 
-  protected navigate(target: string) {
+  protected navigate(target: string): void {
     const sq = this.searchQuery();
     const previousOffset = sq.offset ?? 0;
     const limit = sq.limit ?? 0;
@@ -60,18 +60,14 @@ export class Results {
     } else if (target === 'last') {
       offset = max;
     } else if (target === 'next') {
-
       offset = Math.min(max, previousOffset + limit);
-      console.log({
-        max, previousOffset , limit, offset
-      })
     } else if (target === 'prev') {
       offset = Math.max(0, previousOffset - limit);
     } else if (Number.isSafeInteger(parseInt(target))) {
       offset = Math.min(max, Math.max(0, parseInt(target) * limit));
     }
     const queryParams = flatten({...sq, offset});
-    this.router.navigate([], {
+    void this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
       queryParamsHandling: 'merge'

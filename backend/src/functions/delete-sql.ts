@@ -16,6 +16,6 @@ export const deleteSql = {
     r.predicate.type,
     r.predicate.id,
     r.object.type,
-    r.object.id,
+    r.object.id
   ]
 };

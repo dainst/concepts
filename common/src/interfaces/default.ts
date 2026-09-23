@@ -1,7 +1,3 @@
-export interface Msg {
-  text: string;
-}
-
 export interface Status {
   readonly app: string;
   readonly version: string;

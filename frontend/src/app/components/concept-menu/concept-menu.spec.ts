@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ConceptMenu } from './concept-menu';
+import {ConceptMenu} from './concept-menu';
 
 describe('ConceptMenu', () => {
   let component: ConceptMenu;
@@ -8,7 +8,7 @@ describe('ConceptMenu', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConceptMenu],
+      imports: [ConceptMenu]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConceptMenu);

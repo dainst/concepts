@@ -3,14 +3,14 @@ import {ConceptViewComponent} from '../concept-view';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {Backend} from '../../services/backend';
 import {forkJoin, map, Observable, of, switchMap} from 'rxjs';
-import { ConceptId} from 'concepts-common/interfaces/concept';
+import {ConceptId} from 'concepts-common/interfaces/concept';
 import {SearchResult} from 'concepts-common/interfaces/search';
 
 @Component({
   selector: 'app-concept-abstract',
   imports: [],
   templateUrl: './concept-abstract.html',
-  styleUrl: './concept-abstract.css',
+  styleUrl: './concept-abstract.css'
 })
 export class ConceptAbstract extends ConceptViewComponent {
   private readonly bs = inject(Backend);
@@ -42,7 +42,7 @@ export class ConceptAbstract extends ConceptViewComponent {
                 response.results
                   .forEach(result => {
                     if (!(result.id.type in map)) map[result.id.type] = {};
-                    map[result.id.type][result.id.id] = result.title ?? `#${result.id.type}/${result.id.id}`
+                    map[result.id.type][result.id.id] = result.title ?? `#${result.id.type}/${result.id.id}`;
                   });
                 return map;
               },
@@ -63,6 +63,6 @@ export class ConceptAbstract extends ConceptViewComponent {
         title: decodeURIComponent(id.id).replaceAll('&#39;',"'")
       }]
     });
-    return this.bs.search({...id, shards: ['title']})
+    return this.bs.search({...id, shards: ['title']});
   }
 }

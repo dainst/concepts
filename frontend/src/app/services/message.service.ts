@@ -5,7 +5,7 @@ import {AppMessage, appMessageTypes} from '../interfaces/error';
 export class MessageService {
   readonly messages = signal<AppMessage[]>([]);
 
-  add(msg: AppMessage) {
+  add(msg: AppMessage): void {
     if (appMessageTypes[msg.type]) {
       console.error(msg);
     }
@@ -16,7 +16,7 @@ export class MessageService {
     });
   }
 
-  remove(i: number) {
+  remove(i: number): void {
     const errors = this.messages();
     errors.splice(i, 1);
     this.messages.set([...errors]);

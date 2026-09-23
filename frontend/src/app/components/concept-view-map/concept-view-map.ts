@@ -9,12 +9,12 @@ import {isGeographicalConcept} from 'concepts-common/functions/concept.typeguard
   selector: 'app-concept-view-map',
   imports: [],
   templateUrl: './concept-view-map.html',
-  styleUrl: './concept-view-map.css',
+  styleUrl: './concept-view-map.css'
 })
 export class ConceptViewMap extends ConceptViewComponent implements AfterViewInit {
   private viewInitialized = signal(false);
 
-  private map!: L.Map
+  private map!: L.Map;
   features: L.GeoJSON[] = [];
 
   constructor() {
@@ -34,27 +34,27 @@ export class ConceptViewMap extends ConceptViewComponent implements AfterViewIni
     super();
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.initMap();
     this.viewInitialized.set(true);
   }
 
-  private initMap() {
-    const baseMapURl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  private initMap(): void {
+    const baseMapURl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     this.map = L.map('map');
     L.tileLayer(baseMapURl).addTo(this.map);
   }
 
-  private centerMap() {
+  private centerMap(): void {
     if (!this.features.length) return;
     this.map.fitBounds(L.featureGroup(this.features).getBounds());
   }
 
-  private loadShape(ge: GeographicalExtend) {
+  private loadShape(ge: GeographicalExtend): void {
     try {
       const geometry = JSON.parse(ge.shape ?? ge.center);
       if (!isGeoJsonObject(geometry)) throw new Error(`Invalid GeoJSON: ${ge.shape ?? ge.center}`);
-      const f = L.geoJSON(geometry).addTo(this.map)
+      const f = L.geoJSON(geometry).addTo(this.map);
       this.features.push(f);
     } catch (e) {
       console.error(e);

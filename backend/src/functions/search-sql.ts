@@ -36,22 +36,22 @@ const buildWhere = (selector: ConceptSelector): string => {
     + conditions
       .map(e => `(${e})`)
       .join(' and ');
-}
+};
 
 const autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
   const uniqueShard = selector.shards ?? [];
   if (selector.q) uniqueShard.push('labels', 'title');
   return [...new Set<SearchShard>(uniqueShard)];
-}
+};
 
-export const searchSql = (selector: ConceptSelector, settings: Settings) => {
+export const searchSql = (selector: ConceptSelector, settings: Settings): string => {
   const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
   const shards = autoCompleteShards(selector);
   const includeIds = settings.includeIds ? `, 'id', id` : '';
   const select= [
-    `concepts.id as id`,
-    `concepts.type as type`,
-    `concepts.domain_id as domain`,
+    'concepts.id as id',
+    'concepts.type as type',
+    'concepts.domain_id as domain',
     ...shards
   ];
   const shardJoinsMap: {[s in SearchShard]: string} = {
@@ -121,20 +121,20 @@ export const searchSql = (selector: ConceptSelector, settings: Settings) => {
         and labels.type = 'title'
         order by rank desc
         limit 1
-      ) on true`, // TODO use settings.preferTransliteration
+      ) on true` // TODO use settings.preferTransliteration
 
   };
 
   return `select
-    ${(select).join(`,\n\t\t`)}
+    ${(select).join(',\n\t\t')}
   from concepts
-    ${(shards).map((s: SearchShard) => shardJoinsMap[s]).join(`\n\t\t\t`)}
+    ${(shards).map((s: SearchShard) => shardJoinsMap[s]).join('\n\t\t\t')}
   ${buildWhere(selector)}
   limit ${selector.limit ?? 10}
   offset ${selector.offset ?? 0}`;
-}
+};
 
-export const searchCountSql = (selector: ConceptSelector) => `
+export const searchCountSql = (selector: ConceptSelector): string => `
   select
     count(*) as count
   from (

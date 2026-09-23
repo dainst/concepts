@@ -74,4 +74,4 @@ export const isTemporalExtendsAgg = (thing: unknown): thing is TemporalExtendsAg
 	&& ('end_precision' in thing)
 	&& ((typeof thing.end_precision === 'number') || (thing.end_precision == null))
 	&& ('end_certainty' in thing)
-	&& ((typeof thing.end_certainty === 'number') || (thing.end_certainty == null))
+	&& ((typeof thing.end_certainty === 'number') || (thing.end_certainty == null));

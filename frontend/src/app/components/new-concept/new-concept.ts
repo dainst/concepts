@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {ConceptViewEdit} from '../concept-view-edit/concept-view-edit';
 import {Concept} from 'concepts-common/interfaces/concept';
 
@@ -8,14 +8,14 @@ import {Concept} from 'concepts-common/interfaces/concept';
     ConceptViewEdit
   ],
   templateUrl: './new-concept.html',
-  styleUrl: './new-concept.css',
+  styleUrl: './new-concept.css'
 })
 export class NewConcept {
   protected newConcept: Concept = {
-    domain: "default",
+    domain: 'default',
     id: {
-      id: "",
-      type: ""
+      id: '',
+      type: ''
     }
   };
 }

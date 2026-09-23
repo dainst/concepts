@@ -7,7 +7,7 @@ import {
 } from 'common/interfaces/concept';
 import {
   ConceptRow, GeographicalExtendsAgg,
-  LabelsAgg, RelationsAgg, TemporalExtendsAgg,
+  LabelsAgg, RelationsAgg, TemporalExtendsAgg
 } from '../interfaces/concept-row';
 
 
@@ -102,5 +102,5 @@ export const convertConceptRow  = (row: ConceptRow): Concept => {
     ...(relations.length && {relations}),
     ...(geographicalExtends.length && {geographicalExtends}),
     ...(temporalExtends.length && {temporalExtends})
-  }
+  };
 };

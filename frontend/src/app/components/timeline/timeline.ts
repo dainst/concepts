@@ -3,17 +3,17 @@ import * as d3 from 'd3';
 import {Period, TimeLineData, Domain} from '../../interfaces/timeline';
 import {prepareTimelineData} from '../../functions/timeline-data';
 import {Concept} from 'concepts-common/interfaces/concept';
-import {Router } from "@angular/router";
+import {Router} from '@angular/router';
 
 
 @Component({
   selector: 'timeline',
   imports: [],
   templateUrl: './timeline.html',
-  styleUrl: './timeline.css',
+  styleUrl: './timeline.css'
 })
 export class Timeline implements AfterViewInit {
-  @ViewChild('timeline', { static: true }) tlContainer!: ElementRef;
+  @ViewChild('timeline', {static: true}) tlContainer!: ElementRef;
 
   private readonly router = inject(Router);
 
@@ -32,7 +32,7 @@ export class Timeline implements AfterViewInit {
     minStartYear: -10000,
     maxStartYear: new Date().getFullYear(),
     barHeight : 20,
-    buttonZoomFactor : 0.5,
+    buttonZoomFactor : 0.5
   };
 
   private d3!: {
@@ -50,13 +50,13 @@ export class Timeline implements AfterViewInit {
     startXDomain: Domain;
     startYDomain: Domain;
     hoverPeriod: Period | undefined;
-  }
+  };
 
   private bars!: {
     elems: d3.Selection<d3.EnterElement, Period, SVGGElement, Period>;
     paths: d3.Selection<SVGPathElement, Period, SVGGElement, Period>;
     texts: d3.Selection<SVGTextElement, Period, SVGGElement, Period>;
-  }
+  };
 
   constructor() {
     effect(() => {
@@ -119,13 +119,13 @@ export class Timeline implements AfterViewInit {
     const axisElement = timeline
       .append('g')
       .attr('transform', `translate(0, ${height - 30})`)
-      .classed('axis', true)
+      .classed('axis', true);
 
     const zoom = d3.zoom<SVGSVGElement, Period>()
       .on('zoom', this.zoomCallback.bind(this));
 
     timeline
-      .call(zoom)
+      .call(zoom);
 
     const tooltip = d3.select<HTMLDivElement, Period>('body')
       .append('div')
@@ -150,7 +150,7 @@ export class Timeline implements AfterViewInit {
       startXDomain: [0, 0],
       startYDomain: [0, 0],
       totalXDomain: [0, 0]
-    }
+    };
 
     this.d3Ready.set(true);
   };
@@ -205,10 +205,10 @@ export class Timeline implements AfterViewInit {
       .call(this.d3.axis);
   }
 
-  private draw(timelineData: TimeLineData) {
+  private draw(timelineData: TimeLineData): void {
     this.d3.timeline.classed('inactive', this.inactive());
 
-    this.d3.canvas.selectAll("*").remove();
+    this.d3.canvas.selectAll('*').remove();
     const elems = this.d3.canvas
       .selectAll('g')
       .data(timelineData.periods)
@@ -332,7 +332,7 @@ export class Timeline implements AfterViewInit {
       return 'M' + (this.d3.x(data.from) + edgeRadius) + ' ' + bottomY + ' '
         + 'Q' + this.d3.x(data.from) + ' ' + bottomY + ' ' + this.d3.x(data.from) + ' ' + (bottomY - edgeRadius)
         + 'L' + this.d3.x(data.from) + ' ' + (topY + edgeRadius)
-        + 'Q' + this.d3.x(data.from) + ' ' + topY + ' ' + (this.d3.x(data.from) + edgeRadius) + ' ' + topY
+        + 'Q' + this.d3.x(data.from) + ' ' + topY + ' ' + (this.d3.x(data.from) + edgeRadius) + ' ' + topY;
     } else {
       return 'M' + this.d3.x(data.from) + ' ' + bottomY + ' '
         + 'L' + this.d3.x(data.from) + ' ' + topY;
@@ -367,8 +367,8 @@ export class Timeline implements AfterViewInit {
     return text.length * 7;
   };
 
-  private showPeriod(event: MouseEvent, period: Period) {
-    this.router.navigate(['concept', period.conceptId.type, period.conceptId.id]);
+  private showPeriod(_: MouseEvent, period: Period): void {
+    void this.router.navigate(['concept', period.conceptId.type, period.conceptId.id]);
   };
 
   private formatTickText(text: string | number): string {
@@ -442,11 +442,11 @@ export class Timeline implements AfterViewInit {
     this.d3.startYDomain = [0, this.settings.barHeight * 20];
   };
 
-  protected zoomIn(event: PointerEvent): void {
+  protected zoomIn(_: PointerEvent): void {
     this.zoomFn(true);
   };
 
-  protected zoomOut(event: PointerEvent): void {
+  protected zoomOut(_: PointerEvent): void {
     this.zoomFn(false);
   };
 

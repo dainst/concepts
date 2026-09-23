@@ -1,14 +1,14 @@
 import {HttpParams} from '@angular/common/http';
 import {ConceptSelector} from 'concepts-common/interfaces/search';
 
-const parametrize = (k: string, v: any, prefix: string = ''): [string, string][] => {
+const parametrize = (k: string, v: unknown, prefix: string = ''): [string, string][] => {
   switch (typeof v) {
-    case "bigint":
-    case "string":
-    case "boolean":
-    case "number":
+    case 'bigint':
+    case 'string':
+    case 'boolean':
+    case 'number':
       return [[`${prefix}${k}`, String(v)]];
-    case "object":
+    case 'object':
       if (Array.isArray(v)) {
         return v
           .flatMap(e => parametrize(`${prefix}${k}`, e));
@@ -20,14 +20,14 @@ const parametrize = (k: string, v: any, prefix: string = ''): [string, string][]
         .entries(v)
         .map(([ok, ov]) => parametrize(`${prefix}${ok}`, ov, `${k}.`))
         .flat();
-    case "function":
-    case "symbol":
-      throw new Error(`could not serialize ${v}`);
-    case "undefined":
+    case 'function':
+    case 'symbol':
+      throw new Error(`could not serialize ${v.toString()}`);
+    case 'undefined':
     default:
       return [];
   }
-}
+};
 
 export const searchToHttpParams = (searchQuery: ConceptSelector): HttpParams =>
   Object.entries(searchQuery)

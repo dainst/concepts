@@ -12,7 +12,7 @@ import {Concept} from 'concepts-common/interfaces/concept';
     Timeline
   ],
   templateUrl: './concept-view-timeline.component.html',
-  styleUrl: './concept-view-timeline.component.css',
+  styleUrl: './concept-view-timeline.component.css'
 })
 export class ConceptViewTimeline extends ConceptViewComponent implements AfterViewInit {
   private readonly bs = inject(Backend);
@@ -20,7 +20,7 @@ export class ConceptViewTimeline extends ConceptViewComponent implements AfterVi
 
   readonly data: ResourceRef<Concept[]|undefined> = rxResource({
     params: () => this.concept(),
-    stream: ({ params }) =>
+    stream: ({params}) =>
       this.bs.search({domain: params.domain, limit: 10000, shards: ['temporal_extends', 'relations']})
         .pipe(map(r => r.results))
   });
@@ -28,7 +28,7 @@ export class ConceptViewTimeline extends ConceptViewComponent implements AfterVi
   // TODO this is ugly. use the real id
   protected selected = computed<string>(() => this.concept().id.id + '-' + this.concept().id.type);
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.viewInitialized.set(true);
   }
 }

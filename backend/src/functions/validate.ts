@@ -14,10 +14,10 @@ const check = <T>(name: string, value: T, checks: Array<(v: T) => string|null>):
   checks
     .map(check => check(value))
     .filter(e => e != null)
-    .map(i => `[${name}] ${i}`)
+    .map(i => `[${name}] ${i}`);
 
 const checkPoint = (name: string, pointStr: string): string[] => {
-  const issues = getIssues(pointStr)
+  const issues = getIssues(pointStr);
   if (issues.length) return issues.map(i => `[${name}] ${i.message}`);
   const point = JSON.parse(pointStr);
   if (!('type' in point)) return [`[${name}] invalid point string (GeoJSON)`];
@@ -40,7 +40,7 @@ export const validateGeographicalExtends = (ge: GeographicalExtend): string[] =>
     checkMin(0),
     checkMax(100)
   ]),
-  ...(ge.shape ? getIssues(ge.shape).map(i => `[shape] ${i.message}`) : []),
+  ...(ge.shape ? getIssues(ge.shape).map(i => `[shape] ${i.message}`) : [])
 ];
 
 export const validateLabel = (label: Label): string[] => [

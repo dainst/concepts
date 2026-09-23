@@ -10,7 +10,7 @@ import {
 } from '@angular/forms';
 import {GeographicalExtend} from 'concepts-common/interfaces/concept';
 import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-validation';
-import {JsonPipe, KeyValuePipe} from '@angular/common';
+import {KeyValuePipe} from '@angular/common';
 import {NgbAlert, NgbCollapse, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {check, HintError} from '@placemarkio/check-geojson';
 
@@ -21,14 +21,13 @@ import {check, HintError} from '@placemarkio/check-geojson';
     BootstrapFormValidationDirective,
     FormsModule,
     ReactiveFormsModule,
-    JsonPipe,
     KeyValuePipe,
     NgbAlert,
     NgbCollapse,
     NgbTooltip
   ],
   templateUrl: './edit-geographical-extend.component.html',
-  styleUrl: './edit-geographical-extend.component.css',
+  styleUrl: './edit-geographical-extend.component.css'
 })
 export class EditGeographicalExtend {
   readonly remove = output<void>();
@@ -57,21 +56,22 @@ export class EditGeographicalExtend {
       if (e instanceof HintError) {
         return {invalidGeoJSON: e.issues.map(i => i.message)};
       }
-      return {invalidGeoJSON: "Unknown Error"};
+      return {invalidGeoJSON: 'Unknown Error'};
     }
     return null;
-  }
+  };
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   static value2Form = (fb: NonNullableFormBuilder, ge: GeographicalExtend|undefined = undefined) => {
     const getCenterCoordinates = (ge: GeographicalExtend|undefined): [number, number] => {
       if (!ge) return [0, 0];
       let geoJSON: ReturnType<typeof check>;
       try {
         geoJSON = check(ge.center);
-      } catch (e) {
-        throw new Error("Invalid GeoJSON for center");
+      } catch (_) {
+        throw new Error('Invalid GeoJSON for center');
       }
-      if (geoJSON.type !== 'Point') throw new Error("Invalid center, type must be Point");
+      if (geoJSON.type !== 'Point') throw new Error('Invalid center, type must be Point');
       return [geoJSON.coordinates[1], geoJSON.coordinates[0]];
     };
     const center = getCenterCoordinates(ge);
@@ -81,9 +81,9 @@ export class EditGeographicalExtend {
       shape: [ge?.shape || '', EditGeographicalExtend.isValidGeoJSON('MultiPolygon')],
       certainty: [ge?.certainty || 100, [Validators.min(-0), Validators.max(100)]],
       precision: [ge?.precision || 100, [Validators.min(-0), Validators.max(100)]],
-      id: [ge?.id ?? ''],
+      id: [ge?.id ?? '']
     });
-  }
+  };
 
   static form2Value = (
     ge: ReturnType<ReturnType<typeof EditGeographicalExtend.value2Form>['getRawValue']>
@@ -96,7 +96,7 @@ export class EditGeographicalExtend {
         ...{id: ge.id ? ge.id : undefined}
       });
 
-  protected formatJSON() {
+  protected formatJSON(): void {
     const rawValue = this.form().controls.shape.getRawValue();
     if (!rawValue) return;
     const valueObj = JSON.parse(rawValue);

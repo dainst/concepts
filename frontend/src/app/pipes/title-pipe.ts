@@ -5,7 +5,7 @@ import {map, Observable} from 'rxjs';
 import {stringifyId} from 'concepts-common/functions/concept-id';
 
 @Pipe({
-  name: 'title',
+  name: 'title'
 })
 export class TitlePipe implements PipeTransform {
   private readonly ts = inject(TitleService);

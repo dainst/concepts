@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { EditRelation } from './edit-relation.component';
+import {EditRelation} from './edit-relation.component';
 
 describe('EditRelations', () => {
   let component: EditRelation;
@@ -8,7 +8,7 @@ describe('EditRelations', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditRelation],
+      imports: [EditRelation]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EditRelation);

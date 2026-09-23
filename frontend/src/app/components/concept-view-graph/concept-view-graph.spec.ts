@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ConceptViewGraph } from './concept-view-graph';
+import {ConceptViewGraph} from './concept-view-graph';
 
 describe('ConceptViewGraph', () => {
   let component: ConceptViewGraph;
@@ -8,7 +8,7 @@ describe('ConceptViewGraph', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConceptViewGraph],
+      imports: [ConceptViewGraph]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConceptViewGraph);

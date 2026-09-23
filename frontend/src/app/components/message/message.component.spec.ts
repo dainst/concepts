@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { MessageComponent } from './message.component';
+import {MessageComponent} from './message.component';
 
 describe('ErrorComponent', () => {
   let component: MessageComponent;
@@ -8,7 +8,7 @@ describe('ErrorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MessageComponent],
+      imports: [MessageComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MessageComponent);

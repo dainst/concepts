@@ -1,23 +1,26 @@
 import {Injectable} from '@nestjs/common';
-import { createHash } from "node:crypto";
-import {QueryResult} from 'pg';
+import {createHash} from 'node:crypto';
 import {
   CachedObjectType,
   CacheServiceResponse,
   CacheServiceStore,
-  CacheServiceStoreKey,
-  CacheStore
+  CacheServiceStoreKey
 } from '../../interfaces/cache';
 
 @Injectable()
 export class CacheService {
   private readonly stores: CacheServiceStore = {
-    result: <CacheStore<QueryResult>>{
+    concepts: {
       max: 3,
       items: {},
       keys: []
+    },
+    count: {
+      max: 33,
+      items: {},
+      keys: []
     }
-  } ;
+  };
 
   pop<T extends CacheServiceStoreKey>(
     store: T
@@ -31,11 +34,13 @@ export class CacheService {
     store: T,
     key: string,
     data: CachedObjectType<T>,
-    hash: undefined | string = undefined
+    hash: undefined | string = undefined,
   ): string {
-    if (this.stores[store].keys.length >= this.stores[store].max) this.pop(store);
+    if (this.stores[store].keys.length >= this.stores[store].max)
+      this.pop(store);
     hash = hash ?? createHash('md5').update(key).digest('hex');
-    if (!this.stores[store].keys.includes(hash)) this.stores[store].keys.push(hash);
+    if (!this.stores[store].keys.includes(hash))
+      this.stores[store].keys.push(hash);
     this.stores[store].items[hash] = data;
     return hash;
   }
@@ -48,7 +53,7 @@ export class CacheService {
     return {
       hash,
       result: <CachedObjectType<T>>this.stores[store].items[hash],
-      storeCount: this.stores[store].keys.length
+      storeCount: this.stores[store].keys.length,
     };
   }
 
@@ -59,7 +64,7 @@ export class CacheService {
     return {
       hash,
       result: <CachedObjectType<T>>this.stores[store].items[hash],
-      storeCount: this.stores[store].keys.length
+      storeCount: this.stores[store].keys.length,
     };
   }
 }

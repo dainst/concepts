@@ -19,7 +19,7 @@ export const graphExpansionProfiles: {[id: string]: GraphExpansionProfile} = {
   full: {
     __default: 200
   }
-}
+};
 
 export const graphColorProfiles: {[id: string]: GraphColorProfile} = {
   none: {
@@ -33,5 +33,5 @@ export const graphColorProfiles: {[id: string]: GraphColorProfile} = {
   },
   domain: {
     colorizeNodesBy: 'domain'
-  },
-}
+  }
+};

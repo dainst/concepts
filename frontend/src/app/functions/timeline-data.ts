@@ -1,5 +1,5 @@
 import {Period, PeriodGroup, PeriodsMap, TimeLineData, Domain} from '../interfaces/timeline';
-import {Concept, ConceptAbstract, ConceptId} from 'concepts-common/interfaces/concept';
+import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 
 export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
   const getRelated = (concept: Concept, rId: string): ConceptId[] =>
@@ -10,7 +10,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
 
   const first = <T>(array: T[]): T | undefined => {
     return array.length ? array[0] : undefined;
-  }
+  };
 
   const serializeId = (id: ConceptId): string =>
     `${id.id}-${id.type}`; // TODO find a better way of serialization or use the id obj.
@@ -37,7 +37,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       groupRow: -1,
       periodGroup: createGroup()
     };
-  }
+  };
 
   const determinePeriodRows = (periods: Period[], periodsMap: PeriodsMap): void => {
     const periodGroups = assignPeriodsToGroups(periods, periodsMap);
@@ -62,7 +62,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
         }
       }
     }
-  }
+  };
 
   const assignPeriodsToGroups = (periods: Period[], periodsMap: PeriodsMap): PeriodGroup[] => {
     periods.sort((a, b) => {
@@ -92,16 +92,16 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       addSuccessorToGroup(periods[i], periodsMap, periodGroups);
 
     return periodGroups;
-  }
+  };
 
-  const getRootPeriod = (period: Period, periodsMap: PeriodsMap) => {
+  const getRootPeriod = (period: Period, periodsMap: PeriodsMap): Period => {
     while (period.parent && period.parent[0]) {
       if (period.parent[0] in periodsMap)
         period = periodsMap[period.parent[0]];
       else break;
     }
     return period;
-  }
+  };
 
   const createGroup = (groupNumber: number = -1): PeriodGroup => {
     return {
@@ -112,9 +112,9 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       from: NaN,
       to: NaN
     };
-  }
+  };
 
-  const addToGroup = (period: Period, periodsMap: PeriodsMap, group: PeriodGroup, row: number, hierarchyLevel: number, periodGroups: PeriodGroup[]) => {
+  const addToGroup = (period: Period, periodsMap: PeriodsMap, group: PeriodGroup, row: number, hierarchyLevel: number, periodGroups: PeriodGroup[]): void => {
     if (period.periodGroup.number !== -1) return;
 
     setPeriodGroup(period, group, row, hierarchyLevel);
@@ -130,9 +130,9 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
           periodGroups);
       }
     }
-  }
+  };
 
-  const addSuccessorToGroup = (period: Period, periodsMap: PeriodsMap, periodGroups: PeriodGroup[]) => {
+  const addSuccessorToGroup = (period: Period, periodsMap: PeriodsMap, periodGroups: PeriodGroup[]): void => {
     if (period.successor && period.successor in periodsMap && period.id !== period.successor) {
       const successor = periodsMap[period.successor];
       if (successor.periodGroup && successor.periodGroup.periodsCount === 1) {
@@ -141,9 +141,9 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
         addSuccessorToGroup(successor, periodsMap, periodGroups);
       }
     }
-  }
+  };
 
-  const setPeriodGroup = (period: Period, group: PeriodGroup, row: number, hierarchyLevel: number) => {
+  const setPeriodGroup = (period: Period, group: PeriodGroup, row: number, hierarchyLevel: number): void => {
     period.periodGroup = group;
     period.groupRow = row;
     if (!group.rows[row]) group.rows[row] = [];
@@ -153,7 +153,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
 
     if (isNaN(group.from) || group.from > period.from) group.from = period.from;
     if (isNaN(group.to) || group.to < period.to) group.to = period.to;
-  }
+  };
 
   const doesPeriodFitInRow = (period: Period, row: Period[]): boolean => {
     for (let i in row) {
@@ -162,7 +162,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       }
     }
     return true;
-  }
+  };
 
   const doesPeriodGroupFitInRow = (group: PeriodGroup, rowNumber: number, rows: Period[][]): boolean => {
     for (let i = rowNumber; i < rowNumber + group.rows.length; i++) {
@@ -175,9 +175,9 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       }
     }
     return true;
-  }
+  };
 
-  const putPeriodGroupToRow = (group: PeriodGroup, rowNumber: number, rows: Period[][]) => {
+  const putPeriodGroupToRow = (group: PeriodGroup, rowNumber: number, rows: Period[][]): void => {
     group.startRow = rowNumber;
     for (let i = 0; i < group.rows.length; i++) {
       for (let j in group.rows[i]) {
@@ -186,7 +186,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
         rows[rowNumber + i].push(group.rows[i][j]);
         rows[rowNumber + i].sort(function (a, b) {
           const diff = a.from - b.from;
-          if (diff == 0) {
+          if (diff === 0) {
             return b.number - a.number;
           } else {
             return diff;
@@ -194,7 +194,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
         });
       }
     }
-  }
+  };
 
   const getColorGroupNumber = (currentColorGroupNumber: number, group: PeriodGroup, rows: Period[][]): number => {
     let colorGroupNumber = currentColorGroupNumber;
@@ -203,7 +203,7 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       colorGroupNumber = (colorGroupNumber === 10) ? 1 : colorGroupNumber + 1;
     } while (doAdjacentPeriodGroupsHaveColorGroup(group, colorGroupNumber, rows) && loops++ < 10);
     return colorGroupNumber;
-  }
+  };
 
   const doAdjacentPeriodGroupsHaveColorGroup = (group: PeriodGroup, colorGroupNumber: number, rows: Period[][]): boolean => {
     const startRow = (group.startRow === 0) ? 0 : group.startRow - 1;
@@ -229,22 +229,22 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
       }
     }
     return false;
-  }
+  };
 
   const intersects = (from1: number, to1: number, from2: number, to2: number): boolean => {
     if (from1 <= from2 && to1 >= from2) return true;
     if (from1 <= to2 && to1 >= to2) return true;
     if (from1 >= from2 && to1 <= to2) return true;
     return false;
-  }
+  };
 
-  const setColorGroup = (group: PeriodGroup, colorGroupNumber: number) => {
+  const setColorGroup = (group: PeriodGroup, colorGroupNumber: number): void => {
     for (let i in group.rows) {
       for (let j in group.rows[i]) {
         group.rows[i][j].colorGroup = colorGroupNumber;
       }
     }
-  }
+  };
 
   const periodsToDisplay: Period[] = [];
   const periodsMap: PeriodsMap = {};
@@ -268,4 +268,4 @@ export const prepareTimelineData = (concepts: Concept[]): TimeLineData => {
     periodsMap: periodsMap,
     xDomain: xDomain
   };
-}
+};

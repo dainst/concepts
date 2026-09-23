@@ -19,7 +19,7 @@ import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-
     BootstrapFormValidationDirective
   ],
   templateUrl: './edit-relation.component.html',
-  styleUrl: './edit-relation.component.css',
+  styleUrl: './edit-relation.component.css'
 })
 export class EditRelation {
   readonly remove = output<void>();
@@ -35,12 +35,13 @@ export class EditRelation {
     = (control: AbstractControl<ConceptId|string>): ValidationErrors | null =>
    isConceptId(control.value) && !!control.value.id && !!control.value.type ? null : {invalidConcept: true};
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   static value2Form = (fb: NonNullableFormBuilder, r: RelationWithOutSubject|undefined = undefined) => {
     return fb.group({
       predicate: [r?.predicate ?? {id: '', type: ''}, EditRelation.validConcept],
       object: [r?.object ?? {id: '', type: ''}, EditRelation.validConcept]
     });
-  }
+  };
 
   static form2Value = (
     r: ReturnType<ReturnType<typeof EditRelation.value2Form>['getRawValue']>

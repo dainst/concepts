@@ -9,14 +9,7 @@ export const getPreferredLabel = (labels: Label[], type: LabelType, settings: Se
     ?? {label: '', transliteration: '', language: 'xxx', type},
     settings
   );
-}
+};
+
 export const getPreferredTransliteration = (label: Label, settings: Settings): string =>
   settings.preferTransliteration ? (label.transliteration || label.label) : label.label;
-
-export const getPreferredLabels = (labels: Label[], settings: Settings): PreferredLabels =>
-  Object
-    .fromEntries(
-      labelTypes
-        .map(ltype => [ltype, getPreferredLabel(labels, ltype, settings)])
-        .filter(entry => !!entry[1])
-    );

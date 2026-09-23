@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ConceptViewRaw } from './concept-view-raw';
+import {ConceptViewRaw} from './concept-view-raw';
 
 describe('ConceptViewRaw', () => {
   let component: ConceptViewRaw;
@@ -8,7 +8,7 @@ describe('ConceptViewRaw', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConceptViewRaw],
+      imports: [ConceptViewRaw]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ConceptViewRaw);
