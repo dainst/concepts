@@ -2,7 +2,7 @@ import {Component, computed, inject, ResourceRef, Signal} from '@angular/core';
 import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
 import {flatten} from '../../functions/object';
 import {JsonPipe} from '@angular/common';
@@ -18,7 +18,7 @@ import {JsonPipe} from '@angular/common';
 export class Results {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly bs = inject(Backend);
+  private readonly bs = inject(BackendService);
 
   readonly pageNr = computed(() => {
     const result = this.result.value();

@@ -2,13 +2,13 @@ import {inject, Service} from '@angular/core';
 import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {BehaviorSubject, map, Observable, Subscription} from 'rxjs';
 import {stringifyId} from 'concepts-common/functions/concept-id';
-import {Backend} from './backend';
+import {BackendService} from './backend.service';
 
 // TODO: merge this with language service and the similar functionality from graph and timeline
 
 @Service()
 export class TitleService {
-  private bs = inject(Backend);
+  private bs = inject(BackendService);
 
   private readonly cache: {
     [type: string]: {

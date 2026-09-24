@@ -1,5 +1,5 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import {TitleService} from '../services/title';
+import {TitleService} from '../services/title.service';
 import {ConceptId} from 'concepts-common/interfaces/concept';
 import {map, Observable} from 'rxjs';
 import {stringifyId} from 'concepts-common/functions/concept-id';

@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import {NgbHighlight, NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
 import {debounceTime, distinctUntilChanged, filter, map, Observable, OperatorFunction, withLatestFrom} from 'rxjs';
-import {LanguagesService} from '../../services/languages';
+import {LanguagesService} from '../../services/languages.service';
 import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-validation';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {Language} from '../../interfaces/forms';

@@ -10,7 +10,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import * as d3 from 'd3';
 import {DragBehavior, SubjectPosition} from 'd3';
 import {
@@ -44,7 +44,7 @@ import {RouterLink} from '@angular/router';
 })
 export class ConceptViewGraph extends ConceptViewComponent implements AfterViewInit, OnDestroy {
   @ViewChild('graph', {static: true}) graphContainer!: ElementRef;
-  private readonly bs = inject(Backend);
+  private readonly bs = inject(BackendService);
   private readonly fb = inject(FormBuilder);
   private viewInitialized = signal(false); // TODO make obsolete and replace by d3?
   protected settingsPaneOpen = signal(false);

@@ -2,7 +2,7 @@ import {Component, computed, inject, signal, Signal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import {JsonPipe, NgComponentOutlet} from '@angular/common';
 import {ConceptId} from 'concepts-common/interfaces/concept';
 import {ConceptMenuEntry} from '../../interfaces/ui';
@@ -14,8 +14,8 @@ import {ConceptViewMap} from '../concept-view-map/concept-view-map';
 import {ViewMap} from '../../interfaces/views';
 import {getAvailableViews} from '../../functions/available-views';
 import {ConceptViewGraph} from '../concept-view-graph/concept-view-graph';
-import {ConceptViewHistory} from '../concept-history/concept-history';
 import {ConceptViewEdit} from '../concept-view-edit/concept-view-edit';
+import {ConceptViewHistory} from '../concept-view-history/concept-history';
 
 const viewsMap: ViewMap<ConceptMenuEntry> = {
   map: {
@@ -63,7 +63,7 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
 })
 export class ConceptComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly bs = inject(Backend);
+  private readonly bs = inject(BackendService);
 
   readonly menu: Signal<ConceptMenuEntry[]> =
     computed(() =>

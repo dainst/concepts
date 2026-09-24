@@ -2,7 +2,7 @@ import {AfterViewInit, Component, computed, inject, ResourceRef, signal} from '@
 import {ConceptViewComponent} from '../concept-view';
 import {Timeline} from '../timeline/timeline';
 import {rxResource} from '@angular/core/rxjs-interop';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import {map} from 'rxjs';
 import {Concept} from 'concepts-common/interfaces/concept';
 
@@ -15,7 +15,7 @@ import {Concept} from 'concepts-common/interfaces/concept';
   styleUrl: './concept-view-timeline.component.css'
 })
 export class ConceptViewTimeline extends ConceptViewComponent implements AfterViewInit {
-  private readonly bs = inject(Backend);
+  private readonly bs = inject(BackendService);
   private viewInitialized = signal(false);
 
   readonly data: ResourceRef<Concept[]|undefined> = rxResource({

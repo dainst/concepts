@@ -1,9 +1,9 @@
 import {Routes} from '@angular/router';
-import {About} from './components/pages/about/about';
-import {StatusComponent} from './components/pages/status/status.component';
 import {ConceptComponent} from './components/concept/concept.component';
 import {Results} from './components/results/results';
-import {NewConcept} from './components/new-concept/new-concept';
+import {StatusComponent} from './components/page-status/status.component';
+import {About} from './components/page-about/about';
+import {NewConcept} from './components/concept-new/new-concept';
 
 export const routes: Routes = [
   {path: 'pages/about', component: About},

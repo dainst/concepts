@@ -9,7 +9,7 @@ import {RetryConfig} from 'rxjs/internal/operators/retry';
 import {isConceptId} from 'concepts-common/functions/concept.typeguards';
 
 @Service()
-export class Backend {
+export class BackendService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:3000/';
 
@@ -25,17 +25,17 @@ export class Backend {
 
   getConcept(type: string, id: string): Observable<Concept> {
     return this.http.get<Concept>(this.api + `concept/${type}/${id}`)
-      .pipe(retry(Backend.retryConfig));
+      .pipe(retry(BackendService.retryConfig));
   }
 
   search(searchQuery: ConceptSelector): Observable<SearchResult> {
     return this.http.get<SearchResult>(this.api + `search`, {params: searchToHttpParams(searchQuery)})
-      .pipe(retry(Backend.retryConfig));
+      .pipe(retry(BackendService.retryConfig));
   }
 
   getHistory(type: string, id: string): Observable<ConceptHistory> {
     return this.http.get<ConceptHistory>(this.api + `history/${type}/${id}`)
-      .pipe(retry(Backend.retryConfig));
+      .pipe(retry(BackendService.retryConfig));
   }
 
   upcertConcept(concept: Concept): Observable<{new: boolean, id: ConceptId}> {

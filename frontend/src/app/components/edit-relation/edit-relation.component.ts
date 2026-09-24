@@ -7,7 +7,7 @@ import {
   ReactiveFormsModule, ValidationErrors
 } from '@angular/forms';
 import {ConceptId, RelationWithOutSubject} from 'concepts-common/interfaces/concept';
-import {SelectConceptComponent} from '../select-concept/select-concept';
+import {SelectConcept} from '../select-concept/select-concept';
 import {isConceptId} from 'concepts-common/functions/concept.typeguards';
 import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-validation';
 
@@ -15,7 +15,7 @@ import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-
   selector: 'app-edit-relation',
   imports: [
     ReactiveFormsModule,
-    SelectConceptComponent,
+    SelectConcept,
     BootstrapFormValidationDirective
   ],
   templateUrl: './edit-relation.component.html',

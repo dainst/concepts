@@ -1,7 +1,8 @@
 import {Component, OnInit, signal} from '@angular/core';
-import {Timeline} from '../../timeline/timeline';
 import {Concept} from 'concepts-common/interfaces/concept';
-import {dummyConceptGenerator} from '../../timeline/dummy-data';
+import {dummyConceptGenerator} from '../timeline/dummy-data';
+import {Timeline} from '../timeline/timeline';
+
 
 @Component({
   selector: 'app-about',

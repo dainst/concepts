@@ -13,9 +13,9 @@ import {
   switchMap,
   tap
 } from 'rxjs';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import {ConceptSelector} from 'concepts-common/interfaces/search';
-import {TitleService} from '../../services/title';
+import {TitleService} from '../../services/title.service';
 import {TitlePipe} from '../../pipes/title-pipe';
 import {stringifyId} from 'concepts-common/functions/concept-id';
 
@@ -32,8 +32,8 @@ import {stringifyId} from 'concepts-common/functions/concept-id';
   ],
   styleUrl: './select-concept.css'
 })
-export class SelectConceptComponent implements FormValueControl<ConceptId> {
-  private bs = inject(Backend);
+export class SelectConcept implements FormValueControl<ConceptId> {
+  private bs = inject(BackendService);
   private ts = inject(TitleService);
   value = model<ConceptId>({id: '', type: ''});
   searchBase = input<ConceptSelector>({});

@@ -1,6 +1,6 @@
 import {TestBed} from '@angular/core/testing';
 
-import {LanguagesService} from './languages';
+import {LanguagesService} from './languages.service';
 
 describe('Languages', () => {
   let service: LanguagesService;

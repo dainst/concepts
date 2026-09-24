@@ -1,7 +1,7 @@
 import {Component, inject, Signal} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import {forkJoin, map, Observable, of, switchMap} from 'rxjs';
 import {ConceptId} from 'concepts-common/interfaces/concept';
 import {SearchResult} from 'concepts-common/interfaces/search';
@@ -13,7 +13,7 @@ import {SearchResult} from 'concepts-common/interfaces/search';
   styleUrl: './concept-abstract.css'
 })
 export class ConceptAbstract extends ConceptViewComponent {
-  private readonly bs = inject(Backend);
+  private readonly bs = inject(BackendService);
 
   /**
    * we load the titles of every id and related concept with their own call

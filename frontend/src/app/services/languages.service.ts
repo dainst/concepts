@@ -1,11 +1,11 @@
 import {inject, Service} from '@angular/core';
-import {Backend} from './backend';
+import {BackendService} from './backend.service';
 import {map, Observable, shareReplay, take} from 'rxjs';
 import {Concept} from 'concepts-common/interfaces/concept';
 
 @Service()
 export class LanguagesService {
-  readonly bs = inject(Backend);
+  readonly bs = inject(BackendService);
   public readonly languages$: Observable<Concept[]>;
   constructor() {
     this.languages$ = this.bs.search({type: 'language', shards: ['title'], limit: 300, forceCache: true})

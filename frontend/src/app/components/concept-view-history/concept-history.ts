@@ -1,7 +1,7 @@
 import {Component, inject} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {rxResource} from '@angular/core/rxjs-interop';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import {map} from 'rxjs';
 import {DatePipe, JsonPipe} from '@angular/common';
 import {RouterLink} from '@angular/router';
@@ -17,7 +17,7 @@ import {RouterLink} from '@angular/router';
   styleUrl: './concept-history.css'
 })
 export class ConceptViewHistory extends ConceptViewComponent {
-  private readonly bs = inject(Backend);
+  private readonly bs = inject(BackendService);
   protected readonly history =  rxResource({
     params: () => this.concept(),
     stream: ({params}) =>

@@ -9,7 +9,7 @@ import {
   NgbAccordionItem
 } from '@ng-bootstrap/ng-bootstrap';
 import {EditLabel} from '../edit-label/edit-label';
-import {Backend} from '../../services/backend';
+import {BackendService} from '../../services/backend.service';
 import {Concept} from 'concepts-common/interfaces/concept';
 import {lastValueFrom} from 'rxjs';
 import {Router} from '@angular/router';
@@ -39,7 +39,7 @@ import {packRelationSets, unpackRelationSet} from 'concepts-common/functions/rel
 })
 export class ConceptViewEdit extends ConceptViewComponent {
   private readonly fb = inject(NonNullableFormBuilder);
-  private readonly bs = inject(Backend);
+  private readonly bs = inject(BackendService);
   private readonly router = inject(Router);
   private readonly ms = inject(MessageService);
 
