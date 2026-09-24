@@ -157,7 +157,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       [],
       selector.forceCache ? 'concepts' : null
     );
-    const correctRows = res.rows.filter(isConceptRow);
+    const correctRows = res.rows
+      // .filter(isConceptRow);
     if (correctRows.length < res.rows.length)
       throw new ApiError('internal-server-error', ['Not found']); // TODO better error
     return correctRows;
