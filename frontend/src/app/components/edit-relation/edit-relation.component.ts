@@ -27,7 +27,6 @@ export class EditRelation {
     FormGroup<{
       predicate: FormControl<ConceptId>;
       object: FormControl<ConceptId>;
-      id: FormControl<string>;
     }>
   >();
 
