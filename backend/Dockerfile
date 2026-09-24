@@ -1,15 +1,31 @@
-FROM node:26-trixie-slim
+# run from project root!
 
-WORKDIR /common
-COPY ../* ./
+FROM node:26-trixie-slim AS builder
+
+COPY common /common
+COPY backend/package*.json /app/.
+COPY backend/tsconfig*.json /app/.
+COPY backend/nest-cli.json /app/nest-cli.json
+COPY backend/src /app/src
 
 WORKDIR /app
 
-COPY package*.json ./
+RUN npm ci
+RUN npm run build
 
-RUN npm install
+FROM node:26-trixie-slim AS production
+RUN mkdir /app
 
-COPY src .
-COPY *.json .
+COPY backend/package*.json /app/.
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/dist /app/.
+
+CMD ["node", "main.js"]
 
 EXPOSE 3000
+
