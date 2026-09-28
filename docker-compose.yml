@@ -8,16 +8,14 @@ services:
 #    volumes:
 #      - ./frontend:/app
 #      - ./common:/common
-    ports:
-      - "81:80" # TODO move to dev
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ics-ac-oauth.entrypoints=websecure"
+#      - "traefik.http.routers.ics-ac-oauth.entrypoints=websecure"
 #      - "traefik.http.routers.ics-ac-oauth.tls=true"
 #      - "traefik.http.routers.ics-ac-oauth.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
-      - "traefik.http.routers.ics-ac-oauth.rule=Host(`${SERVER_NAME}`)"
-      - "traefik.http.routers.ics-ac-oauth.middlewares=security-headers"
-#      - "traefik.docker.network=app-net"
+      - "traefik.http.routers.concepts-frontend.rule=Host(`${SERVER_NAME:-localhost}`)"
+#      - "traefik.http.routers.ics-ac-oauth.middlewares=security-headers"
+      - "traefik.http.services.concepts-frontend.loadbalancer.server.port=80"
 
   backend:
     build:
@@ -25,8 +23,6 @@ services:
       dockerfile: backend/Dockerfile
       target: production
     container_name: concepts-backend
-    ports:
-      - "3000:3000" # TODO move to dev
 #    volumes:
 #      - ./backend:/app
 #      - /app/node_modules
@@ -39,45 +35,77 @@ services:
       - DATABASE_NAME=app_db
     depends_on:
       - database
+    labels:
+      - "traefik.enable=true"
+      #      - "traefik.http.routers.ics-ac-oauth.entrypoints=websecure"
+      #      - "traefik.http.routers.ics-ac-oauth.tls=true"
+      #      - "traefik.http.routers.ics-ac-oauth.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
+      #      - "traefik.http.routers.ics-ac-oauth.middlewares=security-headers"
+      - "traefik.http.routers.concepts-backend.rule=Host(`${SERVER_NAME:-localhost}`) && PathPrefix(`/api`)"
+      - "traefik.http.services.concepts-backend.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.concepts-backend-strip-api.stripprefix.prefixes=/api"
+      - "traefik.http.routers.concepts-backend.middlewares=concepts-backend-strip-api"
 
   traefik:
     image: traefik:v3.6
+    container_name: concepts-traefik
     restart: always
     ports:
-      - "${HTTP_PORT}:80"
+      - "${HTTP_PORT:-80}:80"
+      - "8080:8080" # traefik dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    command:
+      - "--global.checknewversion=false"
+      - "--global.sendAnonymousUsage=false"
+      - "--entrypoints.web.address=:80"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--providers.docker.watch=true"
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.4
-    restart: always
-    depends_on:
-      database:
-        condition: service_healthy
-    command: [
-      'start',
-      '--proxy-headers', 'xforwarded',
-      '--http-enabled', 'true',
-      '--import-realm'
-    ]
-    environment:
-      KEYCLOAK_LOGLEVEL: INFO
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
-      KC_HOSTNAME: keycloak.${SERVER_NAME}
-      KC_HEALTH_ENABLED: 'true'
-      KC_METRICS_ENABLED: 'true'
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${ADMIN_NAME}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      KEYCLOAK_EXTRA_ARGS_PREPENDED: "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:26.4
+#    restart: always
+#    depends_on:
+#      database:
+#        condition: service_healthy
+#    command: [
+#      'start',
+#      '--proxy-headers', 'xforwarded',
+#      '--http-enabled', 'true',
+#      '--import-realm'
+#    ]
+#    environment:
+#      KEYCLOAK_LOGLEVEL: INFO
+#      KC_DB: postgres
+#      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
+#      KC_DB_USERNAME: keycloak
+#      KC_DB_PASSWORD: keycloak
+#      KC_HOSTNAME: keycloak.${SERVER_NAME}
+#      KC_HEALTH_ENABLED: 'true'
+#      KC_METRICS_ENABLED: 'true'
+#      KC_BOOTSTRAP_ADMIN_USERNAME: ${ADMIN_NAME}
+#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+#      KEYCLOAK_EXTRA_ARGS_PREPENDED: "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
 #    env_file:
 #      - config/keycloak/import/monitoring-realm.config
 #    volumes:
 #      - "./keycloak/realm.json:/opt/keycloak/data/import/monitoring-realm.json"
 #      - "./theme:/opt/keycloak/themes/iqb"
-
+#  labels:
+#    - "traefik.enable=true"
+#    - "traefik.http.routers.keycloak.entrypoints=websecure"
+#    - "traefik.http.routers.keycloak.tls=true"
+#    - "traefik.http.routers.keycloak.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
+#    - "traefik.http.routers.keycloak.rule=Host(`keycloak.${SERVER_NAME}`)"
+#    - "traefik.http.routers.keycloak.middlewares=security-headers"
+#    - "traefik.http.routers.keycloak.service=keycloak-traefik@docker"
+#    - "traefik.docker.network=app-net"
+#
   database:
     image: postgis/postgis:18-master
     container_name: concepts-database
@@ -88,14 +116,15 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: app_db
+      PGUSER: postgres
     volumes:
-      - concepts-database:/var/lib/postgresq
+      - concepts-database:/var/lib/postgresql
       - ./database/extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
       - ./database/app.sql:/docker-entrypoint-initdb.d/03-app.sql
       - ./database/kc.sql:/docker-entrypoint-initdb.d/04-kc.sql
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      test: [ "CMD-SHELL", "pg_isready"]
       interval: 30s
       timeout: 60s
       retries: 5

@@ -1,7 +1,7 @@
-import {Component, OnInit, signal} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {lastValueFrom} from 'rxjs';
 import {Status} from 'concepts-common/interfaces/default';
+import {BackendService} from '../../services/backend.service';
 
 @Component({
   selector: 'app-status',
@@ -10,9 +10,7 @@ import {Status} from 'concepts-common/interfaces/default';
   styleUrl: './status.component.css'
 })
 export class StatusComponent implements OnInit {
-  constructor(
-    private http: HttpClient
-  ) { }
+  private readonly bs = inject(BackendService);
 
   readonly status = signal<Status>({
     app: 'concepts-frontend',
@@ -24,7 +22,7 @@ export class StatusComponent implements OnInit {
   });
 
   private async getStatus(): Promise<void> {
-    this.status.set(await lastValueFrom(this.http.get<Status>('http://localhost:3000')));
+    this.status.set(await lastValueFrom(this.bs.getStatus()));
   }
 
   ngOnInit(): void {

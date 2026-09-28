@@ -1,4 +1,4 @@
-import {Service, inject} from '@angular/core';
+import {Service, inject, isDevMode} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {map, Observable, retry, timer} from 'rxjs';
 import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
@@ -7,11 +7,14 @@ import {searchToHttpParams} from '../functions/query-params';
 import {ConceptHistory} from 'concepts-common/interfaces/concept-history';
 import {RetryConfig} from 'rxjs/internal/operators/retry';
 import {isConceptId} from 'concepts-common/functions/concept.typeguards';
+import {Status} from 'concepts-common/interfaces/default';
 
 @Service()
 export class BackendService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:3000/';
+  private readonly api = isDevMode()
+    ? 'http://localhost:3000/'
+    : '/api/';
 
   static retryConfig: RetryConfig = {
     count: Infinity, // TODO change this in PROD
@@ -36,6 +39,10 @@ export class BackendService {
   getHistory(type: string, id: string): Observable<ConceptHistory> {
     return this.http.get<ConceptHistory>(this.api + `history/${type}/${id}`)
       .pipe(retry(BackendService.retryConfig));
+  }
+
+  getStatus(): Observable<Status> {
+    return this.http.get<Status>(this.api);
   }
 
   upcertConcept(concept: Concept): Observable<{new: boolean, id: ConceptId}> {
