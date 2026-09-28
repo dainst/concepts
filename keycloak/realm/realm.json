@@ -1,0 +1,54 @@
+{
+  "realm": "concepts",
+  "enabled": true,
+
+  "roles": {
+    "realm": [
+      {
+        "name": "user"
+      },
+      {
+        "name": "admin"
+      }
+    ]
+  },
+
+  "groups": [
+    {
+      "name": "admins"
+    }
+  ],
+
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "email": "test@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+
+  "clients": [
+    {
+      "clientId": "concepts-frontend",
+      "name": "Concepts Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false
+    }
+  ]
+}

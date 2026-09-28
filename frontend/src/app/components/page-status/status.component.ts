@@ -2,6 +2,8 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {lastValueFrom} from 'rxjs';
 import {Status} from 'concepts-common/interfaces/default';
 import {BackendService} from '../../services/backend.service';
+import {UserService} from '../../services/user.service';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-status',
@@ -11,6 +13,8 @@ import {BackendService} from '../../services/backend.service';
 })
 export class StatusComponent implements OnInit {
   private readonly bs = inject(BackendService);
+  private readonly us = inject(UserService);
+  authenticated = toSignal(this.us.authenticated$);
 
   readonly status = signal<Status>({
     app: 'concepts-frontend',

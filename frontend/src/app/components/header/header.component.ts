@@ -2,7 +2,9 @@ import {Component, inject} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap/dropdown';
-import {NgOptimizedImage} from '@angular/common';
+import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import {UserService} from '../../services/user.service';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'header',
@@ -12,7 +14,8 @@ import {NgOptimizedImage} from '@angular/common';
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    NgOptimizedImage
+    NgOptimizedImage,
+    AsyncPipe
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
@@ -20,6 +23,7 @@ import {NgOptimizedImage} from '@angular/common';
 export class Header {
   protected queryParams: { q: string} = {q: ''};
   private router = inject(Router);
+  us = inject(UserService);
 
   async search(): Promise<void> {
     await this.router.navigate(['search'], {

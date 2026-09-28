@@ -5,3 +5,7 @@
   <li>db version: {{ status().db.version }}</li>
   <li>db status: {{ status().db.status }}</li>
 </ul>
+<h2>User</h2>
+<ul>
+  <li>Authenticated: {{authenticated() ? 'yes' : 'no'}}</li>
+</ul>
