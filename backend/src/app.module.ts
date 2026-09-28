@@ -6,10 +6,11 @@ import {ConceptController} from './controllers/concept/concept.controller';
 import {SearchController} from './controllers/search/search.controller';
 import {CacheService} from './services/cache/cache.service';
 import {HistoryController} from './controllers/history/history.controller';
+import {EnvironmentService} from './services/environment/environment.service';
 
 @Module({
   imports: [],
   controllers: [AppController, StatusController, ConceptController, SearchController, HistoryController],
-  providers: [DbService, CacheService]
+  providers: [DbService, CacheService, EnvironmentService]
 })
 export class AppModule {}

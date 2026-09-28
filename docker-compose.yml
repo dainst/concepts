@@ -32,7 +32,7 @@ services:
 #      - /app/node_modules
 #      - ./common:/common
     environment:
-      - DATABASE_HOST=db
+      - DATABASE_HOST=database
       - DATABASE_PORT=5432
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres

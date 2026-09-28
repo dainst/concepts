@@ -6,5 +6,5 @@ export interface Status {
 
 export interface DBStatus {
   readonly version: string | null;
-  readonly status: 'online' | 'offline' | null;
+  readonly status: 'online' | 'offline' | null | 'connecting';
 }

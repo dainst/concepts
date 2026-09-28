@@ -29,6 +29,8 @@ import {
   CacheServiceStoreKey
 } from '../../interfaces/cache';
 import {HistoryRow} from '../../interfaces/history-row';
+import {getErrorCode, getErrorMessage} from '../../functions/error';
+import {EnvironmentService} from '../environment/environment.service';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -45,37 +47,65 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     version: null
   };
 
-  constructor(private readonly cs: CacheService) {
-    this.pool = new Pool({
-      user: 'app_user',
-      password: 'secret_password',
-      host: 'localhost',
-      port: 5432,
-      database: 'app_db'
-    }); // TODO from env
+  constructor(
+    private readonly cs: CacheService,
+    private readonly es: EnvironmentService
+  ) {
+    this.pool = new Pool(this.es.get().db);
   }
 
   async onModuleInit(): Promise<void> {
+    await this.connect();
+    this.status = await this.queryStatus();
+  }
+
+  private async connect(retries: number = 5): Promise<void> {
+    this.status = {
+      status: 'connecting',
+      version: String(6 - retries)
+    };
     try {
       types.setTypeParser(types.builtins.INT8, Number);
       await this.pool.connect();
-      console.log('Connected');
+      console.log('[DB] Connected');
+    } catch (err) {
+      console.error(`[DB] Failed to connect (attempt ${6 - retries}):`, getErrorMessage(err));
+      if (retries) return new Promise(resolve => {
+        setTimeout(
+          () => {
+            void this.connect(retries - 1).then(resolve);
+          },
+          1500
+        );
+      });
       this.status = {
-        status: 'online',
+        status: 'offline',
         version: null
       };
+      console.debug(this.es.get());
+      throw new ApiError('internal-server-error', [
+        `DB connection failed after ${6 - retries} attempts`,
+         String(getErrorCode(err))
+      ]);
+    }
+  }
+
+  private async queryStatus(): Promise<DBStatus> {
+    try {
       const result = await this.pool.query<{ val: string }>(
         "select * from meta where key = 'schema-version'"
       );
-      this.status = {
+      return {
         status: 'online',
         version: result.rows[0]?.val || null
       };
-    } catch (err) {
-      console.error('Failed to connect:', err);
-      // TODO retries...
-      // TODO Error handling
+    } catch (e) {
+      console.error(`Can not fetch DB version`, e);
     }
+    return {
+      status: 'offline',
+      version: null
+    };
   }
 
   async onModuleDestroy(): Promise<void> {
