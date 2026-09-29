@@ -43,7 +43,7 @@
         <input class="form-control me-2" type="search" [(ngModel)]="queryParams.q" name="q" />
         <button class="btn btn-primary" type="submit">Suche</button>
       </form>
-      @if (us.authenticated$ | async) {
+      @if (us.user$ | async) {
         <button class="btn btn-primary" (click)="us.logout()">
           <i class="bi bi-person-fill"></i>
         </button>

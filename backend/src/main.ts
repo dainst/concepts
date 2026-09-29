@@ -7,8 +7,8 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalFilters(new GlobalExceptionFilter());
-  const es = app.get(EnvironmentService);
 
+  const es = app.get(EnvironmentService);
   if (es.get().cors) app.enableCors();
   await app.listen(es.get().port);
 }

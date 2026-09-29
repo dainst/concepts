@@ -12,6 +12,8 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {GlobalErrorHandler} from './global-error-handler';
 import {registerLocaleData} from '@angular/common';
 import {UserService} from './services/user.service';
+import {provideHttpClient, withInterceptors} from '@angular/common/http';
+import {authInterceptor} from './interceptor/auth.interceptor';
 
 registerLocaleData(localeDe);
 
@@ -28,8 +30,9 @@ export const appConfig: ApplicationConfig = {
       provide: LOCALE_ID,
       useValue: 'de-DE'
     },
-    provideAppInitializer(() => {
-      return inject(UserService).init();
-    })
+    provideAppInitializer(() => inject(UserService).init()),
+    provideHttpClient(
+      withInterceptors([authInterceptor])
+    )
   ]
 };

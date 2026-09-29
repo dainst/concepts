@@ -8,6 +8,7 @@ import {ConceptHistory} from 'concepts-common/interfaces/concept-history';
 import {RetryConfig} from 'rxjs/internal/operators/retry';
 import {isConceptId} from 'concepts-common/functions/concept.typeguards';
 import {Status} from 'concepts-common/interfaces/default';
+import {User} from 'concepts-common/interfaces/user';
 
 @Service()
 export class BackendService {
@@ -56,5 +57,9 @@ export class BackendService {
           id: cId
         };
       }));
+  }
+
+  getUser(): Observable<User|null> {
+    return this.http.get<User|null>(this.api + `user`);
   }
 }

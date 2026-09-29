@@ -5,7 +5,15 @@
   <li>db version: {{ status().db.version }}</li>
   <li>db status: {{ status().db.status }}</li>
 </ul>
-<h2>User</h2>
+<h2>Benutzer</h2>
 <ul>
-  <li>Authenticated: {{authenticated() ? 'yes' : 'no'}}</li>
+@if (user(); as user) {
+  <li>Name: {{user.name}}</li>
+  <li>Username: {{user.username}}</li>
+  <li>Email: {{user.email}}</li>
+  <li>Gruppen: {{user.groups.join()}}</li>
+  <li>Rollen: {{user.roles.join()}}</li>
+} @else {
+  <li>Nicht authentifiziert</li>
+}
 </ul>

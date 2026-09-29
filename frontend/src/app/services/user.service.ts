@@ -1,12 +1,12 @@
 import {Service} from '@angular/core';
 import Keycloak from 'keycloak-js';
 import {BehaviorSubject, Subject} from 'rxjs';
-import {User} from '../interfaces/user';
+import {User} from 'concepts-common/interfaces/user';
 
 @Service()
 export class UserService {
-  private readonly _authenticated$: Subject<boolean> = new BehaviorSubject<boolean>(false);
-  readonly authenticated$ = this._authenticated$.asObservable();
+  private readonly _user$: Subject<User|null> = new BehaviorSubject<User|null>(null);
+  readonly user$ = this._user$.asObservable();
 
   private readonly keycloak = new Keycloak({
     url: 'http://localhost:8080',
@@ -16,14 +16,13 @@ export class UserService {
 
   async init(): Promise<void> {
     try {
-      const authenticated = await this.keycloak.init({
+      await this.keycloak.init({
         onLoad: 'check-sso',
         pkceMethod: 'S256'
       });
-      this._authenticated$.next(authenticated);
-      console.log(this.keycloak.tokenParsed);
+      this._user$.next(this.currentUser());
     } catch (e) {
-      this._authenticated$.next(false);
+      this._user$.next(null);
       throw e;
     }
   }
@@ -47,10 +46,19 @@ export class UserService {
 
   async login(): Promise<void> {
     await this.keycloak.login();
-    console.log(this.keycloak.tokenParsed);
   }
 
   async logout(): Promise<void> {
     await this.keycloak.logout();
+  }
+
+  async getToken(): Promise<string | undefined> {
+    if (!this.keycloak.authenticated) {
+      return undefined;
+    }
+
+    await this.keycloak.updateToken(30);
+
+    return this.keycloak.token;
   }
 }
