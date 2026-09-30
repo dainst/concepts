@@ -10,12 +10,13 @@
   z-index: 1050;
 }
 
-a {
+a,
+div.nav-item {
   padding: 15px 11px;
   color: white;
 }
 
-a:hover {
+.nav-item:hover {
   background-color: rgba(116, 141, 181, 0.9);
 }
 

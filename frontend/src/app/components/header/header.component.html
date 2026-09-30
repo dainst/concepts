@@ -6,21 +6,20 @@
 <!--    </button>-->
 
     <div class="pull-left">
-      <ul class="nav navbar-nav">
-        <li ngbDropdown>
+      <div class="nav navbar-nav nav-item">
+        <div ngbDropdown>
           <a href="#" ngbDropdownToggle aria-haspopup="true" aria-expanded="false">
-            <i class="bi bi-list"></i>
             <img ngSrc="img/logo_idai.png" width="57" height="38" id="brand-img" alt="logo"><!-- style="height: 38px" height="38" -->
           </a>
           <ul ngbDropdownMenu class="dropdown-menu">
-            <iframe src="https://idai.world/config/idai-nav.html" frameborder="0" style="height: 100vh; width: 200px;"></iframe>
+            <iframe src="https://idai.world/config/idai-nav.html" frameborder="0" style="width: 200px; height: 350px"></iframe>
           </ul>
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
 
     <a href="/" class="pull-left ng-binding" id="project-logo"><!-- style="height: 36px;" -->
-      <img ngSrc="img/logo_chronontology.png" width="36" height="36" priority>
+      <img ngSrc="img/logo_chronontology.png" width="36" height="36" priority alt="logo">
       <span>concepts</span>
     </a>
 
@@ -30,7 +29,7 @@
           <a class="nav-link" aria-current="page" href="#">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" aria-current="page" routerLink="/concept">Neu</a>
+
         </li>
         <li class="nav-item">
           <a class="nav-link" routerLink="/pages/about">Über</a>
@@ -39,19 +38,34 @@
           <a class="nav-link" routerLink="/pages/status">Status</a>
         </li>
       </ul>
-      <form class="d-flex" role="search" (ngSubmit)="search()">
-        <input class="form-control me-2" type="search" [(ngModel)]="queryParams.q" name="q" />
-        <button class="btn btn-primary" type="submit">Suche</button>
+      <form class="d-flex btn-group me-2" role="search" (ngSubmit)="search()">
+        <div class="input-group">
+          <input class="form-control" type="search" [(ngModel)]="queryParams.q" name="q" />
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
       </form>
-      @if (us.user$ | async) {
-        <button class="btn btn-primary" (click)="us.logout()">
-          <i class="bi bi-person-fill"></i>
-        </button>
-      } @else {
-        <button class="btn btn-primary" (click)="us.login()">
-          <i class="bi bi-person"></i>
-        </button>
-      }
+
+      <div class="nav-item">
+        @if (us.user$ | async) {
+          <div ngbDropdown>
+            <button type="button" class="nav-link" ngbDropdownToggle>
+              <i class="bi bi-person-fill"></i>
+            </button>
+            <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
+              <button ngbDropdownItem routerLink="/concept">Neues Konzept</button>
+              <button ngbDropdownItem href="#">Profil</button>
+              <hr class="dropdown-divider" />
+              <button ngbDropdownItem (click)="us.logout()">Abmelden</button>
+            </div>
+          </div>
+        } @else {
+          <button class="nav-link" (click)="us.login()">
+            <i class="bi bi-person"></i>
+          </button>
+        }
+      </div>
     </div>
   </div>
 </nav>
