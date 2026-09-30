@@ -18,6 +18,12 @@ export class EnvironmentService {
         user:
           process.env.DATABASE_USER ?? 'app_user'
       },
+      kc: {
+        url: process.env.KEYCLOAK_URL ?? 'http://localhost:8080',
+        realm: process.env.KEYCLOAK_URL ?? 'concepts',
+        clientId: process.env.KEYCLOAK_URL ?? 'concepts-backend',
+        clientSecret: process.env.KEYCLOAK_URL ?? 'development-only-secret'
+      },
       cors:
         process.env.CORS ? !!process.env.CORS : true,
       port:

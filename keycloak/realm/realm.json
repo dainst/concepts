@@ -31,6 +31,17 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "username": "service-account-concepts-backend",
+      "enabled": true,
+      "serviceAccountClientId": "concepts-backend",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users"
+        ]
+      }
     }
   ],
 
@@ -49,6 +60,20 @@
       ],
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "concepts-backend",
+      "name": "Concepts Backend",
+      "description": "Technical client for the Concepts NestJS backend",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "development-only-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "authorizationServicesEnabled": false
     }
   ]
 }

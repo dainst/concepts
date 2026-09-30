@@ -31,8 +31,8 @@ import {
 import {HistoryRow} from '../../interfaces/history-row';
 import {getErrorCode, getErrorMessage} from '../../functions/error';
 import {EnvironmentService} from '../environment/environment.service';
-import {User} from 'common/interfaces/user';
 import {Author} from '../../interfaces/author';
+import {Domain} from 'common/interfaces/domain';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -327,5 +327,16 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     // console.log(results);
 
     return concept.id;
+  }
+
+  async upcertDomain(domain: Domain): Promise<void> {
+    const commands: SqlCommand[] = [['set constraints all deferred;']];
+    commands.push(insertSql.domain(domain.id));
+    if (domain.root) {
+      commands.push(insertSql.domainRoot(domain.id, domain.root));
+    } else {
+      // TODO delete domainRoot in case
+    }
+    await this.transaction(commands);
   }
 }

@@ -186,5 +186,22 @@ export const insertSql = {
     ) on conflict do nothing`,
     name,
     email
+  ],
+
+  domain: (
+    id: string
+  ): SqlCommand => [
+    `insert into domains (id) values ($1) on conflict do nothing`,
+    id
+  ],
+
+  domainRoot: (
+    id: string,
+    conceptId: ConceptId
+  ): SqlCommand => [
+    `insert into domain_roots (domain_id, concept_type, concept_id) values ($1, $2, $3) on conflict do nothing`, // TODO on conflict do something!
+    id,
+    conceptId.type,
+    conceptId.id
   ]
 };
