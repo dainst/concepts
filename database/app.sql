@@ -33,27 +33,27 @@ create table app_label_comment (-- TODO rename to comments
   id uuid primary key default uuidv7(),
   type text,
   text text,
-  user_id uuid not null,
+  user_email text not null,
   label_id uuid not null,
   timestamp timestamp default current_timestamp,
   foreign key (label_id)
     references labels (id) deferrable initially immediate,
-  foreign key (user_id)
-    references users (id)
+  foreign key (user_email)
+    references users (email)
 );
 
 create table app_concept_comment (-- TODO rename to comments
   id uuid primary key default uuidv7(),
   type text,
   text text,
-  user_id uuid not null,
+  user_email text not null,
   concept_id text not null,
   concept_type id_type not null,
   timestamp timestamp default current_timestamp,
   foreign key (concept_id, concept_type)
     references concepts (id, type) deferrable initially immediate,
-  foreign key (user_id)
-    references users (id)
+  foreign key (user_email)
+    references users (email)
 );
 
 create table app_concept_snapshots (

@@ -64,7 +64,9 @@ create table labels (
   is_preferred boolean,
 
   foreign key (concept_id, concept_type)
-    references concepts (id, type) deferrable initially immediate
+    references concepts (id, type) deferrable initially immediate,
+
+  constraint te_unique_id_concept unique(id, concept_id, concept_type)
 );
 
 create table geographical_extends (
@@ -79,7 +81,9 @@ create table geographical_extends (
   precision smallint check (precision between 0 and 100),
 
   foreign key (concept_id, concept_type)
-    references concepts (id, type) deferrable initially immediate
+    references concepts (id, type) deferrable initially immediate,
+
+  constraint ge_unique_id_concept unique(id, concept_id, concept_type)
 );
 
 create table temporal_extends (
@@ -98,17 +102,27 @@ create table temporal_extends (
   end_certainty smallint check (end_certainty between 0 and 100),
 
   foreign key (concept_id, concept_type)
-    references concepts (id, type) deferrable initially immediate
+    references concepts (id, type) deferrable initially immediate,
+
+  constraint unique_id_concept unique(id, concept_id, concept_type)
 );
 
 create table relations (
-  id uuid primary key default uuidv7(),
   subject_id text not null,
   subject_type id_type not null,
   predicate_id text not null,
   predicate_type id_type not null,
   object_id text not null,
   object_type id_type not null,
+
+  primary key (
+    subject_id,
+    subject_type,
+    predicate_id,
+    predicate_type,
+    object_id,
+    object_type
+  ),
 
   foreign key (subject_id, subject_type)
     references concepts (id, type) deferrable initially immediate,
@@ -119,10 +133,8 @@ create table relations (
 );
 
 create table users (
-  id uuid primary key default uuidv7(),
   name text not null,
-  email text,
-  unique (name, email)
+  email text not null primary key
 );
 
 create type concept_history_event_type as enum(
@@ -143,7 +155,7 @@ create table concept_history (
   concept_id text not null,
   concept_type id_type not null,
 
-  user_id uuid not null,
+  user_email text not null,
 
   timestamp timestamp default current_timestamp,
 
@@ -151,8 +163,8 @@ create table concept_history (
   value text,
   comment text,
 
-  foreign key (user_id)
-    references users (id),
+  foreign key (user_email)
+    references users (email),
   foreign key (concept_id, concept_type)
     references concepts (id, type) deferrable initially immediate
 );
@@ -164,6 +176,6 @@ create table meta (
 
 
 
-insert into users (id, name) values ('00000000-0000-0000-0000-000000000000', 'importer');
-insert into meta (key, val) values ('schema-version', '0.3.1');
+insert into users (name, email) values ('importer', '@importer');
+insert into meta (key, val) values ('schema-version', '0.4.0');
 

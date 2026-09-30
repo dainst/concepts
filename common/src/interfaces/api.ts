@@ -5,7 +5,8 @@ export const errorResponseTypes = {
   'not-found': 404,
   'unpredicted-internal-server-error': 500,
   'framework-error': 500,
-  'invalid-data': 422
+  'invalid-data': 422,
+  'invalid-user': 403
 } as const;
 
 

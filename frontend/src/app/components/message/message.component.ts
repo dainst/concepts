@@ -14,7 +14,8 @@ const text: {[key in AppMessageType]: (params: string[]) => string} = {
   'unknown-error': p => `Unknown Error: ${p[0]}`,
   'unknown-http-error': p => `Network Error: ${p[0]}`,
   'unpredicted-internal-server-error': p => `Internal Server Error: ${p[0]}`,
-  'db-transaction-error': p => `Could not store in DB: ${p[0]}`
+  'db-transaction-error': p => `Could not store in DB: ${p[0]}`,
+  'invalid-user': p => `Invalid user: ${p[0]}`
 };
 
 const type = (mt: AppMessageType): string => {

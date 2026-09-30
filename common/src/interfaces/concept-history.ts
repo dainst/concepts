@@ -25,10 +25,9 @@ export interface ConceptHistoryEvent {
   value: string;
   comment: string;
   timestamp: number;
-  userId: string;
+  userEmail: string;
   userName: string;
   snapshotId: string | null;
-  icke: string;
 }
 
 export type ConceptHistory = ConceptHistoryEvent[];

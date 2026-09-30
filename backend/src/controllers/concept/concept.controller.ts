@@ -1,9 +1,12 @@
-import {Body, Controller, Get, Param, Post, Res} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
 import {Concept, ConceptId} from 'common/interfaces/concept';
 import {DbService} from '../../services/db/db.service';
 import {ApiError} from '../../classes/api-error';
 import {HttpAdapterHost} from '@nestjs/core';
 import {ExpressAdapter} from '@nestjs/platform-express';
+import {AuthGuard} from '../../guards/auth.guard';
+import {User} from 'common/interfaces/user';
+import {UserDecorator} from '../../decorators/user.decorator';
 
 @Controller('concept')
 export class ConceptController {
@@ -24,11 +27,18 @@ export class ConceptController {
   }
 
   @Post()
+  @UseGuards(AuthGuard)
   async put(
     @Body() concept: Concept,
-    @Res({passthrough: true}) res: Response
+    @Res({passthrough: true}) res: Response,
+    @UserDecorator() user: User | null
   ): Promise<ConceptId> {
-    const upcertedConceptId = await this.db.upcertConcept(concept);
+    if (!user) throw new UnauthorizedException();
+    if (!user.email) throw new ApiError('invalid-user', ['no mail']);
+    if (!user.name) throw new ApiError('invalid-user', ['no name']);
+    // TODO check group,
+    // TODO check domain
+    const upcertedConceptId = await this.db.upcertConcept(concept, {email: user.email, name: user.name});
     const updated = (upcertedConceptId.id === concept.id.id) && (upcertedConceptId.type === concept.id.type);
     this.httpAdapterHost.httpAdapter.status(res, updated ? 200 : 201);
     return upcertedConceptId;   // TODO: make it return the whole object

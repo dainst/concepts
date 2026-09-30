@@ -55,12 +55,12 @@ export const insertSql = {
   conceptHistory: (
     conceptId: ConceptId,
     eventType: ConceptHistoryEventType,
+    userEmail: string,
     value: string | null = null,
-    comment: string | null = null,
-    userId: string = '00000000-0000-0000-0000-000000000000' // TODO real id
+    comment: string | null = null
   ): SqlCommandWithId => [
     `insert into
-      concept_history (id, concept_id, concept_type, event, value, comment, user_id)
+      concept_history (id, concept_id, concept_type, event, value, comment, user_email)
     values ($1, $2, $3, $4, $5, $6, $7)`,
     uuidv7(),
     conceptId.id,
@@ -68,7 +68,7 @@ export const insertSql = {
     eventType,
     value,
     comment,
-    userId
+    userEmail
   ],
 
   snapshot: (
@@ -173,5 +173,18 @@ export const insertSql = {
     r.predicate.id,
     r.object.type,
     r.object.id
+  ],
+
+  user: (
+    name: string,
+    email: string
+  ): SqlCommand => [
+    `insert into users (
+      name, email
+    ) values (
+      $1,  $2
+    ) on conflict do nothing`,
+    name,
+    email
   ]
 };

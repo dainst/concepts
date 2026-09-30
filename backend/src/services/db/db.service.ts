@@ -31,6 +31,8 @@ import {
 import {HistoryRow} from '../../interfaces/history-row';
 import {getErrorCode, getErrorMessage} from '../../functions/error';
 import {EnvironmentService} from '../environment/environment.service';
+import {User} from 'common/interfaces/user';
+import {Author} from '../../interfaces/author';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -250,7 +252,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     ).rows.map(convertHistoryRow);
   }
 
-  async upcertConcept(concept: Concept): Promise<ConceptId> {
+  async upcertConcept(concept: Concept, author: Author): Promise<ConceptId> {
     const commands: SqlCommand[] = [['set constraints all deferred;']];
     if (!concept.id.id) {
       const insertConcept = insertSql.concept(concept);
@@ -263,7 +265,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       };
       commands.push(
         insertConcept,
-        insertSql.conceptHistory(concept.id, 'create')
+        insertSql.user(author.name, author.email),
+        insertSql.conceptHistory(concept.id, 'create', author.email)
       );
     } else {
       const currentVersion = await this.getConcept(
@@ -271,8 +274,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         concept.id.id
       );
       if (currentVersion) {
-        const eventSql = insertSql.conceptHistory(concept.id, 'edit');
+        const eventSql = insertSql.conceptHistory(concept.id, 'edit', author.email);
         commands.push(
+          insertSql.user(author.name, author.email),
           eventSql,
           insertSql.snapshot(eventSql[1], currentVersion, 1)
         );
@@ -293,7 +297,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       } else {
         commands.push(
           insertSql.concept(concept),
-          insertSql.conceptHistory(concept.id, 'create')
+          insertSql.user(author.name, author.email),
+          insertSql.conceptHistory(concept.id, 'create', author.email)
         );
       }
     }

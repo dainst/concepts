@@ -24,7 +24,7 @@
       <tbody>
         @for (event of historyValue; track $index) {
           <tr>
-            <td>{{event.userName}}</td>
+            <td>{{event.userEmail.replaceAll('@', ' at ')}} <{{event.userName}}></td>
             <td>{{event.timestamp * 1000 | date : 'short' : undefined : 'de-DE'}}</td>
             <td>
               {{event.event}}
