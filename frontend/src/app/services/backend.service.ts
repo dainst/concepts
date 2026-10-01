@@ -9,6 +9,8 @@ import {RetryConfig} from 'rxjs/internal/operators/retry';
 import {isConceptId} from 'concepts-common/functions/concept.typeguards';
 import {Status} from 'concepts-common/interfaces/default';
 import {User} from 'concepts-common/interfaces/user';
+import {Domain} from 'concepts-common/interfaces/domain';
+import {isDomain} from 'concepts-common/functions/domain.typeguards';
 
 @Service()
 export class BackendService {
@@ -61,5 +63,10 @@ export class BackendService {
 
   getUser(): Observable<User|null> {
     return this.http.get<User|null>(this.api + `user`);
+  }
+
+  getDomains(): Observable<Domain[]> {
+    return this.http.get<Domain[]>(this.api + 'domains')
+      .pipe(map(list => list.filter(isDomain))); // TODO error out instead on wrong data
   }
 }

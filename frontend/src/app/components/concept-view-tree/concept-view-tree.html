@@ -1,0 +1,32 @@
+<ng-template #treeTemplate let-nodes>
+  @for (domain of nodes; track domain) {
+    <li>
+      <div [class.protagonist]="domain.protagonist"
+      >
+        {{(domain.root ? (domain.root | title | async) : domain.id)}}
+      </div>
+
+      @if (domain.subDomains?.length && domain.expanded) {
+        <ul class="tree-children">
+          <ng-container *ngTemplateOutlet="treeTemplate; context: { $implicit: domain.subDomains }"></ng-container>
+        </ul>
+      }
+    </li>
+  }
+</ng-template>
+
+@if (domains.isLoading()) {
+  <ngb-alert type="info">Baum wird geladen</ngb-alert>
+}
+
+@if (domains.error()) {
+  <ngb-alert type="error">Baum konnte nicht geladen werden</ngb-alert>
+}
+
+@if (domains.value(); as domains) {
+  <ul class="tree">
+    <ng-container
+      *ngTemplateOutlet="treeTemplate; context: { $implicit: domains }">
+    </ng-container>
+  </ul>
+}

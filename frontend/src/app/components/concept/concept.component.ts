@@ -16,16 +16,22 @@ import {getAvailableViews} from '../../functions/available-views';
 import {ConceptViewGraph} from '../concept-view-graph/concept-view-graph';
 import {ConceptViewEdit} from '../concept-view-edit/concept-view-edit';
 import {ConceptViewHistory} from '../concept-view-history/concept-history';
+import {ConceptViewTree} from '../concept-view-tree/concept-view-tree';
 
 const viewsMap: ViewMap<ConceptMenuEntry> = {
+  tree: {
+    id: 'tree',
+    label: 'Baum',
+    component: ConceptViewTree
+  },
   map: {
     id: 'map',
-    label: 'Map',
+    label: 'Karte',
     component: ConceptViewMap
   },
   timeline: {
     id: 'timeline',
-    label: 'Timeline',
+    label: 'Zeitleiste',
     component: ConceptViewTimeline
   },
   graph: {
@@ -35,7 +41,7 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
   },
   history: {
     id: 'history',
-    label: 'History',
+    label: 'Bearbeitungshistorie',
     component: ConceptViewHistory
   },
   raw: {
@@ -45,7 +51,7 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
   },
   edit: {
     id: 'edit',
-    label: 'Edit',
+    label: 'Bearbeiten',
     component: ConceptViewEdit
   }
 };

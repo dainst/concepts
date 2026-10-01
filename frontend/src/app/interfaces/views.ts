@@ -1,4 +1,5 @@
 export const conceptViews = [
+  'tree',
   'map',
   'timeline',
   'graph',
