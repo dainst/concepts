@@ -32,6 +32,8 @@ export class KeycloakAdminService implements OnModuleInit {
   }
 
   async createGroup(name: string): Promise<void> {
+    const groups = await this.client.groups.find({search: name});
+    if (groups.some(g => g.name === name)) return;
     await this.client.groups.create({name});
   }
 

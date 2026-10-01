@@ -8,7 +8,21 @@
         "name": "user"
       },
       {
-        "name": "admin"
+        "name": "admin",
+        "composite": true,
+        "composites": {
+          "client": {
+            "realm-management": [
+              "manage-users",
+              "view-users",
+              "query-groups"
+            ],
+            "account": [
+              "manage-account",
+              "view-profile"
+            ]
+          }
+        }
       }
     ]
   },
@@ -30,6 +44,27 @@
           "value": "test",
           "temporary": false
         }
+      ],
+      "clientRoles": {
+        "account": [
+          "manage-account",
+          "view-profile"
+        ]
+      }
+    },
+    {
+      "username": "concepts-admin",
+      "enabled": true,
+      "email": "admin@concepts.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin"
       ]
     },
     {

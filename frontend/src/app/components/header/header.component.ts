@@ -4,7 +4,6 @@ import {FormsModule} from '@angular/forms';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap/dropdown';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {UserService} from '../../services/user.service';
-import {toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'header',

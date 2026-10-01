@@ -10,7 +10,7 @@
   z-index: 1050;
 }
 
-a,
+.nav-item > a,
 div.nav-item {
   padding: 15px 11px;
   color: white;

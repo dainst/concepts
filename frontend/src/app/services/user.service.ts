@@ -61,4 +61,8 @@ export class UserService {
 
     return this.keycloak.token;
   }
+
+  async openProfile(): Promise<void> {
+    void await this.keycloak.accountManagement();
+  }
 }
