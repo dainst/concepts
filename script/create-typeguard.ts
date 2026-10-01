@@ -301,7 +301,6 @@ const createFunctionsFile = (filePath: string, outPath: string, type: keyof type
   console.log('done.');
 };
 
-
 createFunctionsFile(
  '/home/pfranck/IdeaProjects/concepts/backend/src/interfaces/concept-row.ts',
   '/home/pfranck/IdeaProjects/concepts/backend/src/functions/rows.typeguards.ts',

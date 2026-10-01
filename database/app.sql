@@ -172,7 +172,20 @@ with recursive
     where not (domain_list.domain_id = any(array[tree.domain_id]))
   )
 select
-  id,
-  node
-from domains
-       left join tree on domains.id = tree.domain_id;
+  domain_list.domain_id,
+  coalesce(
+    node,
+    jsonb_build_object(
+      'id', domain_list.domain_id,
+      'warning', true,
+      'root', case
+                when domain_list.root_id is not null
+                  then jsonb_build_object(
+                  'id', domain_list.root_id,
+                  'type', domain_list.root_type
+                       )
+        end
+    )
+  ) as node
+from domain_list
+       left join tree on domain_list.domain_id = tree.domain_id
