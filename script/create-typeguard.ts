@@ -313,3 +313,9 @@ createFunctionsFile(
   '/home/pfranck/IdeaProjects/concepts/common/src/functions/concept.typeguards.ts',
   'typeguard'
 );
+
+createFunctionsFile(
+  '/home/pfranck/IdeaProjects/concepts/common/src/interfaces/domain.ts',
+  '/home/pfranck/IdeaProjects/concepts/common/src/functions/domain.typeguards.ts',
+  'typeguard'
+);

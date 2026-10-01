@@ -12,10 +12,11 @@ import {AuthService} from './services/auth/auth.service';
 import {AuthMiddleware} from './middleware/auth.middleware';
 import {DomainController} from './controllers/domain/domain.controller';
 import {KeycloakAdminService} from './services/keycloak-admin/keycloak-admin.service.service';
+import { DomainsController } from './controllers/domains/domains.controller';
 
 @Module({
   imports: [],
-  controllers: [AppController, StatusController, ConceptController, SearchController, HistoryController, UserController, DomainController],
+  controllers: [AppController, StatusController, ConceptController, SearchController, HistoryController, UserController, DomainController, DomainsController],
   providers: [DbService, CacheService, EnvironmentService, AuthService, KeycloakAdminService]
 })
 export class AppModule {

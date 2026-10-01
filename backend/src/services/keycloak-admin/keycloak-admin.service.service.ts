@@ -16,12 +16,19 @@ export class KeycloakAdminService implements OnModuleInit {
   private readonly client: KcAdminClient;
 
   async onModuleInit(): Promise<void> {
-    await this.client.auth({
-      grantType: 'client_credentials',
-      clientId: this.es.get().kc.clientId,
-      clientSecret: this.es.get().kc.clientSecret
-    });
-    console.log('[KC] connected');
+    try {
+      await this.client.auth({
+        grantType: 'client_credentials',
+        clientId: this.es.get().kc.clientId,
+        clientSecret: this.es.get().kc.clientSecret
+      });
+      console.log('[KC] connected');
+    } catch (e) {
+      console.log('[KC] could not connect');
+      console.error(e);
+      // TODO on prod die
+    }
+
   }
 
   async createGroup(name: string): Promise<void> {

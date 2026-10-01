@@ -1,4 +1,4 @@
-import {Body, Controller, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, UseGuards} from '@nestjs/common';
 import {AuthGuard} from '../../guards/auth.guard';
 import {Domain} from 'common/interfaces/domain';
 import {DbService} from '../../services/db/db.service';
@@ -20,5 +20,12 @@ export class DomainController {
     // TODO check Rights
     await this.kcs.createGroup(domain.id);
     await this.db.upcertDomain(domain);
+  }
+
+  @Get('/:domain_id')
+  async get(
+    @Param('domain_id') domainId: string
+  ): Promise<Domain> {
+    return await this.db.getDomain(domainId);
   }
 }

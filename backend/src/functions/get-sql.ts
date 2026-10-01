@@ -14,3 +14,9 @@ export const getConceptHistorySql =
   where
     concept_type = $1 and concept_id = $2
   order by timestamp`;
+
+export const getDomainSql =
+  `select node from app_domain_tree where id = $1`;
+
+export const getAllDomainsSql =
+  `select node from app_domain_tree`;

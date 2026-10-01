@@ -11,7 +11,7 @@ import {ConceptSelector, SearchResult} from 'common/interfaces/search';
 import {ConceptHistory} from 'common/interfaces/concept-history';
 import {convertHistoryRow} from '../../functions/convert-history-row';
 import {searchCountSql, searchSql} from '../../functions/search-sql';
-import {getConceptHistorySql} from '../../functions/history-sql';
+import {getAllDomainsSql, getConceptHistorySql, getDomainSql} from '../../functions/get-sql';
 import {insertSql} from '../../functions/insert-sql';
 import {SqlCommand} from '../../interfaces/sql';
 import {deleteSql} from '../../functions/delete-sql';
@@ -33,6 +33,7 @@ import {getErrorCode, getErrorMessage} from '../../functions/error';
 import {EnvironmentService} from '../environment/environment.service';
 import {Author} from '../../interfaces/author';
 import {Domain} from 'common/interfaces/domain';
+import {isDomain} from 'common/functions/domain.typeguards';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -338,5 +339,21 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       // TODO delete domainRoot in case
     }
     await this.transaction(commands);
+  }
+
+  async getDomain(domainId: string): Promise<Domain> {
+    const res = await this.query(getDomainSql, [domainId]);
+    if (res.rows.length < 1) throw new ApiError('not-found', ['domain', domainId]);
+    const domain = res.rows[0]?.['node'];
+    if (!isDomain(domain)) throw new ApiError('internal-server-error', ['could not fetch domain', domainId]);
+    return domain;
+  }
+
+  async getDomains(): Promise<Domain[]> {
+    const res = await this.query(getAllDomainsSql);
+    const domains = res.rows.map(row => row?.['node']);
+    let mistake = domains.find(row => !isDomain(row));
+    if (mistake) throw new ApiError('internal-server-error', ['could not fetch domains', JSON.stringify(mistake)]);
+    return domains;
   }
 }

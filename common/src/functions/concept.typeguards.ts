@@ -1,6 +1,6 @@
 // generated with script/creates-typeguards.ts
 
-import {ConceptId, ConceptAbstract, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, Concept, RelationSet, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
+import {ConceptId, ConceptAbstract, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, Concept, RelationSet, RelationSetObject, RelationWithOutSubject, Relation, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
 import {isPreferredLabels} from './labels.typeguards';
 
 export const isConceptId = (thing: unknown): thing is ConceptId =>
@@ -56,7 +56,24 @@ export const isRelationSet = (thing: unknown): thing is RelationSet =>
 	&& (isConceptId(thing.relation))
 	&& ('objects' in thing)
 	&& (Array.isArray(thing.objects))
-	&& (thing.objects.every(isConceptId));
+	&& (thing.objects.every(isRelationSetObject));
+
+export const isRelationSetObject = (thing: unknown): thing is RelationSetObject =>
+  (isConceptId(thing))
+	&& ((!('relationId' in thing)) || ('relationId' in thing && typeof thing.relationId === 'string'));
+
+export const isRelationWithOutSubject = (thing: unknown): thing is RelationWithOutSubject =>
+  (typeof thing === 'object')
+	&& (thing != null)
+	&& ('predicate' in thing)
+	&& (isConceptId(thing.predicate))
+	&& ('object' in thing)
+	&& (isConceptId(thing.object));
+
+export const isRelation = (thing: unknown): thing is Relation =>
+  (isRelationWithOutSubject(thing))
+	&& ('subject' in thing)
+	&& (isConceptId(thing.subject));
 
 export const isLabel = (thing: unknown): thing is Label =>
   (typeof thing === 'object')
@@ -68,7 +85,8 @@ export const isLabel = (thing: unknown): thing is Label =>
 	&& ('language' in thing)
 	&& (typeof thing.language === 'string')
 	&& ('transliteration' in thing)
-	&& (typeof thing.transliteration === 'string');
+	&& (typeof thing.transliteration === 'string')
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'));
 
 export const isTemporalBound = (thing: unknown): thing is TemporalBound =>
   (typeof thing === 'object')
@@ -88,7 +106,8 @@ export const isTemporalExtend = (thing: unknown): thing is TemporalExtend =>
 	&& ('start' in thing)
 	&& (isTemporalBound(thing.start))
 	&& ('end' in thing)
-	&& (isTemporalBound(thing.end));
+	&& (isTemporalBound(thing.end))
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'));
 
 export const isGeographicalExtend = (thing: unknown): thing is GeographicalExtend =>
   (typeof thing === 'object')
@@ -101,3 +120,4 @@ export const isGeographicalExtend = (thing: unknown): thing is GeographicalExten
 	&& (typeof thing.certainty === 'number')
 	&& ('precision' in thing)
 	&& (typeof thing.precision === 'number')
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'))

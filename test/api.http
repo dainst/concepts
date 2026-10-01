@@ -35,3 +35,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJEMmVLUE
 {"name":"test-group"}
 
 
+###
+GET http://localhost:3000/domains
+
+

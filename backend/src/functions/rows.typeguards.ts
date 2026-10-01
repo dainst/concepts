@@ -1,5 +1,6 @@
 // generated with script/creates-typeguards.ts
 
+import {LabelType} from 'common/interfaces/concept';
 import {ConceptRow, RelationsAgg, LabelsAgg, GeographicalExtendsAgg, TemporalExtendsAgg} from '../interfaces/concept-row';
 import {isLabelType} from 'common/functions/labels.typeguards';
 
@@ -42,7 +43,8 @@ export const isLabelsAgg = (thing: unknown): thing is LabelsAgg =>
 	&& ('transliteration' in thing)
 	&& (typeof thing.transliteration === 'string')
 	&& ('is_preferred' in thing)
-	&& (typeof thing.is_preferred === 'boolean');
+	&& (typeof thing.is_preferred === 'boolean')
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'));
 
 export const isGeographicalExtendsAgg = (thing: unknown): thing is GeographicalExtendsAgg =>
   (typeof thing === 'object')
@@ -54,7 +56,8 @@ export const isGeographicalExtendsAgg = (thing: unknown): thing is GeographicalE
 	&& ('certainty' in thing)
 	&& (typeof thing.certainty === 'string')
 	&& ('precision' in thing)
-	&& (typeof thing.precision === 'string');
+	&& (typeof thing.precision === 'string')
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'));
 
 export const isTemporalExtendsAgg = (thing: unknown): thing is TemporalExtendsAgg =>
   (typeof thing === 'object')
@@ -74,4 +77,5 @@ export const isTemporalExtendsAgg = (thing: unknown): thing is TemporalExtendsAg
 	&& ('end_precision' in thing)
 	&& ((typeof thing.end_precision === 'number') || (thing.end_precision == null))
 	&& ('end_certainty' in thing)
-	&& ((typeof thing.end_certainty === 'number') || (thing.end_certainty == null));
+	&& ((typeof thing.end_certainty === 'number') || (thing.end_certainty == null))
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'))
