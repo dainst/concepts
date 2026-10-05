@@ -34,6 +34,7 @@ import {EnvironmentService} from '../environment/environment.service';
 import {Author} from '../../interfaces/author';
 import {Domain} from 'common/interfaces/domain';
 import {isDomain} from 'common/functions/domain.typeguards';
+import {User} from 'common/interfaces/user';
 
 const settings: Settings = {
   preferredLanguage: 'deu',
@@ -253,7 +254,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     ).rows.map(convertHistoryRow);
   }
 
-  async upcertConcept(concept: Concept, author: Author): Promise<ConceptId> {
+  async upcertConcept(concept: Concept, user: User): Promise<ConceptId> {
+    if (!user.groups.includes(concept.domain)) throw new ApiError('no-domain-access-write', [concept.domain]);
+
     const commands: SqlCommand[] = [['set constraints all deferred;']];
     if (!concept.id.id) {
       const insertConcept = insertSql.concept(concept);
@@ -266,8 +269,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       };
       commands.push(
         insertConcept,
-        insertSql.user(author.name, author.email),
-        insertSql.conceptHistory(concept.id, 'create', author.email)
+        insertSql.user(user.name, user.email),
+        insertSql.conceptHistory(concept.id, 'create', user.email)
       );
     } else {
       const currentVersion = await this.getConcept(
@@ -275,9 +278,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         concept.id.id
       );
       if (currentVersion) {
-        const eventSql = insertSql.conceptHistory(concept.id, 'edit', author.email);
+        const eventSql = insertSql.conceptHistory(concept.id, 'edit', user.email);
         commands.push(
-          insertSql.user(author.name, author.email),
+          insertSql.user(user.name, user.email),
           eventSql,
           insertSql.snapshot(eventSql[1], currentVersion, 1)
         );
@@ -295,11 +298,21 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           ...relationsDiff(currentVersion, concept).map(deleteSql.relation)
         ];
         commands.push(...deleteRemoved);
+
+        if (currentVersion.domain !== concept.domain) {
+          if (!user.groups.includes(currentVersion.domain))
+            throw new ApiError('no-domain-access-write', [currentVersion.domain]);
+          commands.push(
+            insertSql.concept(concept),
+            insertSql.conceptHistory(concept.id, 'change-domain', user.email, currentVersion.domain)
+          );
+        }
+
       } else {
         commands.push(
           insertSql.concept(concept),
-          insertSql.user(author.name, author.email),
-          insertSql.conceptHistory(concept.id, 'create', author.email)
+          insertSql.user(user.name, user.email),
+          insertSql.conceptHistory(concept.id, 'create', user.email)
         );
       }
     }

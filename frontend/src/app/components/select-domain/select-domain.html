@@ -1,0 +1,27 @@
+<div ngbDropdown class="select-domain">
+  <button type="button" class="btn btn-outline-secondary btn-sm" ngbDropdownToggle>
+    @if (selected$ | async; as selected) {
+      @if (selected.root) {
+        {{selected.root | title | async}} ({{selected.id}})
+      } @else {
+        {{selected.id}}
+      }
+    }
+  </button>
+
+  <div ngbDropdownMenu>
+    @for (domain of (domains$ | async); track domain.id) {
+      <button
+        [class.active]="domain.id === value()"
+        ngbDropdownItem
+        (click)="$event.preventDefault(); select(domain)"
+      >
+        @if (domain.root) {
+          {{domain.root | title | async}} ({{domain.id}})
+        } @else {
+          {{domain.id}}
+        }
+      </button>
+    }
+  </div>
+</div>

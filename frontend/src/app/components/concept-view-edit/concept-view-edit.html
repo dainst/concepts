@@ -25,14 +25,9 @@
               />
             </div>
           </fieldset>
-          <fieldset class="row" [disabled]="true">
+          <fieldset class="row">
             <div class="col-12">
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                [formControl]="form.controls.domain"
-                [disabled]="true"
-              />
+              <select-domain [formControl]="form.controls.domain" />
             </div>
           </fieldset>
         </div>

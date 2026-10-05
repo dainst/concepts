@@ -18,6 +18,11 @@ import {EditGeographicalExtend} from '../edit-geographic-extend/edit-geographica
 import {EditTemporalExtend} from '../edit-temporal-extend/edit-temporal-extend';
 import {EditRelation} from '../edit-relation/edit-relation.component';
 import {packRelationSets, unpackRelationSet} from 'concepts-common/functions/relation-set';
+import {BootstrapFormValidationDirective} from '../../directives/bootstrap-form-validation';
+import {UserService} from '../../services/user.service';
+import {SelectDomain} from '../select-domain/select-domain';
+import {SelectConcept} from '../select-concept/select-concept';
+
 
 @Component({
   selector: 'app-concept-view-edit',
@@ -32,7 +37,10 @@ import {packRelationSets, unpackRelationSet} from 'concepts-common/functions/rel
     EditLabel,
     EditGeographicalExtend,
     EditTemporalExtend,
-    EditRelation
+    EditRelation,
+    BootstrapFormValidationDirective,
+    SelectDomain,
+    SelectConcept
   ],
   templateUrl: './concept-view-edit.html',
   styleUrl: './concept-view-edit.css'
