@@ -27,7 +27,7 @@ export class UserService {
     }
   }
 
-  private currentUser(): User | null {
+  currentUser(): User | null {
     if (!this.keycloak.authenticated) {
       return null;
     }
@@ -58,6 +58,8 @@ export class UserService {
     }
 
     await this.keycloak.updateToken(30);
+
+    this._user$.next(this.currentUser());
 
     return this.keycloak.token;
   }

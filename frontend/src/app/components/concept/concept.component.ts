@@ -4,19 +4,20 @@ import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 import {BackendService} from '../../services/backend.service';
 import {JsonPipe, NgComponentOutlet} from '@angular/common';
-import {ConceptId} from 'concepts-common/interfaces/concept';
+import {Concept, ConceptId} from 'concepts-common/interfaces/concept';
 import {ConceptMenuEntry} from '../../interfaces/ui';
 import {ConceptMenu} from '../concept-menu/concept-menu';
 import {ConceptViewRaw} from '../concept-view-raw/concept-view-raw';
 import {ConceptViewTimeline} from '../concept-view-timeline/concept-view-timeline.component';
 import {ConceptAbstract} from '../concept-abstract/concept-abstract';
 import {ConceptViewMap} from '../concept-view-map/concept-view-map';
-import {ViewMap} from '../../interfaces/views';
-import {getAvailableViews} from '../../functions/available-views';
+import {View, ViewMap} from '../../interfaces/views';
 import {ConceptViewGraph} from '../concept-view-graph/concept-view-graph';
 import {ConceptViewEdit} from '../concept-view-edit/concept-view-edit';
 import {ConceptViewHistory} from '../concept-view-history/concept-history';
 import {ConceptViewTree} from '../concept-view-tree/concept-view-tree';
+import {isGeographicalConcept, isRelatedConcept, isTemporalConcept} from 'concepts-common/functions/concept.typeguards';
+import {UserService} from '../../services/user.service';
 
 const viewsMap: ViewMap<ConceptMenuEntry> = {
   tree: {
@@ -70,10 +71,11 @@ const viewsMap: ViewMap<ConceptMenuEntry> = {
 export class ConceptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly bs = inject(BackendService);
+  private readonly us = inject(UserService);
 
   readonly menu: Signal<ConceptMenuEntry[]> =
     computed(() =>
-     getAvailableViews(this.concept.value())
+     this.getAvailableViews(this.concept.value())
        .map(view => Object.assign({}, viewsMap[view]))
      );
 
@@ -106,7 +108,6 @@ export class ConceptComponent {
   );
 
   constructor() {
-
     const storedView = localStorage.getItem('idai-concepts-concept-view');
     const storedRightSideOpen = localStorage.getItem('idai-concepts-concept-view-right-side-open');
     this.rightSideOpen.set(!storedRightSideOpen || storedRightSideOpen === 'true');
@@ -125,4 +126,15 @@ export class ConceptComponent {
     localStorage.setItem('idai-concepts-concept-view-right-side-open', String(this.rightSideOpen()));
     // TODO use hash part of URL to store view settings instead of localstorage
   }
+
+  private getAvailableViews(concept: Concept|undefined): View[] {
+    if (!concept) return [];
+    const views: View[] = [];
+    if (isGeographicalConcept(concept)) views.push('map');
+    if (isTemporalConcept(concept)) views.push('timeline');
+    if (isRelatedConcept(concept)) views.push('graph');
+    views.push('tree', 'raw', 'history');
+    if (!!(this.us.currentUser())) views.push('edit'); // TODO check group
+    return views;
+  };
 }
