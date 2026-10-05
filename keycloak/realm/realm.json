@@ -29,13 +29,15 @@
 
   "groups": [
     {
-      "name": "admins"
+      "name": "default"
     }
   ],
 
   "users": [
     {
       "username": "testuser",
+      "firstName": "Test",
+      "lastName": "User",
       "enabled": true,
       "email": "test@example.com",
       "credentials": [
@@ -50,7 +52,10 @@
           "manage-account",
           "view-profile"
         ]
-      }
+      },
+      "groups": [
+        "default"
+      ]
     },
     {
       "username": "concepts-admin",
@@ -94,7 +99,21 @@
         "http://localhost:4200"
       ],
       "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": false
+      "directAccessGrantsEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "claim.name": "groups"
+          }
+        }
+      ]
     },
     {
       "clientId": "concepts-backend",

@@ -36,8 +36,7 @@ export class ConceptController {
     if (!user) throw new UnauthorizedException();
     if (!user.email) throw new ApiError('invalid-user', ['no mail']);
     if (!user.name) throw new ApiError('invalid-user', ['no name']);
-    // TODO check group,
-    // TODO check domain
+    if (!user.groups.includes(concept.domain)) throw new ApiError('no-domain-access-write', [concept.domain]);
     const upcertedConceptId = await this.db.upcertConcept(concept, {email: user.email, name: user.name});
     const updated = (upcertedConceptId.id === concept.id.id) && (upcertedConceptId.type === concept.id.type);
     this.httpAdapterHost.httpAdapter.status(res, updated ? 200 : 201);

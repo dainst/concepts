@@ -6,7 +6,8 @@ export const errorResponseTypes = {
   'unpredicted-internal-server-error': 500,
   'framework-error': 500,
   'invalid-data': 422,
-  'invalid-user': 403
+  'invalid-user': 403,
+  'no-domain-access-write': 403
 } as const;
 
 
