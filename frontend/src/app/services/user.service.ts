@@ -46,7 +46,8 @@ export class UserService {
       name: token?.['name'],
       email: token?.['email'],
       groups: token?.['groups'] ?? [],
-      roles: token?.['realm_access']?.['roles'] ?? []
+      roles: token?.['realm_access']?.['roles'] ?? [],
+      preferredLanguage: token?.['preferredLanguage'] ?? 'deu'
     };
   }
 

@@ -12,8 +12,9 @@
     <li>Name: {{user.name}}</li>
     <li>Username: {{user.username}}</li>
     <li>Email: {{user.email}}</li>
-    <li>Gruppen: {{user.groups.join()}}</li>
-    <li>Rollen: {{user.roles.join()}}</li>
+    <li>Gruppen: {{user.groups.join(', ')}}</li>
+    <li>Rollen: {{user.roles.join(', ')}}</li>
+    <li>Bevorzugte Sprache: {{{id: user.preferredLanguage, type: 'language'} | title | async}}</li>
   } @else if (user === 'connecting') {
     <li>Verbindung zu Authentifizierungsserver wird aufgebaut.</li>
   } @else if (user === 'error') {

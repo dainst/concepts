@@ -5,4 +5,5 @@ export interface User {
   email: string;
   groups: string[];
   roles: string[];
+  preferredLanguage: string;
 }

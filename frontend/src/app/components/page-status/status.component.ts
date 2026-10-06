@@ -4,10 +4,15 @@ import {Status} from 'concepts-common/interfaces/default';
 import {BackendService} from '../../services/backend.service';
 import {UserService} from '../../services/user.service';
 import {toSignal} from '@angular/core/rxjs-interop';
+import {TitlePipe} from '../../pipes/title-pipe';
+import {AsyncPipe} from '@angular/common';
 
 @Component({
   selector: 'app-status',
-  imports: [],
+  imports: [
+    TitlePipe,
+    AsyncPipe
+  ],
   templateUrl: './status.component.html',
   styleUrl: './status.component.css'
 })
