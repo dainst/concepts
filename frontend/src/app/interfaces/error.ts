@@ -5,7 +5,8 @@ export const appMessageTypes = {
   'script-error': 1,
   'unknown-http-error': 1,
   'successful-created': 0,
-  'successful-updated': 0
+  'successful-updated': 0,
+  'kc-not-reachable': 2
 } as const;
 
 export type AppMessageType = keyof typeof appMessageTypes;

@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap/dropdown';
 import {AsyncPipe, NgOptimizedImage} from '@angular/common';
 import {UserService} from '../../services/user.service';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'header',
@@ -15,7 +16,8 @@ import {UserService} from '../../services/user.service';
     NgbDropdownMenu,
     NgOptimizedImage,
     AsyncPipe,
-    NgbDropdownItem
+    NgbDropdownItem,
+    NgbTooltip
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'

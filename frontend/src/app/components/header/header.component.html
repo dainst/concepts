@@ -49,26 +49,41 @@
 
       <div class="nav-item">
         @if (us.user$ | async; as user) {
-          <div ngbDropdown>
-            <button type="button" class="nav-link" ngbDropdownToggle>
-              <i class="bi bi-person-fill"></i>
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
-              <div class="px-3"><small>Angemeldet als: <strong>{{user.name}}</strong></small></div>
-              <hr class="dropdown-divider" />
-              <button ngbDropdownItem routerLink="/concept">Neues Konzept</button>
-              <a ngbDropdownItem (click)="us.openProfile()">Account</a>
-              @if (user.roles.includes('admin')) {
-                <a ngbDropdownItem href="http://localhost:8080/admin/concepts/console">Administration</a>
-              }
-              <hr class="dropdown-divider" />
-              <button ngbDropdownItem (click)="us.logout()">Abmelden</button>
+          @if (us.isUser(user)) {
+            <div ngbDropdown>
+              <button type="button" class="nav-link" ngbDropdownToggle>
+                <i class="bi bi-person-fill"></i>
+              </button>
+              <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
+                <div class="px-3"><small>Angemeldet als: <strong>{{user.name}}</strong></small></div>
+                <hr class="dropdown-divider" />
+                <button ngbDropdownItem routerLink="/concept">Neues Konzept</button>
+                <a ngbDropdownItem (click)="us.openProfile()">Account</a>
+                @if (user.roles.includes('admin')) {
+                  <a ngbDropdownItem href="http://localhost:8080/admin/concepts/console">Administration</a>
+                }
+                <hr class="dropdown-divider" />
+                <button ngbDropdownItem (click)="us.logout()">Abmelden</button>
+              </div>
             </div>
-          </div>
-        } @else {
-          <button class="nav-link" (click)="us.login()">
-            <i class="bi bi-person"></i>
-          </button>
+          } @else if (user === 'error') {
+            <i
+              class="bi bi-exclamation-triangle-fill"
+              ngbTooltip="Identitätsprovider nicht erreichbar. Login nicht möglich."
+            ></i>
+          } @else if (user === 'connecting') {
+            <i
+              class="bi bi-clock-fill"
+              ngbTooltip="Identitätsprovider wird verbunden, bitte warten."
+            ></i>
+          } @else {
+            <button class="nav-link" (click)="us.login()">
+              <i
+                class="bi bi-person"
+                ngbTooltip="Anmelden"
+              ></i>
+            </button>
+          }
         }
       </div>
     </div>

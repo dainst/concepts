@@ -8,6 +8,7 @@ import {BehaviorSubject, combineLatest, map, Observable} from 'rxjs';
 import {Domain} from 'concepts-common/interfaces/domain';
 import {TitlePipe} from '../../pipes/title-pipe';
 import {toObservable} from '@angular/core/rxjs-interop';
+import { isUser } from "concepts-common/functions/user.typeguard";
 
 @Component({
   selector: 'select-domain',
@@ -35,7 +36,7 @@ export class SelectDomain implements FormValueControl<string> {
   protected readonly domains$: Observable<Domain[]> = combineLatest(this.us.user$, this.ds.domains$)
     .pipe(
       map(([user, domains]) =>
-        (user?.groups || [])
+        (isUser(user) ? user.groups : [])
           .map(dId => domains.find(d => d.id === dId))
           .filter(d => !!d)
       )

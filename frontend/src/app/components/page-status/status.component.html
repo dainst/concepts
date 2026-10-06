@@ -8,12 +8,18 @@
 <h2>Benutzer</h2>
 <ul>
 @if (user(); as user) {
-  <li>Name: {{user.name}}</li>
-  <li>Username: {{user.username}}</li>
-  <li>Email: {{user.email}}</li>
-  <li>Gruppen: {{user.groups.join()}}</li>
-  <li>Rollen: {{user.roles.join()}}</li>
-} @else {
-  <li>Nicht authentifiziert</li>
+  @if (us.isUser(user)) {
+    <li>Name: {{user.name}}</li>
+    <li>Username: {{user.username}}</li>
+    <li>Email: {{user.email}}</li>
+    <li>Gruppen: {{user.groups.join()}}</li>
+    <li>Rollen: {{user.roles.join()}}</li>
+  } @else if (user === 'connecting') {
+    <li>Verbindung zu Authentifizierungsserver wird aufgebaut.</li>
+  } @else if (user === 'error') {
+    <li>Authentifizierung nicht möglich, Provider nicht erreichbar.</li>
+  } @else if (user === 'not-logged-in') {
+    <li>Nicht authentifiziert</li>
+  }
 }
 </ul>
