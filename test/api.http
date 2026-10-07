@@ -53,3 +53,4 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJVc3QzbX
 
 
 ###
+GET http://localhost:3000/search?q=Jamdat&limit=10&offset=274340

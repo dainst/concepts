@@ -1,30 +1,50 @@
-@if (result.isLoading()) {
-  <h1>Search for "{{searchQuery().q ?? ''}}"</h1>
-  <p>Results are loading</p>
-}
-
-@if (result.error()) {
-  <h1>Search for "{{searchQuery().q ?? ''}}"</h1>
-  <p>Error: {{result.error() | json}}</p>
-}
-
-@if (result.value(); as result) {
-  <h1>{{result.count}} results for "{{result.selector.q ?? ''}}"</h1>
-
-  @for (entry of result.results; track entry.id.id + entry.id.type) {
-
-    <a href="concept/{{entry.id.type}}/{{entry.id.id}}">
-      <div>
-        <h2>{{entry.title}}</h2>
-      </div>
-    </a>
+<div class="container py-5">
+  @if (result.isLoading()) {
+    <div class="mb-4">
+      <h1 class="h3 mb-1">Suche nach "{{searchQuery().q ?? ''}}"</h1>
+      <p class="text-muted mb-0">Ergebnisse werden geladen</p>
+    </div>
   }
-  <div class="footer">
-    <button (click)="navigate('first')">|←</button>
-    <button (click)="navigate('prev')">←</button>
-    <div>{{pageNr()}}</div>
-    <button (click)="navigate('next')">→</button>
-    <button (click)="navigate('last')">→|</button>
-  </div>
-  <div>limit: {{result.selector.limit}} | offset: {{result.selector.offset}}</div>
-}
+
+  @if (result.error()) {
+    <div class="mb-4">
+      <h1 class="h3 mb-1">Suche nach "{{searchQuery().q ?? ''}}"</h1>
+      <p class="text-muted mb-0">Fehler: {{result.error() | json}}</p>
+    </div>
+  }
+
+  @if (result.value(); as result) {
+    <div class="mb-4">
+      <h1 class="h3 mb-1">Suche nach "{{searchQuery().q ?? ''}}"</h1>
+      <p class="text-muted mb-0">{{result.count}} Treffer</p>
+    </div>
+
+    <div class="list-group shadow-sm mb-4">
+      @for (entry of result.results; track entry.id.id + entry.id.type) {
+        <a [routerLink]="['/concept', entry.id.type, entry.id.id]"  class="list-group-item list-group-item-action p-4">
+          <div class="h5 mb-2">{{entry.title}}</div>
+          <p class="mb-2 text-muted"></p>
+        </a>
+      }
+    </div>
+
+
+    <nav aria-label="Suchergebnisse Seiten">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="!pages().length || pages()[0].current">
+          <button class="page-link" (click)="navigate('prev')">Zurück</button>
+        </li>
+
+        @for (page of pages(); track page) {
+          <li class="page-item" [class.active]="page.current" [class.disabled]="page.disabled">
+            <button class="page-link" (click)="navigate(page.nr)">{{page.caption}}</button>
+          </li>
+        }
+
+        <li class="page-item" [class.disabled]="!pages().length || pages()[pages().length - 1].current">
+          <button class="page-link" (click)="navigate('next')">Weiter</button>
+        </li>
+      </ul>
+    </nav>
+  }
+</div>
