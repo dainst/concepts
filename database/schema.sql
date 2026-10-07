@@ -179,3 +179,9 @@ create table meta (
 insert into users (name, email) values ('importer', '@importer');
 insert into meta (key, val) values ('schema-version', '0.4.0');
 
+
+create index labels_label_trgm_idx on labels using gin (label gin_trgm_ops);
+create index labels_concept_id_type_idx on labels (concept_id, concept_type);
+create index geographical_extends_concept_id_type_idx on geographical_extends (concept_id, concept_type);
+create index temporal_extends_concept_id_type_idx on temporal_extends (concept_id, concept_type);
+create index relations_object_id_type_idx on relations (object_id, object_type);

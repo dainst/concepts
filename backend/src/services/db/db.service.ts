@@ -114,7 +114,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     params: (string | number | boolean | null)[] = [],
     cacheId: CacheServiceStoreKey | null = null
   ): Promise<QueryResult<T>> {
-    // console.log(sql);
+    console.log(sql);
     // console.log(params);
 
     if (cacheId == null) return this.pool.query<T>(sql, params);
