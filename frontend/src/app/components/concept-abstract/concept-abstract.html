@@ -3,12 +3,12 @@
   <p>{{concept().description}}</p>
   <h2>Relations</h2>
   @for(r of concept().relations; track r.relation.id) {
-    <h3>{{titles()?.[r.relation.type]?.[r.relation.id] ?? `#${r.relation.type}/${r.relation.id}`}}</h3>
+    <h3>{{r.relation | title | async}}</h3>
     <ul>
       @for(target of r.objects; track target.id) {
         <li>
           <a href="concept/{{target.type}}/{{target.id}}">
-            {{titles()?.[target.type]?.[target.id] ?? `#${target.type}/${target.id}`}}
+            {{target | title | async}}
           </a>
         </li>
       }
