@@ -6,8 +6,7 @@ import {ApiError} from '../../classes/api-error';
 import {ConceptRow} from '../../interfaces/concept-row';
 import {convertConceptRow} from '../../functions/convert-concept-row';
 import {Concept, ConceptId} from 'common/interfaces/concept';
-import {Settings} from 'common/interfaces/settings';
-import {ConceptSelector, SearchResult} from 'common/interfaces/search';
+import {ConceptQueryWithSettings, ConceptSelector, SearchResult} from 'common/interfaces/search';
 import {ConceptHistory} from 'common/interfaces/concept-history';
 import {convertHistoryRow} from '../../functions/convert-history-row';
 import {searchCountSql, searchSql} from '../../functions/search-sql';
@@ -31,17 +30,10 @@ import {
 import {HistoryRow} from '../../interfaces/history-row';
 import {getErrorCode, getErrorMessage} from '../../functions/error';
 import {EnvironmentService} from '../environment/environment.service';
-import {Author} from '../../interfaces/author';
 import {Domain} from 'common/interfaces/domain';
 import {isDomain} from 'common/functions/domain.typeguards';
 import {User} from 'common/interfaces/user';
-
-const settings: Settings = {
-  preferredLanguage: 'deu',
-  preferTransliteration: false,
-  geoExportFormat: 'GeoJSON',
-  includeIds: true
-}; // TODO extend by user settings
+import {SettingsService} from '../settings/settings.service';
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
@@ -53,7 +45,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private readonly cs: CacheService,
-    private readonly es: EnvironmentService
+    private readonly es: EnvironmentService,
+    private readonly ss: SettingsService
   ) {
     this.pool = new Pool(this.es.get().db);
   }
@@ -183,9 +176,9 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async queryConcepts(
-    selector: ConceptSelector
+    selector: ConceptQueryWithSettings
   ): Promise<ConceptRow[]> {
-    const query = searchSql(selector, settings);
+    const query = searchSql(selector);
     const res = await this.query<ConceptRow>(
       query,
       [],
@@ -218,8 +211,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     return res.rows[0].count;
   }
 
-  async getConcept(type: string, id: string): Promise<Concept | null> {
+  async getConcept(type: string, id: string, requester: User|null = null): Promise<Concept | null> {
     const conceptRows = await this.queryConcepts({
+      ...this.ss.get(),
+      ...{preferredLanguage: requester ? requester.preferredLanguage : this.ss.get().preferredLanguage},
       type,
       id,
       limit: 1,
@@ -230,15 +225,20 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         'geographical_extends',
         'temporal_extends',
         'title'
-      ]
+      ],
+      includeIds: true
     });
     return conceptRows[0] ? convertConceptRow(conceptRows[0]) : null;
   }
 
-  async search(selector: ConceptSelector): Promise<SearchResult> {
-    const results: Concept[] = (await this.queryConcepts(selector)).map(
-      convertConceptRow
-    );
+  async search(selector: ConceptSelector, requester: User|null): Promise<SearchResult> {
+    const results: Concept[] = (await this.queryConcepts({
+      ...this.ss.get(),
+      ...{preferredLanguage: requester ? requester.preferredLanguage : this.ss.get().preferredLanguage},
+      ...selector,
+      includeIds: false
+    }))
+      .map(convertConceptRow);
     const count = await this.getSearchResultCount(selector, results.length);
     return {
       selector,

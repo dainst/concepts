@@ -8,13 +8,15 @@ import {ConceptHistory} from 'concepts-common/interfaces/concept-history';
 import {RetryConfig} from 'rxjs/internal/operators/retry';
 import {isConceptId} from 'concepts-common/functions/concept.typeguards';
 import {Status} from 'concepts-common/interfaces/default';
-import {User} from 'concepts-common/interfaces/user';
 import {Domain} from 'concepts-common/interfaces/domain';
 import {isDomain} from 'concepts-common/functions/domain.typeguards';
+import {UserService} from './user.service';
+import {isUser} from 'concepts-common/functions/user.typeguard';
 
 @Service()
 export class BackendService {
   private readonly http = inject(HttpClient);
+  private readonly us = inject(UserService);
   private readonly api = isDevMode()
     ? 'http://localhost:3000/'
     : '/api/';
@@ -35,6 +37,11 @@ export class BackendService {
   }
 
   search(searchQuery: ConceptSelector): Observable<SearchResult> {
+    const currentUser = this.us.currentUser();
+    if (!searchQuery.preferredLanguage && isUser(currentUser)) {
+      searchQuery.preferredLanguage = currentUser.preferredLanguage;
+    }
+
     return this.http.get<SearchResult>(this.api + `search`, {params: searchToHttpParams(searchQuery)})
       .pipe(retry(BackendService.retryConfig));
   }
@@ -59,10 +66,6 @@ export class BackendService {
           id: cId
         };
       }));
-  }
-
-  getUser(): Observable<User|null> {
-    return this.http.get<User|null>(this.api + `user`);
   }
 
   getDomains(): Observable<Domain[]> {

@@ -1,6 +1,6 @@
 import {Service} from '@angular/core';
 import Keycloak from 'keycloak-js';
-import {BehaviorSubject, Subject} from 'rxjs';
+import {BehaviorSubject, filter, firstValueFrom} from 'rxjs';
 import {User} from 'concepts-common/interfaces/user';
 import {AppError} from '../../classes/app-error';
 import {UserServiceStatus} from '../interfaces/user-service-status';
@@ -9,7 +9,7 @@ import {isUser} from 'concepts-common/functions/user.typeguard';
 
 @Service()
 export class UserService {
-  private readonly _user$: Subject<User|UserServiceStatus> = new BehaviorSubject<User|UserServiceStatus>('connecting');
+  private readonly _user$: BehaviorSubject<User|UserServiceStatus> = new BehaviorSubject<User|UserServiceStatus>('connecting');
   readonly user$ = this._user$.asObservable();
 
   private readonly keycloak = new Keycloak({
@@ -60,6 +60,11 @@ export class UserService {
   }
 
   async getToken(): Promise<string | undefined> {
+    await firstValueFrom(
+      this._user$
+        .pipe(filter(u => u !== 'connecting'))
+    );
+
     if (!this.keycloak.authenticated) {
       return undefined;
     }

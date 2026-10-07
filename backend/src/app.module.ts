@@ -12,13 +12,14 @@ import {AuthService} from './services/auth/auth.service';
 import {AuthMiddleware} from './middleware/auth.middleware';
 import {DomainController} from './controllers/domain/domain.controller';
 import {KeycloakAdminService} from './services/keycloak-admin/keycloak-admin.service.service';
-import { DomainsController } from './controllers/domains/domains.controller';
-import { SyncService } from './services/sync/sync.service';
+import {DomainsController} from './controllers/domains/domains.controller';
+import {SyncService} from './services/sync/sync.service';
+import { SettingsService } from './services/settings/settings.service';
 
 @Module({
   imports: [],
   controllers: [AppController, StatusController, ConceptController, SearchController, HistoryController, UserController, DomainController, DomainsController],
-  providers: [DbService, CacheService, EnvironmentService, AuthService, KeycloakAdminService, SyncService]
+  providers: [DbService, CacheService, EnvironmentService, AuthService, KeycloakAdminService, SyncService, SettingsService]
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {

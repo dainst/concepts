@@ -39,6 +39,7 @@ export const fromToken = (token: JWTPayload): User => {
     name: getStringField('name'),
     email: getStringField('email'),
     groups: getStringArrayField('groups'),
+    preferredLanguage: getStringField('preferredLanguage'),
     roles
   };
 };

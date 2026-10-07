@@ -19,9 +19,10 @@ export class ConceptController {
   @Get(':type/:id')
   async get(
     @Param('type') type: string,
-    @Param('id') id: string
+    @Param('id') id: string,
+    @UserDecorator() user: User | null
   ): Promise<Concept> {
-    const c = await this.db.getConcept(type, id);
+    const c = await this.db.getConcept(type, id, user);
     if (!c) throw new ApiError('not-found', ['concept', type, id]);
     return c;
   }

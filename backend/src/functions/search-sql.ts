@@ -1,5 +1,4 @@
-import {ConceptSelector, SearchShard} from 'common/interfaces/search';
-import {Settings} from 'common/interfaces/settings';
+import {ConceptQueryWithSettings, ConceptSelector, SearchShard} from 'common/interfaces/search';
 import {findConceptIdInString} from 'common/functions/concept-id';
 
 const buildWhere = (selector: ConceptSelector): string => {
@@ -38,16 +37,16 @@ const buildWhere = (selector: ConceptSelector): string => {
       .join(' and ');
 };
 
-const autoCompleteShards = (selector: ConceptSelector): SearchShard[] => {
+const autoCompleteShards = (selector: ConceptQueryWithSettings): SearchShard[] => {
   const uniqueShard = selector.shards ?? [];
   if (selector.q) uniqueShard.push('labels', 'title');
   return [...new Set<SearchShard>(uniqueShard)];
 };
 
-export const searchSql = (selector: ConceptSelector, settings: Settings): string => {
-  const geoFn = settings.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
+export const searchSql = (selector: ConceptQueryWithSettings): string => {
+  const geoFn = selector.geoExportFormat === 'WKT' ? 'ST_AsText' : 'ST_AsGeoJSON';
   const shards = autoCompleteShards(selector);
-  const includeIds = settings.includeIds ? `, 'id', id` : '';
+  const includeIds = selector.includeIds ? `, 'id', id` : '';
   const select= [
     'concepts.id as id',
     'concepts.type as type',
@@ -112,7 +111,7 @@ export const searchSql = (selector: ConceptSelector, settings: Settings): string
         select
           label as title,
           case
-            when language = '${settings.preferredLanguage}' then 2
+            when language = '${selector.preferredLanguage}' then 2
             when language = 'eng' then 1
             else 0
           end as rank
@@ -121,7 +120,7 @@ export const searchSql = (selector: ConceptSelector, settings: Settings): string
         and labels.type = 'title'
         order by rank desc
         limit 1
-      ) on true` // TODO use settings.preferTransliteration
+      ) on true` // TODO use selector.preferTransliteration
 
   };
 
