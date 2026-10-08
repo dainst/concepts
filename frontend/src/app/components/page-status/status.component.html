@@ -1,26 +1,46 @@
-<h2>Status</h2>
-<ul>
-  <li>app: {{ status().app }}</li>
-  <li>version: {{ status().version }}</li>
-  <li>db version: {{ status().db.version }}</li>
-  <li>db status: {{ status().db.status }}</li>
-</ul>
-<h2>Benutzer</h2>
-<ul>
-@if (user(); as user) {
-  @if (us.isUser(user)) {
-    <li>Name: {{user.name}}</li>
-    <li>Username: {{user.username}}</li>
-    <li>Email: {{user.email}}</li>
-    <li>Gruppen: {{user.groups.join(', ')}}</li>
-    <li>Rollen: {{user.roles.join(', ')}}</li>
-    <li>Bevorzugte Sprache: {{{id: user.preferredLanguage, type: 'language'} | title | async}}</li>
-  } @else if (user === 'connecting') {
-    <li>Verbindung zu Authentifizierungsserver wird aufgebaut.</li>
-  } @else if (user === 'error') {
-    <li>Authentifizierung nicht möglich, Provider nicht erreichbar.</li>
-  } @else if (user === 'not-logged-in') {
-    <li>Nicht authentifiziert</li>
-  }
-}
-</ul>
+
+<div class="container py-5">
+  <div class="mb-4">
+    <h1 class="h3 mb-1">Status</h1>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Anwendung</h5>
+      <div class="card-text">
+        <ul>
+          <li>app: {{ status().app }}</li>
+          <li>version: {{ status().version }}</li>
+          <li>db version: {{ status().db.version }}</li>
+          <li>db status: {{ status().db.status }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Benutzer</h5>
+      <div class="card-text">
+        <ul>
+        @if (user(); as user) {
+          @if (us.isUser(user)) {
+            <li>Name: {{user.name}}</li>
+            <li>Username: {{user.username}}</li>
+            <li>Email: {{user.email}}</li>
+            <li>Gruppen: {{user.groups.join(', ')}}</li>
+            <li>Rollen: {{user.roles.join(', ')}}</li>
+            <li>Bevorzugte Sprache: {{{id: user.preferredLanguage, type: 'language'} | title | async}}</li>
+          } @else if (user === 'connecting') {
+            <li>Verbindung zu Authentifizierungsserver wird aufgebaut.</li>
+          } @else if (user === 'error') {
+            <li>Authentifizierung nicht möglich, Provider nicht erreichbar.</li>
+          } @else if (user === 'not-logged-in') {
+            <li>Nicht authentifiziert</li>
+          }
+        }
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
