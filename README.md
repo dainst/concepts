@@ -1,9 +1,10 @@
 # Run
 ## Development
-* Frontend `cd frontend && npm run start`
-* Backend `cd backend && npm start:dev`
-* DB TODO
-* Keycloak: `docker compose -f dev-kc.yml up`
+1. Keycloak & DB: `docker compose -f docker-compose.dev.yml up`
+2. Frontend `cd frontend && npm run start`
+3. Backend `cd backend && npm start:dev`
+
+
 
 ## Production
 * setup .env following dev.env

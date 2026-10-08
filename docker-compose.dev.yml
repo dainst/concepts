@@ -1,0 +1,30 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    volumes:
+      - ./keycloak/realm:/opt/keycloak/data/import
+
+  concepts-db:
+    image: postgis/postgis:18-master
+    container_name: concepts-db-dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - concepts-postgres-data:/var/lib/postgresql
+      - ./database/extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
+      - ./database/app.sql:/docker-entrypoint-initdb.d/03-app.sql
+
+volumes:
+  concepts-postgres-data:
+
+networks:
+  shared:
+    name: concepts
+    external: true
