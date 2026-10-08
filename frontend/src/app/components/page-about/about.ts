@@ -1,51 +1,12 @@
-import {Component, OnInit, signal} from '@angular/core';
-import {Concept} from 'concepts-common/interfaces/concept';
-import {dummyConceptGenerator} from '../timeline/dummy-data';
-import {Timeline} from '../timeline/timeline';
-
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-about',
   imports: [
-    Timeline
   ],
   templateUrl: './about.html',
   styleUrl: './about.css'
 })
-export class About implements OnInit {
-  ngOnInit(): void {
-    setTimeout(() => {this.pumpData();},100);
-    setTimeout(() => {this.pumpData();},1000);
-  }
-  protected data = signal<Concept[]>([]);
-  protected selected = signal<string | undefined>(undefined);
-  protected axisTicks = signal<number>(10);
-  protected inactive = signal<boolean>(false);
+export class About {
 
-  private gen = dummyConceptGenerator();
-
-  protected pumpData(): void {
-    this.data.set([
-      ...this.data(),
-      ...Array.from({length: 3}).map(_ => this.gen.next().value)
-    ]);
-  }
-
-  protected select(what: number = 1): void {
-    if (!this.data().length) {
-      this.selected.set(undefined);
-      return;
-    }
-    const last = this.data()[this.data().length - what];
-    this.selected.set(`${last.id.id}-${last.id.type}`);
-  };
-
-
-  protected increaseAxisTicks(): void {
-    this.axisTicks.set(this.axisTicks() + 1);
-  }
-
-  protected toggleInactive(): void {
-    this.inactive.set(!this.inactive());
-  }
 }
