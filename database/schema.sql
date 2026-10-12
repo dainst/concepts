@@ -140,10 +140,9 @@ create table users (
 create type concept_history_event_type as enum(
   'create',
   'set-status',
-  'edit', -- for historic records only
-  'transfer-ownership',
+  'edit',
   'change-domain',
-  'delete'
+  'delete',
   'merge',
   'replace',
   'duplicate'

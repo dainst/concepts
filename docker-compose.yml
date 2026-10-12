@@ -67,45 +67,45 @@ services:
       - "--accesslog=true"
       - "--providers.docker.watch=true"
 
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:26.4
-#    restart: always
-#    depends_on:
-#      database:
-#        condition: service_healthy
-#    command: [
-#      'start',
-#      '--proxy-headers', 'xforwarded',
-#      '--http-enabled', 'true',
-#      '--import-realm'
-#    ]
-#    environment:
-#      KEYCLOAK_LOGLEVEL: INFO
-#      KC_DB: postgres
-#      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
-#      KC_DB_USERNAME: keycloak
-#      KC_DB_PASSWORD: keycloak
-#      KC_HOSTNAME: keycloak.${SERVER_NAME}
-#      KC_HEALTH_ENABLED: 'true'
-#      KC_METRICS_ENABLED: 'true'
-#      KC_BOOTSTRAP_ADMIN_USERNAME: ${ADMIN_NAME}
-#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-#      KEYCLOAK_EXTRA_ARGS_PREPENDED: "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
-#    env_file:
-#      - config/keycloak/import/monitoring-realm.config
-#    volumes:
-#      - "./keycloak/realm.json:/opt/keycloak/data/import/monitoring-realm.json"
-#      - "./theme:/opt/keycloak/themes/iqb"
-#  labels:
-#    - "traefik.enable=true"
-#    - "traefik.http.routers.keycloak.entrypoints=websecure"
-#    - "traefik.http.routers.keycloak.tls=true"
-#    - "traefik.http.routers.keycloak.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
-#    - "traefik.http.routers.keycloak.rule=Host(`keycloak.${SERVER_NAME}`)"
-#    - "traefik.http.routers.keycloak.middlewares=security-headers"
-#    - "traefik.http.routers.keycloak.service=keycloak-traefik@docker"
-#    - "traefik.docker.network=app-net"
-#
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    restart: always
+    depends_on:
+      database:
+        condition: service_healthy
+    command: [
+      'start',
+      '--proxy-headers', 'xforwarded',
+      '--http-enabled', 'true',
+      '--import-realm'
+    ]
+    environment:
+      KEYCLOAK_LOGLEVEL: INFO
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://database/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME: keycloak.${SERVER_NAME}
+      KC_HEALTH_ENABLED: 'true'
+      KC_METRICS_ENABLED: 'true'
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${ADMIN_NAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      KEYCLOAK_EXTRA_ARGS_PREPENDED: "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
+    env_file:
+      - config/keycloak/import/monitoring-realm.config
+    volumes:
+      - "./keycloak/realm.json:/opt/keycloak/data/import/monitoring-realm.json"
+      - "./theme:/opt/keycloak/themes/iqb"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls=true"
+      - "traefik.http.routers.keycloak.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.${SERVER_NAME}`)"
+      - "traefik.http.routers.keycloak.middlewares=security-headers"
+      - "traefik.http.routers.keycloak.service=keycloak-traefik@docker"
+      - "traefik.docker.network=app-net"
+
   database:
     image: postgis/postgis:18-master
     container_name: concepts-database

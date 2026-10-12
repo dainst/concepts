@@ -15,14 +15,16 @@ services:
     container_name: concepts-db-dev
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: secret_password
     volumes:
-      - concepts-postgres-data:/var/lib/postgresql
       - ./database/extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
       - ./database/app.sql:/docker-entrypoint-initdb.d/03-app.sql
-
-volumes:
-  concepts-postgres-data:
+      - ./database/sampledata.sql:/docker-entrypoint-initdb.d/04-sampledata.sql
 
 networks:
   shared:
