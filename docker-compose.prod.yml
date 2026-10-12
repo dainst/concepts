@@ -1,8 +1,8 @@
 services:
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ..
+      dockerfile: ../frontend/Dockerfile
       target: production
     container_name: concepts-frontend
 #    volumes:
@@ -19,8 +19,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ..
+      dockerfile: ../backend/Dockerfile
       target: production
     container_name: concepts-backend
 #    volumes:

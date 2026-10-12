@@ -1,8 +1,8 @@
 import * as fs from "node:fs";
 
 const files = {
-  'realm': fs.readFileSync('../keycloak/realm.json', 'utf8'),
-  'user-profile': fs.readFileSync('../keycloak/user-profile.json', 'utf8')
+  'realm': fs.readFileSync('keycloak/realm.json', 'utf8'),
+  'user-profile': fs.readFileSync('keycloak/user-profile.json', 'utf8')
 };
 
 const resolveReferences = reference =>
@@ -12,4 +12,4 @@ const resolveReferences = reference =>
       .replaceAll(/"\$REF:(.*?:)(.*?)"/g, m => resolveReferences(m.substring('"$REF:'.length, m.length - 1)));
 
 
-fs.writeFileSync('../keycloak/realm/realm.json', resolveReferences('realm'));
+fs.writeFileSync('keycloak/realm/realm.json', resolveReferences('realm'));
