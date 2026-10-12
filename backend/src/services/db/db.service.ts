@@ -79,7 +79,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         status: 'offline',
         version: null
       };
-      console.debug(this.es.get());
+
       throw new ApiError('internal-server-error', [
         `DB connection failed after ${6 - retries} attempts`,
          String(getErrorCode(err))
