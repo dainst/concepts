@@ -1,8 +1,9 @@
 import {Controller, Get} from '@nestjs/common';
 import {Status} from 'common/interfaces/default';
 import {DbService} from '../../services/db/db.service';
+import packageJson from '../../../package.json';
 
-@Controller('status')
+@Controller()
 export class StatusController {
   constructor(
     private readonly db: DbService
@@ -10,12 +11,14 @@ export class StatusController {
   }
 
   @Get()
+  @Get('status')
   getStatus(): Status {
     const db = this.db.getStatus();
+    console.log(packageJson)
     return {
-      app: 'concepts-backend',
+      app: packageJson['name'],
       db,
-      version: '0.0.0'
+      version: packageJson['version']
     };
   }
 }

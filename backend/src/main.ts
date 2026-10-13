@@ -2,6 +2,7 @@ import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import {GlobalExceptionFilter} from './filters/exception.filter';
 import {EnvironmentService} from './services/environment/environment.service';
+import packageJson from '../package.json';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -11,5 +12,6 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new GlobalExceptionFilter());
   if (es.get().cors) app.enableCors();
   await app.listen(es.get().port);
+  console.log(`Concepts Backend running on ${packageJson}`);
 }
 void bootstrap();

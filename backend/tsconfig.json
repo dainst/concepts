@@ -11,6 +11,7 @@
     "outDir": "./dist",
     "removeComments": true,
     "resolveJsonModule": true,
+    "esModuleInterop": true,
     "sourceMap": true,
     "target": "ES2023",
     "paths": {
