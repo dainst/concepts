@@ -89,4 +89,4 @@ git commit -m "update version nr to $NEXT_VERSION"
 
 
 git tag "$NEXT_VERSION"
-git push --tags
+git push origin tag "$NEXT_VERSION"
