@@ -18,6 +18,7 @@ import {ConceptViewHistory} from '../concept-view-history/concept-history';
 import {ConceptViewTree} from '../concept-view-tree/concept-view-tree';
 import {isGeographicalConcept, isRelatedConcept, isTemporalConcept} from 'concepts-common/functions/concept.typeguards';
 import {UserService} from '../../services/user.service';
+import {isUser} from 'concepts-common/functions/user.typeguard';
 
 const viewsMap: ViewMap<ConceptMenuEntry> = {
   tree: {
@@ -134,7 +135,7 @@ export class ConceptComponent {
     if (isTemporalConcept(concept)) views.push('timeline');
     if (isRelatedConcept(concept)) views.push('graph');
     views.push('tree', 'raw', 'history');
-    if (!!(this.us.currentUser())) views.push('edit'); // TODO check group
+    if (isUser(this.us.currentUser())) views.push('edit'); // TODO check group
     return views;
   };
 }

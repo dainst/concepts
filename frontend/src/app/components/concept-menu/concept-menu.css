@@ -3,12 +3,11 @@
 }
 
 .btn {
-  height: 150px;
+  min-height: 100px;
   overflow: hidden;
 }
 
 .menu-label {
-
   writing-mode: vertical-lr;
   transform: rotate(180deg);
 }
