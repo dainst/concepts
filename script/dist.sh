@@ -77,12 +77,12 @@ mkdir dist/tmp/keycloak
 mkdir dist/tmp/keycloak/realm
 cp keycloak/realm/realm.json dist/tmp/keycloak/realm/realm.json
 cp -r database dist/tmp/database
-tar -czf dist/concepts-"NEXT_VERSION".tar.gz dist/tmp
+tar -czf dist/concepts-"$NEXT_VERSION".tar.gz dist/tmp
 rm -rf "dist/tmp"
 
 git add backend/package.json
 git add frontend/package.json
-git add dist/concepts-"NEXT_VERSION".tar.gz
+git add dist/concepts-"$NEXT_VERSION".tar.gz
 git commit -m "update version nr to $NEXT_VERSION"
 
 
