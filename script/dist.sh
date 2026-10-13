@@ -69,7 +69,8 @@ echo "Done."
 
 echo "## 2. Build dist"
 
-mkdir -p "dist/tmp"
+rm -rf dist/*.tar.gz
+mkdir -p dist/tmp
 cp docker-compose.prod.yml dist/tmp/docker-compose.yml
 cp sample.env dist/tmp/sample.env
 node script/create-realm-json.js
@@ -78,7 +79,7 @@ mkdir dist/tmp/keycloak/realm
 cp keycloak/realm/realm.json dist/tmp/keycloak/realm/realm.json
 cp -r database dist/tmp/database
 tar -czf dist/concepts-"$NEXT_VERSION".tar.gz dist/tmp
-rm -rf "dist/tmp"
+rm -rf dist/tmp
 
 git add backend/package.json
 git add frontend/package.json
@@ -88,4 +89,4 @@ git commit -m "update version nr to $NEXT_VERSION"
 
 
 git tag "$NEXT_VERSION"
-git push --follow-tags
+git push --tags
