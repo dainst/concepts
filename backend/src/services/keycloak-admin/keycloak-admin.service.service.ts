@@ -20,7 +20,7 @@ export class KeycloakAdminService implements OnModuleInit {
     await this.connect();
   }
 
-  private async connect(retries: number = 5): Promise<void> {
+  private async connect(retries: number = 7): Promise<void> {
     try {
       await this.client.auth({
         grantType: 'client_credentials',
@@ -39,8 +39,8 @@ export class KeycloakAdminService implements OnModuleInit {
         );
       });
 
-      console.error(e);
-      // TODO on prod die
+      throw e;
+      // TODO on dev continue
     }
   }
 

@@ -11,9 +11,10 @@ import {isUser} from 'concepts-common/functions/user.typeguard';
 export class UserService {
   private readonly _user$: BehaviorSubject<User|UserServiceStatus> = new BehaviorSubject<User|UserServiceStatus>('connecting');
   readonly user$ = this._user$.asObservable();
+  public readonly url = isDevMode() ? 'http://localhost:8080' : '/auth/';
 
   private readonly keycloak = new Keycloak({
-    url: isDevMode() ? 'http://localhost:8080' : '/auth/',
+    url: this.url,
     realm: 'concepts',
     clientId: 'concepts-frontend'
   });

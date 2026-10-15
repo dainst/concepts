@@ -75,8 +75,9 @@ node script/create-realm-json.js
 mkdir dist/tmp/keycloak
 mkdir dist/tmp/keycloak/realm
 cp keycloak/realm/realm.json dist/tmp/keycloak/realm/realm.json
+cp -r traefik dist/tmp/traefik
 cp -r database dist/tmp/database
-tar -czf dist/concepts-"$NEXT_VERSION".tar.gz dist/tmp
+tar -czf dist/concepts-"$NEXT_VERSION".tar.gz -C dist/tmp
 rm -rf dist/tmp
 
 echo "## 3. Commit"

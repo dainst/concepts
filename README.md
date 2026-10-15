@@ -6,4 +6,9 @@
 
 
 ## Production
-.. follows
+1. Get concepts-V.tar.gz from releases or the dist folder.
+2. extract on target machine
+3. `mv sample.env .env`
+4. adjust settings in .env
+5. put ssl certifactes under traefik/certs and name them cert.pem and key.pem
+6. `docker compose up`
