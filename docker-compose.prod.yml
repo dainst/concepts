@@ -12,8 +12,9 @@ services:
 #      - "traefik.http.routers.ics-ac-oauth.tls=true"
 #      - "traefik.http.routers.ics-ac-oauth.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
       - "traefik.http.routers.concepts-frontend.rule=Host(`${SERVER_NAME:-localhost}`)"
-#      - "traefik.http.routers.ics-ac-oauth.middlewares=security-headers"
+      - "traefik.http.routers.concepts-frontend.middlewares=security-headers,frontend-security-headers"
       - "traefik.http.services.concepts-frontend.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.frontend-security-headers.headers.contentSecurityPolicy=default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://idai.world; frame-ancestors 'none'"
 
   backend:
     image: ghcr.io/dainst/concepts-backend:5
@@ -38,11 +39,11 @@ services:
       #      - "traefik.http.routers.ics-ac-oauth.entrypoints=websecure"
       #      - "traefik.http.routers.ics-ac-oauth.tls=true"
       #      - "traefik.http.routers.ics-ac-oauth.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
-      #      - "traefik.http.routers.ics-ac-oauth.middlewares=security-headers"
+      - "traefik.http.routers.concepts-backend.middlewares=security-headers"
       - "traefik.http.routers.concepts-backend.rule=Host(`${SERVER_NAME:-localhost}`) && PathPrefix(`/api`)"
       - "traefik.http.services.concepts-backend.loadbalancer.server.port=3000"
-      - "traefik.http.middlewares.concepts-backend-strip-api.stripprefix.prefixes=/api"
       - "traefik.http.routers.concepts-backend.middlewares=concepts-backend-strip-api"
+      - "traefik.http.middlewares.concepts-backend-strip-api.stripprefix.prefixes=/api"
 
   traefik:
     image: traefik:v3.6
@@ -64,6 +65,14 @@ services:
       - "--log.level=${LOG_LEVEL-ERROR}"
       - "--accesslog=${TRAEFIK_ACCESSLOG-false}"
       - "--providers.docker.watch=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.security-headers.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
+#      - "traefik.http.middlewares.security-headers.headers.stsPreload=true" TODO activate when we have SSL
+      - "traefik.http.middlewares.security-headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.security-headers.headers.browserXssFilter=true"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
