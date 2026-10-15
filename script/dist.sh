@@ -34,7 +34,7 @@ fi
 echo "## 1. Update version nr"
 sed -i -E 's/("version"[[:space:]]*:[[:space:]]*")[^"]*(")/\1'"$NEXT_VERSION"'\2/' backend/package.json
 sed -i -E 's/("version"[[:space:]]*:[[:space:]]*")[^"]*(")/\1'"$NEXT_VERSION"'\2/' frontend/package.json
-sed -i "s/foo:${CURRENT_VERSION}/foo${NEXT_VERSION}/g" docker-compose.prod.yml
+sed -i "s/ghcr.io/dainst/concepts-backend:${CURRENT_VERSION}/ghcr.io/dainst/concepts-backend${NEXT_VERSION}/g" docker-compose.prod.yml
 
 
 echo "## 2. Build & Upload images"
@@ -77,7 +77,7 @@ mkdir dist/tmp/keycloak/realm
 cp keycloak/realm/realm.json dist/tmp/keycloak/realm/realm.json
 cp -r traefik dist/tmp/traefik
 cp -r database dist/tmp/database
-tar -czf dist/concepts-"$NEXT_VERSION".tar.gz -C dist/tmp
+tar -czf dist/concepts-"$NEXT_VERSION".tar.gz --transform='s|^\./||' -C dist/tmp .
 rm -rf dist/tmp
 
 echo "## 3. Commit"
