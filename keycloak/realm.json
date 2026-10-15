@@ -116,10 +116,10 @@
       "publicClient": true,
       "protocol": "openid-connect",
       "redirectUris": [
-        "http://localhost:4200/*"
+        "${FRONTEND_URL}/*"
       ],
       "webOrigins": [
-        "http://localhost:4200"
+        "${FRONTEND_URL}"
       ],
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
@@ -158,7 +158,7 @@
       "enabled": true,
       "publicClient": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "development-only-secret",
+      "secret": "${BACKEND_CLIENT_SECRET}",
       "serviceAccountsEnabled": true,
       "standardFlowEnabled": false,
       "implicitFlowEnabled": false,

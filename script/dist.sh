@@ -35,6 +35,7 @@ fi
 echo "## 1. Update version nr"
 sed -i -E 's/("version"[[:space:]]*:[[:space:]]*")[^"]*(")/\1'"$NEXT_VERSION"'\2/' backend/package.json
 sed -i -E 's/("version"[[:space:]]*:[[:space:]]*")[^"]*(")/\1'"$NEXT_VERSION"'\2/' frontend/package.json
+sed -i "s/foo:${CURRENT_VERSION}/foo${NEXT_VERSION}/g" docker-compose.prod.yml
 
 
 echo "## 2. Build & Upload images"
@@ -65,7 +66,7 @@ docker build . \
 docker push ghcr.io/dainst/concepts-frontend:latest
 docker push ghcr.io/dainst/concepts-frontend:"$NEXT_VERSION"
 
-echo "Done."
+echo "images built."
 
 echo "## 2. Build dist"
 
@@ -81,9 +82,10 @@ cp -r database dist/tmp/database
 tar -czf dist/concepts-"$NEXT_VERSION".tar.gz dist/tmp
 rm -rf dist/tmp
 
+echo "## 3. Commit"
 git add backend/package.json
 git add frontend/package.json
-git add dist/concepts-"$NEXT_VERSION".tar.gz
+git add dist/*
 git commit -m "update version nr to $NEXT_VERSION"
 
 
