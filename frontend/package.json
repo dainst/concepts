@@ -1,6 +1,6 @@
 {
   "name": "concepts-frontend",
-  "version": "5",
+  "version": "6",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
