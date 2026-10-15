@@ -116,10 +116,10 @@
       "publicClient": true,
       "protocol": "openid-connect",
       "redirectUris": [
-        "http://localhost:4200/*"
+        "${FRONTEND_URL}/*"
       ],
       "webOrigins": [
-        "http://localhost:4200"
+        "${FRONTEND_URL}"
       ],
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,

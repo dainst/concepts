@@ -12,6 +12,6 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new GlobalExceptionFilter());
   if (es.get().cors) app.enableCors();
   await app.listen(es.get().port);
-  console.log(`Concepts Backend running on ${packageJson}`);
+  console.log(`Concepts Backend Version ${packageJson.version}`);
 }
 void bootstrap();

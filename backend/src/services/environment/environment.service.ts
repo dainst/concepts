@@ -1,6 +1,11 @@
 import {Injectable} from '@nestjs/common';
 import {Environment} from '../../interfaces/environment';
 
+const truthyStrings = [
+  'true', 'TRUE', 'true', 'On', 'on', 'ON', 'yes', 'Yes', 'YES',
+  'enabled', 'ENABLED', 'Enabled', '1', 1, true
+];
+
 @Injectable()
 export class EnvironmentService {
   private readonly e: Environment;
@@ -20,14 +25,12 @@ export class EnvironmentService {
       },
       kc: {
         url: process.env.KEYCLOAK_URL ?? 'http://localhost:8080',
-        realm: process.env.KEYCLOAK_URL ?? 'concepts',
-        clientId: process.env.KEYCLOAK_URL ?? 'concepts-backend',
-        clientSecret: process.env.KEYCLOAK_URL ?? 'development-only-secret'
+        realm: process.env.KEYCLOAK_REALM ?? 'concepts',
+        clientId: process.env.KEYCLOAK_CLIENT_ID ?? 'concepts-backend',
+        clientSecret: process.env.CLIENT_SECRET ?? 'development-only-secret'
       },
-      cors:
-        process.env.CORS ? !!process.env.CORS : true,
-      port:
-        Number(process.env.PORT) || 3000
+      cors: !process.env.CORS || truthyStrings.includes(process.env.CORS),
+      port: Number(process.env.PORT) || 3000
     };
   }
 

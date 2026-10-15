@@ -1,13 +1,11 @@
+name: concepts
+# Standalone compose file for concepts-application in production.
+
 services:
   frontend:
-    build:
-      context: ..
-      dockerfile: ../frontend/Dockerfile
-      target: production
+    image: ghcr.io/dainst/concepts-frontend:5
     container_name: concepts-frontend
-#    volumes:
-#      - ./frontend:/app
-#      - ./common:/common
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
 #      - "traefik.http.routers.ics-ac-oauth.entrypoints=websecure"
@@ -18,23 +16,23 @@ services:
       - "traefik.http.services.concepts-frontend.loadbalancer.server.port=80"
 
   backend:
-    build:
-      context: ..
-      dockerfile: ../backend/Dockerfile
-      target: production
+    image: ghcr.io/dainst/concepts-backend:5
     container_name: concepts-backend
-#    volumes:
-#      - ./backend:/app
-#      - /app/node_modules
-#      - ./common:/common
+    restart: unless-stopped
     environment:
-      - DATABASE_HOST=database
-      - DATABASE_PORT=5432
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres
-      - DATABASE_NAME=app_db
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD-postgres}
+      DATABASE_NAME: app_db
+      KEYCLOAK_URL: http://keycloak:8080
+      CLIENT_SECRET: ${KC_BACKEND_CLIENT_SECRET-development-only-secret}
+      CORS: ${CORS-0}
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       #      - "traefik.http.routers.ics-ac-oauth.entrypoints=websecure"
@@ -49,10 +47,10 @@ services:
   traefik:
     image: traefik:v3.6
     container_name: concepts-traefik
-    restart: always
+    restart: unless-stopped
     ports:
       - "${HTTP_PORT:-80}:80"
-      - "8080:8080" # traefik dashboard
+      - "8088:8080" # traefik dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command:
@@ -61,15 +59,15 @@ services:
       - "--entrypoints.web.address=:80"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--api.dashboard=true"
-      - "--api.insecure=true"
-      - "--log.level=INFO"
-      - "--accesslog=true"
+      - "--api.dashboard=${TRAEFIK_DASHBOARD-false}"
+      - "--api.insecure=${TRAEFIK_DASHBOARD-false}"
+      - "--log.level=${LOG_LEVEL-ERROR}"
+      - "--accesslog=${TRAEFIK_ACCESSLOG-false}"
       - "--providers.docker.watch=true"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
-    restart: always
+#    restart: unless-stopped
     depends_on:
       database:
         condition: service_healthy
@@ -80,49 +78,54 @@ services:
       '--import-realm'
     ]
     environment:
-      KEYCLOAK_LOGLEVEL: INFO
+      KEYCLOAK_LOGLEVEL: ${LOG_LEVEL-ERROR}
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://database/keycloak
       KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
-      KC_HOSTNAME: keycloak.${SERVER_NAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD-kc_postgres}
+      KC_HOSTNAME: http://${SERVER_NAME-localhost}/auth
       KC_HEALTH_ENABLED: 'true'
       KC_METRICS_ENABLED: 'true'
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${ADMIN_NAME}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN_NAME-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD-istrator}
       KEYCLOAK_EXTRA_ARGS_PREPENDED: "--spi-login-protocol-openid-connect-legacy-logout-redirect-uri=true"
-    env_file:
-      - config/keycloak/import/monitoring-realm.config
+      FRONTEND_URL: ${FRONTEND_URL-http://${HOSTNAME-localhost}}
+      BACKEND_CLIENT_SECRET: ${KC_BACKEND_CLIENT_SECRET-development-only-secret}
     volumes:
-      - "./keycloak/realm.json:/opt/keycloak/data/import/monitoring-realm.json"
-      - "./theme:/opt/keycloak/themes/iqb"
+      - ./keycloak/realm:/opt/keycloak/data/import
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.keycloak.entrypoints=websecure"
-      - "traefik.http.routers.keycloak.tls=true"
-      - "traefik.http.routers.keycloak.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
-      - "traefik.http.routers.keycloak.rule=Host(`keycloak.${SERVER_NAME}`)"
-      - "traefik.http.routers.keycloak.middlewares=security-headers"
-      - "traefik.http.routers.keycloak.service=keycloak-traefik@docker"
-      - "traefik.docker.network=app-net"
+#      - "traefik.http.routers.keycloak.entrypoints=websecure"
+#      - "traefik.http.routers.keycloak.tls=true"
+#      - "traefik.http.routers.keycloak.tls.certresolver=${TLS_CERTIFICATE_RESOLVER}"
+      - "traefik.http.routers.concepts-kc.rule=Host(`${SERVER_NAME:-localhost}`) && PathPrefix(`/auth`)"
+      - "traefik.http.middlewares.concepts-kc-strip-auth.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.concepts-kc.middlewares=concepts-kc-strip-auth"
+#      - "traefik.http.routers.concepts-kc.middlewares=security-headers"
+      - "traefik.http.services.concepts-kc.loadbalancer.server.port=8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
   database:
     image: postgis/postgis:18-master
     container_name: concepts-database
     restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD-postgres}
       POSTGRES_DB: app_db
       PGUSER: postgres
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD-kc_postgres}
     volumes:
       - concepts-database:/var/lib/postgresql
       - ./database/extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
       - ./database/app.sql:/docker-entrypoint-initdb.d/03-app.sql
-      - ./database/kc.sql:/docker-entrypoint-initdb.d/04-kc.sql
+      - ./database/init-kc-db.sh:/docker-entrypoint-initdb.d/04-init-kc-db.sh.sh:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready"]
       interval: 30s

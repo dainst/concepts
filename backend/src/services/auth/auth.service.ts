@@ -1,20 +1,25 @@
 import {Injectable} from '@nestjs/common';
-import {createRemoteJWKSet, jwtVerify} from 'jose';
+import {createRemoteJWKSet, jwtVerify, RemoteJWKSet} from 'jose';
 import {fromToken} from '../../functions/user';
 import {User} from 'common/interfaces/user';
 import {Request} from 'express';
+import {EnvironmentService} from '../environment/environment.service';
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private readonly es: EnvironmentService
+  ) {
+    this.issuer = `${this.es.get().kc.url}/realms/concepts`;
+    this.jwks = createRemoteJWKSet(
+      new URL(`${this.issuer}/protocol/openid-connect/certs`)
+    );
+  }
 
-  private readonly issuer = 'http://localhost:8080/realms/concepts';
-
-  private readonly jwks = createRemoteJWKSet(
-    new URL(`${this.issuer}/protocol/openid-connect/certs`)
-  );
+  private readonly issuer: string;
+  private readonly jwks: RemoteJWKSet;
 
   async authenticate(request: Request): Promise<User|null> {
-
     const authorization = request.headers.authorization;
 
     if (!authorization?.startsWith('Bearer ')) {

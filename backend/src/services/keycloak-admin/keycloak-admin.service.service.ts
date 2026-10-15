@@ -1,6 +1,7 @@
 import {Injectable, OnModuleInit} from '@nestjs/common';
 import {EnvironmentService} from '../environment/environment.service';
 import KcAdminClient from '@keycloak/keycloak-admin-client';
+import {getErrorMessage} from '../../functions/error';
 
 @Injectable()
 export class KeycloakAdminService implements OnModuleInit {
@@ -16,6 +17,10 @@ export class KeycloakAdminService implements OnModuleInit {
   private readonly client: KcAdminClient;
 
   async onModuleInit(): Promise<void> {
+    await this.connect();
+  }
+
+  private async connect(retries: number = 5): Promise<void> {
     try {
       await this.client.auth({
         grantType: 'client_credentials',
@@ -24,11 +29,19 @@ export class KeycloakAdminService implements OnModuleInit {
       });
       console.log('[KC] connected');
     } catch (e) {
-      console.log('[KC] could not connect');
+      console.error(`[KC] Failed to connect (attempt ${6 - retries}):`, getErrorMessage(e));
+      if (retries) return new Promise(resolve => {
+        setTimeout(
+          () => {
+            void this.connect(retries - 1).then(resolve);
+          },
+          10000
+        );
+      });
+
       console.error(e);
       // TODO on prod die
     }
-
   }
 
   async createGroup(name: string): Promise<void> {

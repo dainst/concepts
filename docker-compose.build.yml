@@ -1,0 +1,13 @@
+# use this file as override with prod to test the current state of development in docker
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: production
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: production

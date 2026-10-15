@@ -14,7 +14,6 @@ export class StatusController {
   @Get('status')
   getStatus(): Status {
     const db = this.db.getStatus();
-    console.log(packageJson)
     return {
       app: packageJson['name'],
       db,

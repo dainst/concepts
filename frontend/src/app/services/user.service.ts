@@ -1,4 +1,4 @@
-import {Service} from '@angular/core';
+import {isDevMode, Service} from '@angular/core';
 import Keycloak from 'keycloak-js';
 import {BehaviorSubject, filter, firstValueFrom} from 'rxjs';
 import {User} from 'concepts-common/interfaces/user';
@@ -13,7 +13,7 @@ export class UserService {
   readonly user$ = this._user$.asObservable();
 
   private readonly keycloak = new Keycloak({
-    url: 'http://localhost:8080', // TODO prod
+    url: isDevMode() ? 'http://localhost:8080' : '/auth/',
     realm: 'concepts',
     clientId: 'concepts-frontend'
   });

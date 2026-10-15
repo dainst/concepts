@@ -7,6 +7,8 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      FRONTEND_URL: http://localhost:4200
+      BACKEND_CLIENT_SECRET: development-only-secret
     volumes:
       - ./keycloak/realm:/opt/keycloak/data/import
 
