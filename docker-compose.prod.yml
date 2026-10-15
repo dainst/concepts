@@ -3,7 +3,7 @@ name: concepts
 
 services:
   frontend:
-    image: ghcr.io/dainst/concepts-frontend:5
+    image: ghcr.io/dainst/concepts-frontend:7
     container_name: concepts-frontend
     restart: unless-stopped
     labels:
@@ -17,7 +17,7 @@ services:
       - "traefik.http.middlewares.frontend-security-headers.headers.contentSecurityPolicy=default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://idai.world; frame-ancestors 'none'"
 
   backend:
-    image: ghcr.io/dainst/concepts-backend:5
+    image: ghcr.io/dainst/concepts-backend:7
     container_name: concepts-backend
     restart: unless-stopped
     environment:

@@ -9,7 +9,6 @@ echo "# Create Distribution - Version $NEXT_VERSION"
 
 
 echo "## 0. Checking State..."
-
 branch="$(git branch --show-current)"
 if [[ "$branch" != "main" ]]; then
   echo "Error: Expected branch 'main', currently on '$branch'." >&2
@@ -39,7 +38,6 @@ sed -i "s/foo:${CURRENT_VERSION}/foo${NEXT_VERSION}/g" docker-compose.prod.yml
 
 
 echo "## 2. Build & Upload images"
-
 echo "$GHCR_PW" | docker login ghcr.io -u "$GHCR_UN" --password-stdin
 
 docker build . \
@@ -69,7 +67,6 @@ docker push ghcr.io/dainst/concepts-frontend:"$NEXT_VERSION"
 echo "images built."
 
 echo "## 2. Build dist"
-
 rm -rf dist/*.tar.gz
 mkdir -p dist/tmp
 cp docker-compose.prod.yml dist/tmp/docker-compose.yml
@@ -83,12 +80,10 @@ tar -czf dist/concepts-"$NEXT_VERSION".tar.gz dist/tmp
 rm -rf dist/tmp
 
 echo "## 3. Commit"
+git add keycloak/realm.json
 git add backend/package.json
 git add frontend/package.json
-git add dist/*
+git add -u -- dist
 git commit -m "update version nr to $NEXT_VERSION"
-
-
-
 git tag "$NEXT_VERSION"
 git push origin tag "$NEXT_VERSION"
