@@ -34,7 +34,7 @@ fi
 echo "## 1. Update version nr"
 sed -i -E 's/("version"[[:space:]]*:[[:space:]]*")[^"]*(")/\1'"$NEXT_VERSION"'\2/' backend/package.json
 sed -i -E 's/("version"[[:space:]]*:[[:space:]]*")[^"]*(")/\1'"$NEXT_VERSION"'\2/' frontend/package.json
-sed -i "s/ghcr.io/dainst/concepts-backend:${CURRENT_VERSION}/ghcr.io/dainst/concepts-backend${NEXT_VERSION}/g" docker-compose.prod.yml
+sed -i -E "s|ghcr.io/dainst/concepts-([^:/]+):${CURRENT_VERSION}|ghcr.io/dainst/concepts-\1:${NEXT_VERSION}|g" docker-compose.prod.yml
 
 
 echo "## 2. Build & Upload images"
