@@ -42,6 +42,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     status: null,
     version: null
   };
+  private lastRateLimitCall: number = 0;
 
   constructor(
     private readonly cs: CacheService,
@@ -112,26 +113,34 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   async query<T extends QueryResultRow>(
     sql: string,
     params: (string | number | boolean | null)[] = [],
-    cacheId: CacheServiceStoreKey | null = null
+    cacheId: CacheServiceStoreKey | null = null,
+    rateLimit: boolean = false
   ): Promise<QueryResult<T>> {
     // console.log(sql);
     // console.log(params);
 
-    if (cacheId == null) return this.pool.query<T>(sql, params);
+    let cachedHash: string = '';
+    if (cacheId != null) {
+      const cached: CacheServiceResponse<typeof cacheId> = this.cs.get<typeof cacheId>(cacheId, sql + params?.join());
+      if (cached.result) return cached.result as unknown as QueryResult<T>;
+      cachedHash = cached.hash;
+    }
 
-    const cached: CacheServiceResponse<typeof cacheId> = this.cs.get<
-      typeof cacheId
-    >(cacheId, sql + params?.join());
-    if (cached.result) return cached.result as unknown as QueryResult<T>;
+    if (rateLimit && Date.now() - this.lastRateLimitCall <= 30000) {
+      throw new ApiError('rate-limit-exceeded');
+    }
+    this.lastRateLimitCall = Date.now();
 
     const res: QueryResult<T> = await this.pool.query<T>(sql, params);
 
-    this.cs.store(
-      cacheId,
-      sql + params?.join(),
-      res as unknown as CachedObjectType<typeof cacheId>, // TODO get rid of type assertion
-      cached.hash
-    );
+    if (cacheId != null) {
+      this.cs.store(
+        cacheId,
+        sql + params?.join(),
+        res as unknown as CachedObjectType<typeof cacheId>, // TODO get rid of type assertion
+        cachedHash
+      );
+    }
 
     return res;
   }
@@ -182,7 +191,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     const res = await this.query<ConceptRow>(
       query,
       [],
-      selector.forceCache ? 'concepts' : null
+      selector.forceCache ? 'concepts' : null,
+      Number(selector.limit) > 30
     );
     const correctRows = res.rows
       // .filter(isConceptRow);

@@ -17,7 +17,8 @@ const text: {[key in AppMessageType]: (params: string[]) => string} = {
   'db-transaction-error': p => `Could not store in DB: ${p[0]}`,
   'invalid-user': p => `Invalid user: ${p[0]}`,
   'no-domain-access-write': p => `No write access to domain ${p[0]}`,
-  'kc-not-reachable': _ => `Identity Provider is not reachable. Login impossible.`
+  'kc-not-reachable': _ => `Identity Provider is not reachable. Login impossible.`,
+  'rate-limit-exceeded': _ => `Rate Limit Exceeded. Try smaller search request or wait some time.`
 };
 
 const type = (mt: AppMessageType): string => {

@@ -7,7 +7,8 @@ export const errorResponseTypes = {
   'framework-error': 500,
   'invalid-data': 422,
   'invalid-user': 403,
-  'no-domain-access-write': 403
+  'no-domain-access-write': 403,
+  'rate-limit-exceeded': 429
 } as const;
 
 
