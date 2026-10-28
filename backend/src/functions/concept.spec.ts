@@ -1,5 +1,5 @@
-import {Concept} from 'common/interfaces/concept';
 import {conceptItemDiff, getItemId} from './concept';
+import {Concept} from '../../../common/src/interfaces/concept';
 
 describe("conceptItemDiff", () => {
   it("should substract", () => {

@@ -116,8 +116,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     cacheId: CacheServiceStoreKey | null = null,
     rateLimit: boolean = false
   ): Promise<QueryResult<T>> {
-    // console.log(sql);
-    // console.log(params);
+
 
     let cachedHash: string = '';
     if (cacheId != null) {
@@ -131,7 +130,18 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     }
     this.lastRateLimitCall = Date.now();
 
-    const res: QueryResult<T> = await this.pool.query<T>(sql, params);
+    console.log('→')
+    console.log(sql);
+    console.log(params);
+    let res: QueryResult<T>;
+    try {
+      res = await this.pool.query<T>(sql, params);
+    } catch (e) {
+
+      console.error(e)
+      throw e
+    }
+    console.log('←')
 
     if (cacheId != null) {
       this.cs.store(
@@ -187,10 +197,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private async queryConcepts(
     selector: ConceptQueryWithSettings
   ): Promise<ConceptRow[]> {
-    const query = searchSql(selector);
+    const [query, ...params] = searchSql(selector);
     const res = await this.query<ConceptRow>(
       query,
-      [],
+      params,
       selector.forceCache ? 'concepts' : null,
       Number(selector.limit) > 30
     );
@@ -216,8 +226,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private async getAvailableSearchResultCount(
     selector: ConceptSelector
   ): Promise<number> {
-    const sql = searchCountSql(selector);
-    const res = await this.query<{ count: number }>(sql, [], 'count');
+    const [sql, ...params] = searchCountSql(selector);
+    const res = await this.query<{ count: number }>(sql, params, 'count');
     return res.rows[0].count;
   }
 
