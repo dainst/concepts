@@ -85,6 +85,8 @@ git add keycloak/realm.json
 git add backend/package.json
 git add frontend/package.json
 git add -u -- dist
-git commit -m "update version nr to $NEXT_VERSION"
+git add docker-compose.prod.yml
+git add dist
+git commit -m "update version nr to 9"
 git tag "$NEXT_VERSION"
 git push origin tag "$NEXT_VERSION"
