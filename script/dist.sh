@@ -90,3 +90,4 @@ git add dist
 git commit -m "update version nr to 9"
 git tag "$NEXT_VERSION"
 git push origin tag "$NEXT_VERSION"
+git push
