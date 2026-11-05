@@ -33,6 +33,7 @@ export interface ConceptSelector {
   preferTransliteration?: boolean;
   geoExportFormat?: 'GeoJSON' | 'WKT';
   includeIds?: boolean;
+  includeDeleted?: boolean;
 }
 
 export type ConceptQueryWithSettings =

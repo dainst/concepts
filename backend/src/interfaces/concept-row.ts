@@ -5,6 +5,8 @@ export interface ConceptRow {
   readonly id: string;
   readonly type: string;
   readonly domain: string;
+  readonly last_event: string;
+  readonly last_event_value: string;
   readonly title?: string | null;
   readonly labels?: LabelsAgg[] | null;
   readonly geographical_extends?: GeographicalExtendsAgg[] | null;

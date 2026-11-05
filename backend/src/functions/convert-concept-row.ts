@@ -1,7 +1,7 @@
 import {
   Concept,
   GeographicalExtend,
-  Label,
+  Label, LastEvent,
   RelationSet,
   TemporalExtend
 } from 'common/interfaces/concept';
@@ -9,6 +9,7 @@ import {
   ConceptRow, GeographicalExtendsAgg,
   LabelsAgg, RelationsAgg, TemporalExtendsAgg
 } from '../interfaces/concept-row';
+import {isConceptHistoryEventType} from 'common/functions/concept-history.typeguards';
 
 
 const convertRelationAgg = (cell: RelationsAgg[]): RelationSet[] => cell
@@ -79,6 +80,11 @@ export const convertConceptRow  = (row: ConceptRow): Concept => {
     type: row.type
   };
 
+  const lastEvent: LastEvent|undefined = isConceptHistoryEventType(row.last_event) ? {type: row.last_event} : undefined;
+  if (lastEvent && row.last_event_value && typeof row.last_event_value === 'string') {
+    lastEvent.value = row.last_event_value;
+  }
+
   const domain = row.domain;
 
   const labels: Label[] = (row.labels ?? []).map(convertLabel);
@@ -97,6 +103,7 @@ export const convertConceptRow  = (row: ConceptRow): Concept => {
   return  {
     id,
     domain,
+    lastEvent,
     ...(title.length && {title}),
     ...(labels.length && {labels}),
     ...(relations.length && {relations}),

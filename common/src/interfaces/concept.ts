@@ -1,3 +1,5 @@
+import {ConceptHistoryEventType} from './concept-history';
+
 export const labelTypes = [
   'title',
   'description',
@@ -35,12 +37,18 @@ export interface TemporalConcept extends ConceptAbstract {
   readonly temporalExtends: TemporalExtend[];
 }
 
+export interface LastEvent {
+  type: ConceptHistoryEventType;
+  value?: string;
+}
+
 export interface Concept extends ConceptAbstract {
   readonly domain: string;
   readonly temporalExtends?: TemporalExtend[];
   readonly geographicalExtends?: GeographicalExtend[];
   readonly labels?: Label[];
   readonly relations?: RelationSet[];
+  readonly lastEvent?: LastEvent;
 }
 
 export interface RelationSet { // TODO better naming of properties, maybe remove this at all?

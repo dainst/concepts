@@ -66,7 +66,7 @@ create table labels (
   foreign key (concept_id, concept_type)
     references concepts (id, type) deferrable initially immediate,
 
-  constraint te_unique_id_concept unique(id, concept_id, concept_type)
+  constraint l_unique_id_concept unique(id, concept_id, concept_type)
 );
 
 create table geographical_extends (
@@ -104,7 +104,21 @@ create table temporal_extends (
   foreign key (concept_id, concept_type)
     references concepts (id, type) deferrable initially immediate,
 
-  constraint unique_id_concept unique(id, concept_id, concept_type)
+  constraint te_unique_id_concept unique(id, concept_id, concept_type)
+);
+
+create table sources (
+  id uuid primary key default uuidv7(),
+
+  concept_id text not null,
+  concept_type id_type not null,
+
+  reference text,
+
+  foreign key (concept_id, concept_type)
+    references concepts (id, type) deferrable initially immediate,
+
+  constraint s_unique_id_concept unique(id, concept_id, concept_type)
 );
 
 create table relations (
@@ -137,7 +151,7 @@ create table users (
   email text not null primary key
 );
 
-create type concept_history_event_type as enum(
+create type concept_history_event_type as enum (
   'create',
   'set-status',
   'edit',
@@ -176,7 +190,7 @@ create table meta (
 
 
 insert into users (name, email) values ('importer', '@importer');
-insert into meta (key, val) values ('schema-version', '0.4.0');
+insert into meta (key, val) values ('schema-version', '0.5.0');
 
 
 create index labels_label_trgm_idx on labels using gin (label gin_trgm_ops);
@@ -184,3 +198,4 @@ create index labels_concept_id_type_idx on labels (concept_id, concept_type);
 create index geographical_extends_concept_id_type_idx on geographical_extends (concept_id, concept_type);
 create index temporal_extends_concept_id_type_idx on temporal_extends (concept_id, concept_type);
 create index relations_object_id_type_idx on relations (object_id, object_type);
+create index concept_history_latest_idx on concept_history (concept_id, concept_type, timestamp desc) include (event);

@@ -1,6 +1,26 @@
 <div class="concept-abstract">
   <h1>{{concept().title}}</h1>
   <p>{{concept().description}}</p>
+
+  @if (concept().lastEvent?.type === 'delete') {
+    <ngb-alert [dismissible]="false">Dieses Konzept wurde gelöscht!</ngb-alert>
+  }
+  @if (concept().lastEvent?.type === 'replace') {
+    <ngb-alert type="warning" [dismissible]="false">
+      <strong>Achtung!</strong>
+      Dieses Konzept wurde gegen
+      @if (concept().lastEvent?.value; as replacementId) {
+        <a [routerLink]="`/concept/${concept().id.type}/${concept().lastEvent?.value}`">
+          #{{concept().id.type}}/{{concept().lastEvent?.value}}
+          ({{ {type: concept().id.type, id: replacementId} | title | async}})
+        </a>
+      } @else {
+        unbekannt
+      }
+      ersetzt!
+    </ngb-alert>
+  }
+
   <h2>Relations</h2>
   @for(r of concept().relations; track r.relation.id) {
     <h3>{{r.relation | title | async}}</h3>

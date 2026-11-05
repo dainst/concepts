@@ -246,7 +246,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         'temporal_extends',
         'title'
       ],
-      includeIds: true
+      includeIds: true,
+      includeDeleted: true
     });
     return conceptRows[0] ? convertConceptRow(conceptRows[0]) : null;
   }

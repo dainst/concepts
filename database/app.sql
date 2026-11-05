@@ -189,3 +189,27 @@ select
   ) as node
 from domain_list
        left join tree on domain_list.domain_id = tree.domain_id
+
+
+create view app_concepts as
+  select
+    concepts.id,
+    concepts.type,
+    history.event as last_event,
+    history.timestamp as last_event_ts,
+    history.value as last_event_value,
+    concepts.domain_id
+  from concepts
+    left join lateral (
+      select
+        event,
+        timestamp,
+        value
+      from
+        concept_history
+      where
+        concept_id = concepts.id
+        and concept_type = concepts.type
+      order by timestamp desc
+      limit 1
+    ) history on true;

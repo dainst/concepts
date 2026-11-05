@@ -20,7 +20,7 @@ export const joinSqlFragments = (glue: string, fragments: SqlCommand[], braces: 
 export const existsCond = (agg: string, where: SqlCommand): SqlCommand => {
   const [head, ...rest] = where;
   return [
-    `exists (select 1 from ${agg} where ${head} and concepts.id = ${agg}.concept_id and concepts.type = ${agg}.concept_type)`,
+    `exists (select 1 from ${agg} where ${head} and app_concepts.id = ${agg}.concept_id and app_concepts.type = ${agg}.concept_type)`,
     ...rest
   ];
 };
@@ -35,22 +35,23 @@ export const buildWhere = (selector: ConceptSelector): SqlCommand => {
           const id = findConceptIdInString(val);
           const matchTitleOrId: SqlCommand = joinSqlFragments('or', [
             existsCond('labels', [`label ilike ¿`, `%${id[1]}%`]), // TODO auf title beschränken?
-            [`concepts.id ilike ?`, id[1]]
+            [`app_concepts.id ilike ?`, id[1]]
           ]);
           if (!id[0]) return [matchTitleOrId];
           return [matchTitleOrId, [`type = ¿`, id[0]]];
         case 'id':
-          return [[`concepts.id = ¿`, selector.id || null]];
+          return [[`app_concepts.id = ¿`, selector.id || null]];
         case 'type':
-          return [[`concepts.type = ¿`, selector.type || null]];
+          return [[`app_concepts.type = ¿`, selector.type || null]];
         case 'domain':
-          return [[`concepts.domain_id = ¿`, selector.domain || null]];
+          return [[`app_concepts.domain_id = ¿`, selector.domain || null]];
         case 'limit':
         case 'offset':
         default:
           return [];
       }
     });
+  if (!selector.includeDeleted) conditions.push([`last_event not in ('replace', 'delete')`]);
   return conditions.length ? joinSqlFragments('and', conditions) : ['1=1'];
 };
 
@@ -65,9 +66,11 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
   const shards = autoCompleteShards(selector);
   const includeIds = selector.includeIds ? `, 'id', id` : '';
   const select= [
-    'concepts.id as id',
-    'concepts.type as type',
-    'concepts.domain_id as domain',
+    'app_concepts.id as id',
+    'app_concepts.type as type',
+    'app_concepts.domain_id as domain',
+    'app_concepts.last_event as last_event',
+    'app_concepts.last_event_value as last_event_value',
     ...shards
   ];
   const shardJoinsMap: {[s in SearchShard]: SqlCommand} = {
@@ -81,7 +84,7 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
             ${includeIds}
           )) as geographical_extends
         from geographical_extends
-        where concepts.id = geographical_extends.concept_id and concepts.type = geographical_extends.concept_type
+        where app_concepts.id = geographical_extends.concept_id and app_concepts.type = geographical_extends.concept_type
       ) on true`],
     labels: [`left join lateral (
         select
@@ -94,7 +97,7 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
             ${includeIds}
           )) as labels
         from labels
-        where concepts.id = labels.concept_id and concepts.type = labels.concept_type
+        where app_concepts.id = labels.concept_id and app_concepts.type = labels.concept_type
       ) on true`],
     relations: [`left join lateral (
         select
@@ -106,7 +109,7 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
           )) as relations
         from app_expanded_relations
         where
-          (concepts.id = app_expanded_relations.subject_id and concepts.type = app_expanded_relations.subject_type)
+          (app_concepts.id = app_expanded_relations.subject_id and app_concepts.type = app_expanded_relations.subject_type)
       ) on true`],
     temporal_extends: [`left join lateral (
         select
@@ -122,7 +125,7 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
             ${includeIds}
           )) as temporal_extends
         from temporal_extends
-        where concepts.id = temporal_extends.concept_id and concepts.type = temporal_extends.concept_type
+        where app_concepts.id = temporal_extends.concept_id and app_concepts.type = temporal_extends.concept_type
       ) on true`],
     title: [`left join lateral (
         select
@@ -133,7 +136,7 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
             else 0
           end as rank
         from labels
-        where concept_type = concepts.type and concept_id = concepts.id
+        where concept_type = app_concepts.type and concept_id = app_concepts.id
         and labels.type = 'title'
         order by rank desc
         limit 1
@@ -145,7 +148,7 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
   const [where, ...whereParams] = buildWhere(selector);
   const sql = `select
       ${(select).join(',\n\t\t')}
-    from concepts
+    from app_concepts
       ${joins}
     where ${where}
     limit ${selector.limit ?? 10}
@@ -171,8 +174,8 @@ export const searchCountSql = (selector: ConceptSelector): SqlCommand => {
       count(*) as count
     from (
       select
-        concept_id, concept_type from concepts
-        left join labels on concepts.id = labels.concept_id and concepts.type = labels.concept_type
+        concept_id, concept_type from app_concepts
+        left join labels on app_concepts.id = labels.concept_id and app_concepts.type = labels.concept_type
       where ${where}
       group by concept_id, concept_type
     )`;
