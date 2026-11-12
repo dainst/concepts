@@ -197,6 +197,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private async queryConcepts(
     selector: ConceptQueryWithSettings
   ): Promise<ConceptRow[]> {
+    console.log(selector);
     const [query, ...params] = searchSql(selector);
     const res = await this.query<ConceptRow>(
       query,
@@ -244,7 +245,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         'relations',
         'geographical_extends',
         'temporal_extends',
-        'title'
+        'title',
+        'description'
       ],
       includeIds: true,
       includeDeleted: true

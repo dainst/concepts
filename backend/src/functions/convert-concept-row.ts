@@ -97,14 +97,15 @@ export const convertConceptRow  = (row: ConceptRow): Concept => {
 
   const relations: RelationSet[] = row.relations ? convertRelationAgg(row.relations) : [];
 
-  // const preferredLabels = getPreferredLabels(labels, settings); // TODO replace this by title
   const title = row.title ?? '';
+  const description = row.description ?? '';
 
   return  {
     id,
     domain,
     lastEvent,
     ...(title.length && {title}),
+    ...(title.length && {description}),
     ...(labels.length && {labels}),
     ...(relations.length && {relations}),
     ...(geographicalExtends.length && {geographicalExtends}),

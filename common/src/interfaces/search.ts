@@ -14,7 +14,8 @@ export const searchShards = [
   'relations',
   'geographical_extends',
   'temporal_extends',
-  'title'
+  'title',
+  'description'
 ] as const;
 
 export type SearchShard = typeof searchShards[number];

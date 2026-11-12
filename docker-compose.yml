@@ -11,6 +11,8 @@ services:
       BACKEND_CLIENT_SECRET: development-only-secret
     volumes:
       - ./keycloak/realm:/opt/keycloak/data/import
+    networks:
+      - shared
 
   concepts-db:
     image: postgis/postgis:18-master
@@ -30,5 +32,5 @@ services:
 
 networks:
   shared:
-    name: concepts
+    name: concepts-data_default
     external: true

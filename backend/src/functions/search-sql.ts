@@ -51,13 +51,13 @@ export const buildWhere = (selector: ConceptSelector): SqlCommand => {
           return [];
       }
     });
-  if (!selector.includeDeleted) conditions.push([`last_event not in ('replace', 'delete')`]);
+  if (!selector.includeDeleted) conditions.push([`last_event not in ('replace', 'delete') or last_event is null`]);
   return conditions.length ? joinSqlFragments('and', conditions) : ['1=1'];
 };
 
 const autoCompleteShards = (selector: ConceptQueryWithSettings): SearchShard[] => {
   const uniqueShard = selector.shards ?? [];
-  if (selector.q) uniqueShard.push('labels', 'title');
+  if (selector.q) uniqueShard.push('description', 'title');
   return [...new Set<SearchShard>(uniqueShard)];
 };
 
@@ -140,11 +140,24 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
         and labels.type = 'title'
         order by rank desc
         limit 1
+      ) on true`, selector.preferredLanguage], // TODO use selector.preferTransliteration
+    description: [`left join lateral (
+        select
+          label as description,
+          case
+            when language = ¿ then 2
+            when language = 'eng' then 1
+            else 0
+          end as rank
+        from labels
+        where concept_type = app_concepts.type and concept_id = app_concepts.id
+        and labels.type = 'description'
+        order by rank desc
+        limit 1
       ) on true`, selector.preferredLanguage] // TODO use selector.preferTransliteration
-
   };
 
-  const [joins, ...joinParams] = joinSqlFragments('\n\t\t\t', shards.map((s: SearchShard) => shardJoinsMap[s]), false)
+  const [joins, ...joinParams] = joinSqlFragments('\n\t\t\t', shards.map((s: SearchShard) => shardJoinsMap[s]), false);
   const [where, ...whereParams] = buildWhere(selector);
   const sql = `select
       ${(select).join(',\n\t\t')}

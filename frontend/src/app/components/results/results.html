@@ -21,9 +21,9 @@
 
     <div class="list-group shadow-sm mb-4">
       @for (entry of result.results; track entry.id.id + entry.id.type) {
-        <a [routerLink]="['/concept', entry.id.type, entry.id.id]"  class="list-group-item list-group-item-action p-4">
+        <a [routerLink]="['/concept', entry.id.type, entry.id.id]" class="list-group-item list-group-item-action p-4">
           <div class="h5 mb-2">{{entry.title}}</div>
-          <p class="mb-2 text-muted"></p>
+          <p class="mb-2 text-muted">{{entry.description}}</p>
         </a>
       }
     </div>
