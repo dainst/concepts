@@ -18,7 +18,8 @@ const text: {[key in AppMessageType]: (params: string[]) => string} = {
   'invalid-user': p => `Invalid user: ${p[0]}`,
   'no-domain-access-write': p => `No write access to domain ${p[0]}`,
   'kc-not-reachable': _ => `Identity Provider is not reachable. Login impossible.`,
-  'rate-limit-exceeded': _ => `Rate Limit Exceeded. Try smaller search request or wait some time.`
+  'rate-limit-exceeded': _ => `Rate Limit Exceeded. Try smaller search request or wait some time.`,
+  'no-write-access': _ => `Writing not allowed on this item.`
 };
 
 const type = (mt: AppMessageType): string => {

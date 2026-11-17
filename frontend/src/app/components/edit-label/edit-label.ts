@@ -98,13 +98,14 @@ export class EditLabel implements OnInit {
     = (control: AbstractControl<Language>): ValidationErrors | null =>
     control.value && control.value.id && (control.value.id.length === 3) ? null : {invalidLangCode: true};
 
-  static form2Value = (l: ReturnType<ReturnType<typeof EditLabel.value2Form>['getRawValue']>): Label => ({
-    type: 'title',
-    transliteration: l.transliteration,
-    label: l.label,
-    language: l.language.id,
-    ...{id: l.id ? l.id : undefined}
-  });
+  static form2Value = (type: Label['type']) =>
+    (l: ReturnType<ReturnType<typeof EditLabel.value2Form>['getRawValue']>): Label => ({
+      type,
+      transliteration: l.transliteration,
+      label: l.label,
+      language: l.language.id,
+      ...{id: l.id ? l.id : undefined}
+    });
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   static value2Form = (fb: NonNullableFormBuilder, label: Label | undefined = undefined) => fb.group({

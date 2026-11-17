@@ -39,8 +39,7 @@ import {SelectConcept} from '../select-concept/select-concept';
     EditTemporalExtend,
     EditRelation,
     BootstrapFormValidationDirective,
-    SelectDomain,
-    SelectConcept
+    SelectDomain
   ],
   templateUrl: './concept-view-edit.html',
   styleUrl: './concept-view-edit.css'
@@ -58,6 +57,7 @@ export class ConceptViewEdit extends ConceptViewComponent {
     }),
     domain: ['default', Validators.required],
     title: this.fb.array<ReturnType<typeof EditLabel.value2Form>>([]),
+    description: this.fb.array<ReturnType<typeof EditLabel.value2Form>>([]),
     geographicalExtend: this.fb.array<ReturnType<typeof EditGeographicalExtend.value2Form>>([]),
     temporalExtend: this.fb.array<ReturnType<typeof EditTemporalExtend.value2Form>>([]),
     relation: this.fb.array<ReturnType<typeof EditRelation.value2Form>>([])
@@ -93,6 +93,12 @@ export class ConceptViewEdit extends ConceptViewComponent {
     );
 
     resetFormArray(
+      this.form.controls.description,
+      (concept.labels || []).filter(l => l.type === 'description'),
+      label => EditLabel.value2Form(this.fb, label)
+    );
+
+    resetFormArray(
       this.form.controls.geographicalExtend,
       concept.geographicalExtends || [],
       ge => EditGeographicalExtend.value2Form(this.fb, ge)
@@ -114,10 +120,12 @@ export class ConceptViewEdit extends ConceptViewComponent {
     this.form.markAsUntouched();
   }
 
-  add(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation'): void {
+  add(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation' | 'description'): void {
     switch (type) {
       case 'title':
         return this.form.controls.title.push(EditLabel.value2Form(this.fb));
+      case 'description':
+        return this.form.controls.description.push(EditLabel.value2Form(this.fb));
       case 'geographicalExtend':
         return this.form.controls.geographicalExtend.push(EditGeographicalExtend.value2Form(this.fb));
       case 'temporalExtend':
@@ -127,7 +135,7 @@ export class ConceptViewEdit extends ConceptViewComponent {
     }
   }
 
-  remove(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation', index: number): void {
+  remove(type: 'title' | 'geographicalExtend' | 'temporalExtend' | 'relation' | 'description', index: number): void {
     this.form.controls[type].removeAt(index);
   }
 
@@ -145,7 +153,10 @@ export class ConceptViewEdit extends ConceptViewComponent {
     const unsavedConcept: Concept = {
       id: value.id,
       domain: value.domain,
-      labels: value.title.map(EditLabel.form2Value),
+      labels: [
+        ...value.title.map(EditLabel.form2Value('title')),
+        ...value.description.map(EditLabel.form2Value('description'))
+      ],
       geographicalExtends: value.geographicalExtend.map(EditGeographicalExtend.form2Value),
       temporalExtends: value.temporalExtend.map(EditTemporalExtend.form2Value),
       relations: packRelationSets(value.relation.map(EditRelation.form2Value))

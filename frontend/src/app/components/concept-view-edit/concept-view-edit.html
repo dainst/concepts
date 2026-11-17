@@ -42,7 +42,7 @@
         <div ngbAccordionBody>
           <ng-template>
             @for (title of form.controls.title.controls; track title) {
-              <app-edit-label [form]="title" (remove)="remove('title', $index)" caption="Titel" />
+              <app-edit-label [form]="title" (remove)="remove('title',$index)" caption="Titel" />
             }
           </ng-template>
           <div class="row">
@@ -59,13 +59,36 @@
 
     <div ngbAccordionItem [collapsed]="false">
       <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Beschreibung</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            @for (description of form.controls.description.controls; track description) {
+              <app-edit-label [form]="description" (remove)="remove('description', $index)" caption="Titel" />
+            }
+          </ng-template>
+          <div class="row">
+            <div class="col"></div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="add('description')">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
         <button ngbAccordionButton>Relationen</button>
       </h2>
       <div ngbAccordionCollapse>
         <div ngbAccordionBody>
           <ng-template>
             @for (relation of form.controls.relation.controls; track relation) {
-              <app-edit-relation [form]="relation" (remove)="remove('relation', $index)" />
+              <app-edit-relation [form]="relation" (remove)="remove('relation',$index)" />
             }
           </ng-template>
           <div class="row">
@@ -88,7 +111,7 @@
         <div ngbAccordionBody>
           <ng-template>
             @for (ge of form.controls.geographicalExtend.controls; track ge) {
-              <app-edit-geographic-extend [form]="ge" (remove)="remove('geographicalExtend', $index)"  />
+              <app-edit-geographic-extend [form]="ge" (remove)="remove('geographicalExtend',$index)"  />
             }
           </ng-template>
           <div class="row">
@@ -111,7 +134,7 @@
         <div ngbAccordionBody>
           <ng-template>
             @for (te of form.controls.temporalExtend.controls; track te) {
-              <app-edit-temporal-extend [form]="te" (remove)="remove('temporalExtend', $index)"  />
+              <app-edit-temporal-extend [form]="te" (remove)="remove('temporalExtend',$index)"  />
             }
           </ng-template>
           <div class="row">

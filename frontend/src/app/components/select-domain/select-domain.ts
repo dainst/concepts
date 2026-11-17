@@ -9,6 +9,7 @@ import {Domain} from 'concepts-common/interfaces/domain';
 import {TitlePipe} from '../../pipes/title-pipe';
 import {toObservable} from '@angular/core/rxjs-interop';
 import { isUser } from "concepts-common/functions/user.typeguard";
+import {AppError} from '../../../classes/app-error';
 
 @Component({
   selector: 'select-domain',
@@ -45,10 +46,12 @@ export class SelectDomain implements FormValueControl<string> {
   constructor() {
     combineLatest(toObservable(this.value), this.domains$)
       .subscribe(([v, domainList]) => {
-        console.log(v, domainList);
         const d = domainList.find(d => d.id === v);
-        if (d) this.selected$.next(d);
-        // TODO else: invalid
+        if (d) {
+          this.selected$.next(d);
+        } else {
+          throw new AppError('no-write-access');
+        }
       });
   }
 

@@ -6,7 +6,8 @@ export const appMessageTypes = {
   'unknown-http-error': 1,
   'successful-created': 0,
   'successful-updated': 0,
-  'kc-not-reachable': 2
+  'kc-not-reachable': 2,
+  'no-write-access': 3
 } as const;
 
 export type AppMessageType = keyof typeof appMessageTypes;
