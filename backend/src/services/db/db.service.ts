@@ -126,7 +126,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     if (rateLimit && Date.now() - this.lastRateLimitCall <= 30000) {
       throw new ApiError('rate-limit-exceeded');
     }
-    this.lastRateLimitCall = Date.now();
+    if (rateLimit) {
+      this.lastRateLimitCall = Date.now();
+    }
+
 
     // console.log(sql);
     // console.log(params);
@@ -187,8 +190,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   private async queryConcepts(
     selector: ConceptQueryWithSettings
   ): Promise<ConceptRow[]> {
-    console.log(selector);
     const [query, ...params] = searchSql(selector);
+    if (Number(selector.limit) > 30) {
+      console.log('RATE LIMIT FOR', selector);
+    }
     const res = await this.query<ConceptRow>(
       query,
       params,
