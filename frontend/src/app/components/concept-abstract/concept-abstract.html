@@ -1,6 +1,6 @@
 <div class="concept-abstract">
   <h1>{{concept().title}}</h1>
-  <p>{{concept().description}}</p>
+  <p>{{concept().description | markdown}}</p>
 
   @if (concept().lastEvent?.type === 'delete') {
     <ngb-alert [dismissible]="false">Dieses Konzept wurde gelöscht!</ngb-alert>
@@ -24,7 +24,7 @@
   <h2>Quellen</h2>
   <ul>
   @for(s of concept().sources; track s) {
-    <li>{{s}}</li>
+    <li [innerHTML]="s | markdown"></li>
   }
   </ul>
 

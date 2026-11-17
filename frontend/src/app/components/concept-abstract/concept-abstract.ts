@@ -4,6 +4,7 @@ import {TitlePipe} from '../../pipes/title-pipe';
 import {AsyncPipe} from '@angular/common';
 import {NgbAlert} from '@ng-bootstrap/ng-bootstrap';
 import {RouterLink} from '@angular/router';
+import {MarkdownPipe} from '../../pipes/markdown-pipe';
 
 @Component({
   selector: 'app-concept-abstract',
@@ -11,11 +12,11 @@ import {RouterLink} from '@angular/router';
     TitlePipe,
     AsyncPipe,
     NgbAlert,
-    RouterLink
+    RouterLink,
+    MarkdownPipe
   ],
   templateUrl: './concept-abstract.html',
   styleUrl: './concept-abstract.css'
 })
 export class ConceptAbstract extends ConceptViewComponent {
-
 }
