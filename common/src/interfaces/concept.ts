@@ -49,6 +49,7 @@ export interface Concept extends ConceptAbstract {
   readonly labels?: Label[];
   readonly relations?: RelationSet[];
   readonly lastEvent?: LastEvent;
+  readonly sources?: string[];
 }
 
 export interface RelationSet { // TODO better naming of properties, maybe remove this at all?

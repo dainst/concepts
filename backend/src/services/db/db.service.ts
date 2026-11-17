@@ -116,8 +116,6 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     cacheId: CacheServiceStoreKey | null = null,
     rateLimit: boolean = false
   ): Promise<QueryResult<T>> {
-
-
     let cachedHash: string = '';
     if (cacheId != null) {
       const cached: CacheServiceResponse<typeof cacheId> = this.cs.get<typeof cacheId>(cacheId, sql + params?.join());
@@ -130,18 +128,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     }
     this.lastRateLimitCall = Date.now();
 
-    console.log('→')
-    console.log(sql);
-    console.log(params);
+    // console.log(sql);
+    // console.log(params);
     let res: QueryResult<T>;
-    try {
-      res = await this.pool.query<T>(sql, params);
-    } catch (e) {
-
-      console.error(e)
-      throw e
-    }
-    console.log('←')
+    res = await this.pool.query<T>(sql, params);
 
     if (cacheId != null) {
       this.cs.store(
@@ -246,7 +236,8 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         'geographical_extends',
         'temporal_extends',
         'title',
-        'description'
+        'description',
+        'sources'
       ],
       includeIds: true,
       includeDeleted: true

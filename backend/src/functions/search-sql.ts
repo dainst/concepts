@@ -154,7 +154,16 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
         and labels.type = 'description'
         order by rank desc
         limit 1
-      ) on true`, selector.preferredLanguage] // TODO use selector.preferTransliteration
+      ) on true`, selector.preferredLanguage], // TODO use selector.preferTransliteration
+    sources: [
+      `left join lateral (
+        select
+          array_agg(reference) as sources
+        from sources
+        where
+          (app_concepts.id = sources.concept_id and app_concepts.type = sources.concept_type)
+      ) on true`
+    ]
   };
 
   const [joins, ...joinParams] = joinSqlFragments('\n\t\t\t', shards.map((s: SearchShard) => shardJoinsMap[s]), false);

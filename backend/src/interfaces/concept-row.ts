@@ -13,6 +13,7 @@ export interface ConceptRow {
   readonly geographical_extends?: GeographicalExtendsAgg[] | null;
   readonly temporal_extends?: TemporalExtendsAgg[] | null;
   readonly relations?: RelationsAgg[] | null;
+  readonly sources?: string[] | null;
 }
 
 export interface RelationsAgg {

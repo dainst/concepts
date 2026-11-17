@@ -100,6 +100,8 @@ export const convertConceptRow  = (row: ConceptRow): Concept => {
   const title = row.title ?? '';
   const description = row.description ?? '';
 
+  const sources: string[] = row.sources ?? [];
+
   return  {
     id,
     domain,
@@ -109,6 +111,7 @@ export const convertConceptRow  = (row: ConceptRow): Concept => {
     ...(labels.length && {labels}),
     ...(relations.length && {relations}),
     ...(geographicalExtends.length && {geographicalExtends}),
-    ...(temporalExtends.length && {temporalExtends})
+    ...(temporalExtends.length && {temporalExtends}),
+    ...(sources.length && {sources})
   };
 };

@@ -21,6 +21,13 @@
     </ngb-alert>
   }
 
+  <h2>Quellen</h2>
+  <ul>
+  @for(s of concept().sources; track s) {
+    <li>{{s}}</li>
+  }
+  </ul>
+
   <h2>Relationen</h2>
   @for(r of concept().relations; track r.relation.id) {
     <h3>{{r.relation | title | async}}</h3>
