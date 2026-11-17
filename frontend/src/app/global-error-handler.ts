@@ -8,10 +8,10 @@ import {isAppErrorType} from './functions/error.typeguards';
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   constructor(
-    private readonly es: MessageService
+    private readonly ms: MessageService
   ) {}
 
-  private convertError(error: unknown): AppMessage {
+  static convertError(error: unknown): AppMessage {
     if (error instanceof Error) {
       // we found a generic error
 
@@ -59,6 +59,6 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   handleError(error: unknown): void {
-    this.es.add(this.convertError(error));
+    this.ms.add(GlobalErrorHandler.convertError(error));
   }
 }
