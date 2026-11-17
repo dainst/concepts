@@ -4,7 +4,7 @@ import {
   ConceptId,
   GeographicalExtend,
   Label,
-  Relation,
+  Relation, Source,
   TemporalExtend
 } from 'common/interfaces/concept';
 import {ConceptHistoryEventType} from 'common/interfaces/concept-history';
@@ -203,5 +203,20 @@ export const insertSql = {
     id,
     conceptId.type,
     conceptId.id
-  ]
+  ],
+
+  source: (
+    conceptId: ConceptId,
+    source: Source
+  ): SqlCommandWithId => [
+      `insert into sources (
+        id, concept_id, concept_type, reference
+      ) values (
+        $1,  $2,  $3,  $4
+      ) on conflict do nothing`,
+      uuidv7(),
+      conceptId.id,
+      conceptId.type,
+      source.reference
+    ]
 };

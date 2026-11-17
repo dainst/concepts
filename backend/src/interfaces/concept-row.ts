@@ -13,7 +13,7 @@ export interface ConceptRow {
   readonly geographical_extends?: GeographicalExtendsAgg[] | null;
   readonly temporal_extends?: TemporalExtendsAgg[] | null;
   readonly relations?: RelationsAgg[] | null;
-  readonly sources?: string[] | null;
+  readonly sources?: SourceAgg[] | null;
 }
 
 export interface RelationsAgg {
@@ -29,6 +29,11 @@ export interface LabelsAgg {
   readonly language: string;
   readonly transliteration: string;
   readonly is_preferred: boolean;
+  readonly id?: string;
+}
+
+export interface SourceAgg {
+  readonly reference: string;
   readonly id?: string;
 }
 

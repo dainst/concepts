@@ -191,9 +191,6 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     selector: ConceptQueryWithSettings
   ): Promise<ConceptRow[]> {
     const [query, ...params] = searchSql(selector);
-    if (Number(selector.limit) > 30) {
-      console.log('RATE LIMIT FOR', selector);
-    }
     const res = await this.query<ConceptRow>(
       query,
       params,
@@ -314,7 +311,10 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
           ...conceptItemDiff('temporalExtends', currentVersion, concept)
             .map(getItemId)
             .map(deleteSql.temporalExtend),
-          ...relationsDiff(currentVersion, concept).map(deleteSql.relation)
+          ...relationsDiff(currentVersion, concept).map(deleteSql.relation),
+          ...conceptItemDiff('sources', currentVersion, concept)
+            .map(getItemId)
+            .map(deleteSql.source)
         ];
         commands.push(...deleteRemoved);
 
@@ -339,17 +339,20 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     if (issues.length) throw new ApiError('invalid-data', issues);
 
     commands.push(
-      ...(concept.labels ?? []).map((label) =>
+      ...(concept.labels ?? []).map(label =>
         insertSql.label(concept.id, label)
       ),
-      ...(concept.temporalExtends ?? []).map((te) =>
+      ...(concept.temporalExtends ?? []).map(te =>
         insertSql.temporalExtend(concept.id, te)
       ),
-      ...(concept.geographicalExtends ?? []).map((ge) =>
+      ...(concept.geographicalExtends ?? []).map(ge =>
         insertSql.geographicalExtend(concept.id, ge)
       ),
-      ...unpackRelationSets(concept.id, concept.relations ?? []).map((r) =>
+      ...unpackRelationSets(concept.id, concept.relations ?? []).map(r =>
         insertSql.relation(concept.id, r)
+      ),
+      ...(concept.sources ?? []).map(s =>
+        insertSql.source(concept.id, s)
       )
     );
 

@@ -149,6 +149,29 @@
       </div>
     </div>
 
+    <div ngbAccordionItem [collapsed]="false">
+      <h2 ngbAccordionHeader>
+        <button ngbAccordionButton>Quellen</button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            @for (source of form.controls.sources.controls; track source) {
+              <app-edit-source [form]="source" (remove)="remove('sources', $index)" />
+            }
+          </ng-template>
+          <div class="row">
+            <div class="col"></div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="add('source')">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
   <input type="submit" class="btn btn-primary"  value="Speichern"/>
 </form>

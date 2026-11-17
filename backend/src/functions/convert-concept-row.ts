@@ -2,12 +2,12 @@ import {
   Concept,
   GeographicalExtend,
   Label, LastEvent,
-  RelationSet,
+  RelationSet, Source,
   TemporalExtend
 } from 'common/interfaces/concept';
 import {
   ConceptRow, GeographicalExtendsAgg,
-  LabelsAgg, RelationsAgg, TemporalExtendsAgg
+  LabelsAgg, RelationsAgg, SourceAgg, TemporalExtendsAgg
 } from '../interfaces/concept-row';
 import {isConceptHistoryEventType} from 'common/functions/concept-history.typeguards';
 
@@ -38,6 +38,11 @@ const convertRelationAgg = (cell: RelationsAgg[]): RelationSet[] => cell
     },
     <RelationSet[]>[]
   );
+
+const convertSourceAgg = (cell: SourceAgg): Source => ({
+  reference: cell.reference,
+  ...{id: cell.id}
+});
 
 const convertLabel = (cell: LabelsAgg): Label => ({
   label: cell.label,
@@ -100,7 +105,7 @@ export const convertConceptRow  = (row: ConceptRow): Concept => {
   const title = row.title ?? '';
   const description = row.description ?? '';
 
-  const sources: string[] = row.sources ?? [];
+  const sources: Source[] = (row.sources || []).map(convertSourceAgg);
 
   return  {
     id,

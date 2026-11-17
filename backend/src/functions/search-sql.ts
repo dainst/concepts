@@ -158,7 +158,10 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
     sources: [
       `left join lateral (
         select
-          array_agg(reference) as sources
+          json_agg(json_build_object(
+            'reference', reference
+            ${includeIds}
+          )) as sources
         from sources
         where
           (app_concepts.id = sources.concept_id and app_concepts.type = sources.concept_type)

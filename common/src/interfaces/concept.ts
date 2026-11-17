@@ -49,7 +49,7 @@ export interface Concept extends ConceptAbstract {
   readonly labels?: Label[];
   readonly relations?: RelationSet[];
   readonly lastEvent?: LastEvent;
-  readonly sources?: string[];
+  readonly sources?: Source[];
 }
 
 export interface RelationSet { // TODO better naming of properties, maybe remove this at all?
@@ -68,6 +68,11 @@ export interface RelationWithOutSubject {
 
 export interface Relation extends RelationWithOutSubject {
   readonly subject: ConceptId;
+}
+
+export interface Source {
+  readonly reference: string;
+  readonly id?: string;
 }
 
 export interface Label {

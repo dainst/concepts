@@ -17,5 +17,6 @@ export const deleteSql = {
     r.predicate.id,
     r.object.type,
     r.object.id
-  ]
+  ],
+  source: (sId: string): SqlCommand => [`delete from sources where id = $1`, sId]
 };
