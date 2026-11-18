@@ -42,7 +42,7 @@ const generateNumbers = (nr: number): GeneratedNumbers => {
 export function* dummyConceptGenerator(): Generator<Concept> {
   const makeObj = (i: number): ConceptId => ({
     id: String(i),
-    type: 'dummy'
+    type: 'concepts'
   });
 
   let index = 0;
@@ -105,7 +105,7 @@ export function* dummyConceptGenerator(): Generator<Concept> {
       ],
       id: {
         id: String(index),
-        type: 'dummy'
+        type: 'concepts'
       }
     };
   }

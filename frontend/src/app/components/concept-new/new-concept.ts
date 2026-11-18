@@ -15,7 +15,7 @@ export class NewConcept {
     domain: 'default',
     id: {
       id: '',
-      type: ''
+      type: 'concepts'
     }
   };
 }

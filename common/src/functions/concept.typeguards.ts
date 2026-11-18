@@ -1,7 +1,7 @@
 // generated with script/creates-typeguards.ts
 
-import {ConceptId, ConceptAbstract, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, Concept, RelationSet, RelationSetObject, RelationWithOutSubject, Relation, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
-import {isPreferredLabels} from './labels.typeguards';
+import {ConceptId, ConceptAbstract, RelatedConcept, LabelledConcept, GeographicalConcept, TemporalConcept, LastEvent, Concept, RelationSet, RelationSetObject, RelationWithOutSubject, Relation, Source, Label, TemporalBound, TemporalExtend, GeographicalExtend} from '../interfaces/concept';
+import {isConceptType, isPreferredLabels} from './constants.typeguards';
 
 export const isConceptId = (thing: unknown): thing is ConceptId =>
   (typeof thing === 'object')
@@ -9,7 +9,7 @@ export const isConceptId = (thing: unknown): thing is ConceptId =>
 	&& ('id' in thing)
 	&& (typeof thing.id === 'string')
 	&& ('type' in thing)
-	&& (typeof thing.type === 'string');
+	&& (isConceptType(thing.type));
 
 export const isConceptAbstract = (thing: unknown): thing is ConceptAbstract =>
   (isPreferredLabels(thing))
@@ -40,6 +40,13 @@ export const isTemporalConcept = (thing: unknown): thing is TemporalConcept =>
 	&& (Array.isArray(thing.temporalExtends))
 	&& (thing.temporalExtends.every(isTemporalExtend));
 
+export const isLastEvent = (thing: unknown): thing is LastEvent =>
+  (typeof thing === 'object')
+	&& (thing != null)
+	&& ('type' in thing)
+	&& ((typeof thing.type === 'string' && ["set-status","create","update","edit","transfer-ownership","change-domain","delete","merge","replace","duplicate"].includes(thing.type)))
+	&& ((!('value' in thing)) || ('value' in thing && typeof thing.value === 'string'));
+
 export const isConcept = (thing: unknown): thing is Concept =>
   (isConceptAbstract(thing))
 	&& ('domain' in thing)
@@ -47,7 +54,9 @@ export const isConcept = (thing: unknown): thing is Concept =>
 	&& ((!('temporalExtends' in thing)) || ('temporalExtends' in thing && Array.isArray(thing.temporalExtends) && thing.temporalExtends.every(isTemporalExtend)))
 	&& ((!('geographicalExtends' in thing)) || ('geographicalExtends' in thing && Array.isArray(thing.geographicalExtends) && thing.geographicalExtends.every(isGeographicalExtend)))
 	&& ((!('labels' in thing)) || ('labels' in thing && Array.isArray(thing.labels) && thing.labels.every(isLabel)))
-	&& ((!('relations' in thing)) || ('relations' in thing && Array.isArray(thing.relations) && thing.relations.every(isRelationSet)));
+	&& ((!('relations' in thing)) || ('relations' in thing && Array.isArray(thing.relations) && thing.relations.every(isRelationSet)))
+	&& ((!('lastEvent' in thing)) || ('lastEvent' in thing && isLastEvent(thing.lastEvent)))
+	&& ((!('sources' in thing)) || ('sources' in thing && Array.isArray(thing.sources) && thing.sources.every(isSource)));
 
 export const isRelationSet = (thing: unknown): thing is RelationSet =>
   (typeof thing === 'object')
@@ -74,6 +83,13 @@ export const isRelation = (thing: unknown): thing is Relation =>
   (isRelationWithOutSubject(thing))
 	&& ('subject' in thing)
 	&& (isConceptId(thing.subject));
+
+export const isSource = (thing: unknown): thing is Source =>
+  (typeof thing === 'object')
+	&& (thing != null)
+	&& ('reference' in thing)
+	&& (typeof thing.reference === 'string')
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'));
 
 export const isLabel = (thing: unknown): thing is Label =>
   (typeof thing === 'object')

@@ -1,8 +1,7 @@
 // generated with script/creates-typeguards.ts
 
-import {LabelType} from 'common/interfaces/concept';
-import {ConceptRow, RelationsAgg, LabelsAgg, GeographicalExtendsAgg, TemporalExtendsAgg} from '../interfaces/concept-row';
-import {isLabelType} from 'common/functions/labels.typeguards';
+import {ConceptRow, RelationsAgg, LabelsAgg, SourceAgg, GeographicalExtendsAgg, TemporalExtendsAgg} from '../interfaces/concept-row';
+import {isLabelType} from 'common/functions/constants.typeguards';
 
 export const isConceptRow = (thing: unknown): thing is ConceptRow =>
   (typeof thing === 'object')
@@ -13,11 +12,17 @@ export const isConceptRow = (thing: unknown): thing is ConceptRow =>
 	&& (typeof thing.type === 'string')
 	&& ('domain' in thing)
 	&& (typeof thing.domain === 'string')
+	&& ('last_event' in thing)
+	&& (typeof thing.last_event === 'string')
+	&& ('last_event_value' in thing)
+	&& (typeof thing.last_event_value === 'string')
 	&& ((!('title' in thing)) || ('title' in thing && (typeof thing.title === 'string') || (thing.title == null)))
+	&& ((!('description' in thing)) || ('description' in thing && (typeof thing.description === 'string') || (thing.description == null)))
 	&& ((!('labels' in thing)) || ('labels' in thing && (Array.isArray(thing.labels) && thing.labels.every(isLabelsAgg)) || (thing.labels == null)))
 	&& ((!('geographical_extends' in thing)) || ('geographical_extends' in thing && (Array.isArray(thing.geographical_extends) && thing.geographical_extends.every(isGeographicalExtendsAgg)) || (thing.geographical_extends == null)))
 	&& ((!('temporal_extends' in thing)) || ('temporal_extends' in thing && (Array.isArray(thing.temporal_extends) && thing.temporal_extends.every(isTemporalExtendsAgg)) || (thing.temporal_extends == null)))
-	&& ((!('relations' in thing)) || ('relations' in thing && (Array.isArray(thing.relations) && thing.relations.every(isRelationsAgg)) || (thing.relations == null)));
+	&& ((!('relations' in thing)) || ('relations' in thing && (Array.isArray(thing.relations) && thing.relations.every(isRelationsAgg)) || (thing.relations == null)))
+	&& ((!('sources' in thing)) || ('sources' in thing && (Array.isArray(thing.sources) && thing.sources.every(isSourceAgg)) || (thing.sources == null)));
 
 export const isRelationsAgg = (thing: unknown): thing is RelationsAgg =>
   (typeof thing === 'object')
@@ -44,6 +49,13 @@ export const isLabelsAgg = (thing: unknown): thing is LabelsAgg =>
 	&& (typeof thing.transliteration === 'string')
 	&& ('is_preferred' in thing)
 	&& (typeof thing.is_preferred === 'boolean')
+	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'));
+
+export const isSourceAgg = (thing: unknown): thing is SourceAgg =>
+  (typeof thing === 'object')
+	&& (thing != null)
+	&& ('reference' in thing)
+	&& (typeof thing.reference === 'string')
 	&& ((!('id' in thing)) || ('id' in thing && typeof thing.id === 'string'));
 
 export const isGeographicalExtendsAgg = (thing: unknown): thing is GeographicalExtendsAgg =>

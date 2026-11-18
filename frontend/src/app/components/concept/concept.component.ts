@@ -19,6 +19,8 @@ import {ConceptViewTree} from '../concept-view-tree/concept-view-tree';
 import {isGeographicalConcept, isRelatedConcept, isTemporalConcept} from 'concepts-common/functions/concept.typeguards';
 import {UserService} from '../../services/user.service';
 import {isUser} from 'concepts-common/functions/user.typeguard';
+import {AppError} from '../../../classes/app-error';
+import {isConceptType} from 'concepts-common/functions/constants.typeguards';
 
 const viewsMap: ViewMap<ConceptMenuEntry> = {
   tree: {
@@ -101,6 +103,7 @@ export class ConceptComponent {
 
         if (!id) throw new Error('id missing');
         if (!type) throw new Error('type missing');
+        if (!isConceptType(type)) throw new Error(`invalid type: ${type}`);
 
         return {id, type};
       })

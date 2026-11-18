@@ -42,7 +42,9 @@ export class BackendService {
       searchQuery.preferredLanguage = currentUser.preferredLanguage;
     }
 
-    return this.http.get<SearchResult>(this.api + `search`, {params: searchToHttpParams(searchQuery)})
+    const params = searchToHttpParams(searchQuery);
+
+    return this.http.get<SearchResult>(this.api + `search`, {params})
       .pipe(retry(BackendService.retryConfig));
   }
 

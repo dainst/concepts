@@ -26,7 +26,7 @@ export interface ConceptSelector {
   quickConcept?: string;
   domain?: string;
   id?: string;
-  type?: string;
+  type?: string | string[];
   limit?: number;
   offset?: number;
   shards?: SearchShard[];

@@ -42,7 +42,12 @@ export const buildWhere = (selector: ConceptSelector): SqlCommand => {
         case 'id':
           return [[`app_concepts.id = ¿`, selector.id || null]];
         case 'type':
-          return [[`app_concepts.type = ¿`, selector.type || null]];
+          if (Array.isArray(selector.type))
+            return [
+              joinSqlFragments('or', selector.type.map(type => [`app_concepts.type = ¿`, type]))
+            ];
+          else
+            return [[`app_concepts.type = ¿`, selector.type || null]];
         case 'domain':
           return [[`app_concepts.domain_id = ¿`, selector.domain || null]];
         case 'limit':

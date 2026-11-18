@@ -1,7 +1,7 @@
 import {Controller, Get, Query} from '@nestjs/common';
 import {DbService} from '../../services/db/db.service';
 import {SearchResult} from 'common/interfaces/search';
-import {queryParamsToConceptSelector} from '../../functions/query-params';
+import {queryParamsToConceptSelector} from 'common/functions/query-params';
 import {UserDecorator} from '../../decorators/user.decorator';
 import {User} from 'common/interfaces/user';
 

@@ -1,9 +1,9 @@
-import {LabelType} from 'common/interfaces/concept';
+import {ConceptType, LabelType} from 'common/interfaces/concept';
 
 
 export interface ConceptRow {
   readonly id: string;
-  readonly type: string;
+  readonly type: ConceptType;
   readonly domain: string;
   readonly last_event: string;
   readonly last_event_value: string;
@@ -18,9 +18,9 @@ export interface ConceptRow {
 
 export interface RelationsAgg {
   readonly predicate_id: string;
-  readonly predicate_type: string;
+  readonly predicate_type: ConceptType;
   readonly object_id: string;
-  readonly object_type: string;
+  readonly object_type: ConceptType;
 }
 
 export interface LabelsAgg {

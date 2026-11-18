@@ -280,7 +280,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
         ...concept,
         id: {
           id: insertConcept[1],
-          type: String(insertConcept[2])
+          type: concept.id.type
         }
       };
       commands.push(

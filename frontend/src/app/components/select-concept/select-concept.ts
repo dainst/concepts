@@ -35,12 +35,12 @@ import {stringifyId} from 'concepts-common/functions/concept-id';
 export class SelectConcept implements FormValueControl<ConceptId> {
   private bs = inject(BackendService);
   private ts = inject(TitleService);
-  value = model<ConceptId>({id: '', type: ''});
+  value = model<ConceptId>({id: '', type: 'concepts'});
   searchBase = input<ConceptSelector>({});
   protected searching = signal(false);
   protected selected = signal<ConceptId|null>(null);
   @ViewChild('input') input?: ElementRef<HTMLInputElement>;
-  private oldValue: ConceptId = {id: '', type: ''};
+  private oldValue: ConceptId = {id: '', type: 'concepts'};
 
   protected searchConcept: OperatorFunction<string, readonly ConceptId[]> = (text$: Observable<string>) =>
     text$.pipe(
@@ -72,7 +72,7 @@ export class SelectConcept implements FormValueControl<ConceptId> {
 
   protected deselect(): void {
     this.oldValue = {...this.value()};
-    this.value.set({id: '', type: ''});
+    this.value.set({id: '', type: 'concepts'});
 
     setTimeout((): void => {
       this.input?.nativeElement.focus();

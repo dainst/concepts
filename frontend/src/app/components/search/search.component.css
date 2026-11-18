@@ -1,0 +1,9 @@
+.search-sidebar {
+  position: sticky;
+  top: 1rem;
+  align-self: flex-start;
+}
+
+input, h4, h5 {
+  margin-bottom: 0.6em;
+}

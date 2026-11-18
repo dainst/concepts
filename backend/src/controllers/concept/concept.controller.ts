@@ -30,7 +30,7 @@ export class ConceptController {
   @Post()
   @UseGuards(AuthGuard)
   async put(
-    @Body() concept: Concept,
+    @Body() concept: Concept, // TODO it might contain a incomplete concept (no id)
     @Res({passthrough: true}) res: Response,
     @UserDecorator() user: User | null
   ): Promise<ConceptId> {

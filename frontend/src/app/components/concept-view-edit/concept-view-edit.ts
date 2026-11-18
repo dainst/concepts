@@ -10,7 +10,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {EditLabel} from '../edit-label/edit-label';
 import {BackendService} from '../../services/backend.service';
-import {Concept} from 'concepts-common/interfaces/concept';
+import {Concept, ConceptType} from 'concepts-common/interfaces/concept';
 import {lastValueFrom} from 'rxjs';
 import {Router} from '@angular/router';
 import {MessageService} from '../../services/message.service';
@@ -52,7 +52,7 @@ export class ConceptViewEdit extends ConceptViewComponent {
 
   readonly form = this.fb.group({
     id: this.fb.group({
-      type: ['concepts'],
+      type: this.fb.control<ConceptType>('concepts'),
       id: ['']
     }),
     domain: ['default', Validators.required],

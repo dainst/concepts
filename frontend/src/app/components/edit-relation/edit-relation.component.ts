@@ -37,8 +37,8 @@ export class EditRelation {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   static value2Form = (fb: NonNullableFormBuilder, r: RelationWithOutSubject|undefined = undefined) => {
     return fb.group({
-      predicate: [r?.predicate ?? {id: '', type: ''}, EditRelation.validConcept],
-      object: [r?.object ?? {id: '', type: ''}, EditRelation.validConcept]
+      predicate: [r?.predicate ?? {id: '', type: 'concepts'}, EditRelation.validConcept],
+      object: [r?.object ?? {id: '', type: 'concepts'}, EditRelation.validConcept]
     });
   };
 

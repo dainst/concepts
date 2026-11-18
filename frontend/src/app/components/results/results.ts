@@ -1,6 +1,5 @@
-import {Component, computed, inject, ResourceRef, Signal} from '@angular/core';
-import {rxResource, toSignal} from '@angular/core/rxjs-interop';
-import {map} from 'rxjs';
+import {Component, computed, inject, input, ResourceRef, Signal} from '@angular/core';
+import {rxResource} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {BackendService} from '../../services/backend.service';
 import {ConceptSelector, SearchResult} from 'concepts-common/interfaces/search';
@@ -9,18 +8,18 @@ import {JsonPipe} from '@angular/common';
 import {Page} from '../../interfaces/page';
 
 @Component({
-  selector: 'app-search',
+  selector: 'app-results',
   templateUrl: './results.html',
-  styleUrl: './results.css',
   imports: [
     JsonPipe,
     RouterLink
   ]
 })
 export class Results {
+  readonly searchQuery = input.required<ConceptSelector>({});
+  private readonly bs = inject(BackendService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly bs = inject(BackendService);
 
   readonly pages: Signal<Page[]> = computed(() => {
     const result = this.result.value();
@@ -48,22 +47,6 @@ export class Results {
     params: () => this.searchQuery(),
     stream: ({params}) => this.bs.search(params)
   });
-
-  readonly searchQuery: Signal<ConceptSelector> = toSignal(
-    this.route.queryParamMap.pipe(
-      map(params => {
-        const q = params.get('q') ?? '';
-        const limit = parseInt(params.get('limit') ?? '10');
-        const offset = parseInt(params.get('offset') ?? '0');
-        return {
-          limit,
-          offset,
-          q
-        };
-      })
-    ),
-    {requireSync: true}
-  );
 
   protected navigate(target: string | number): void {
     const sq = this.searchQuery();

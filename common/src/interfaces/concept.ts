@@ -8,9 +8,26 @@ export const labelTypes = [
 
 export type LabelType = typeof labelTypes[number];
 
+export const conceptTypes = [
+  'concepts',
+  'chronontology',
+  'idai.gazetteer',
+  'cidoc.crm.relationship',
+  'idai.thesauri',
+  'url',
+  'pleiades',
+  'geonames',
+  'skos',
+  'owl',
+  'rdfs',
+  'language'
+] as const;
+
+export type ConceptType = typeof conceptTypes[number];
+
 export interface ConceptId {
   readonly id: string;
-  readonly type: string;
+  readonly type: ConceptType;
 }
 
 export type PreferredLabels = {

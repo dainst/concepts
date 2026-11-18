@@ -1,5 +1,6 @@
 import {HttpParams} from '@angular/common/http';
 import {ConceptSelector} from 'concepts-common/interfaces/search';
+import {ParamMap} from '@angular/router';
 
 const parametrize = (k: string, v: unknown, prefix: string = ''): [string, string][] => {
   switch (typeof v) {
@@ -33,6 +34,14 @@ export const searchToHttpParams = (searchQuery: ConceptSelector): HttpParams =>
   Object.entries(searchQuery)
     .flatMap(([k, v]) => parametrize(k, v))
     .reduce(
-      ((params, entry) => params.append(...entry)),
+      ((params, [key, value]) =>
+        params.append(key, value)
+      ),
       new HttpParams()
     );
+
+const deWrap = (ar: string[]): string | string[] =>
+  ar.length === 1 ? ar[0] : ar;
+
+export const paramMapToRecord = (pm: ParamMap): Record<string,string|string[]> =>
+  Object.fromEntries(pm.keys.map(k => [k, deWrap(pm.getAll(k))]));

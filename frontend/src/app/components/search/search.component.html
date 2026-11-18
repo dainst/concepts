@@ -1,0 +1,27 @@
+<div class="container-fluid">
+  <div class="row">
+    <main class="col-lg-9 col-xl-10">
+      <app-results [searchQuery]="currentSearch()" />
+    </main>
+
+    <aside class="col-lg-3 col-xl-2 py-5 search-sidebar">
+      <form class="me-2" role="search" (ngSubmit)="search()">
+        <input class="form-control" type="search" [(ngModel)]="query.q" name="q" />
+
+        <h4>Suchfilter</h4>
+
+        <h5 class="card-title">Filter nach Typ</h5>
+        <app-checkbox-group
+          [(ngModel)]="query.type"
+          [options]="conceptTypes"
+          name="types"
+        />
+
+        <button class="btn btn-primary" type="submit">
+          Suche
+          <i class="bi bi-search"></i>
+        </button>
+      </form>
+    </aside>
+  </div>
+</div>
