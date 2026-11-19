@@ -6,7 +6,7 @@
         {{(domain.root ? (domain.root | title | async) : domain.id)}}
       </div>
 
-      @if (domain.subDomains?.length && domain.expanded) {
+      @if (domain.subDomains?.length) {
         <ul class="tree-children">
           <ng-container *ngTemplateOutlet="treeTemplate; context: { $implicit: domain.subDomains }"></ng-container>
         </ul>
