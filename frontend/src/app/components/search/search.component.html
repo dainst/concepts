@@ -1,21 +1,43 @@
 <div class="container-fluid">
-  <div class="row">
-    <main class="col-lg-9 col-xl-10">
+  <div class="row search-layout">
+    <main class="col-lg-9 col-xl-10 search-results">
       <app-results [searchQuery]="currentSearch()" />
     </main>
 
     <aside class="col-lg-3 col-xl-2 py-5 search-sidebar">
       <form class="me-2" role="search" (ngSubmit)="search()">
+
         <input class="form-control" type="search" [(ngModel)]="query.q" name="q" />
 
-        <h4>Suchfilter</h4>
+        <h5>Suchoptionen</h5>
 
-        <h5 class="card-title">Filter nach Typ</h5>
-        <app-checkbox-group
-          [(ngModel)]="query.type"
-          [options]="conceptTypes"
-          name="types"
-        />
+        <div ngbAccordion #filters="ngbAccordion" class="section">
+          <div ngbAccordionItem="type">
+            <h5 ngbAccordionHeader><button ngbAccordionButton>Filter nach Typ</button></h5>
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <app-checkbox-group
+                  [(ngModel)]="query.type"
+                  [options]="conceptTypes"
+                  name="types"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div ngbAccordionItem="domain">
+            <h5 ngbAccordionHeader><button ngbAccordionButton>Filter nach Domäne</button></h5>
+            <div ngbAccordionCollapse>
+              <div ngbAccordionBody>
+                <app-checkbox-group
+                  [(ngModel)]="query.domain"
+                  [options]="domains()"
+                  name="domains"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         <button class="btn btn-primary" type="submit">
           Suche

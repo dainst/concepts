@@ -24,7 +24,7 @@ export type SearchShard = typeof searchShards[number];
 export interface ConceptSelector {
   q?: string;
   quickConcept?: string;
-  domain?: string;
+  domain?: string | string[];
   id?: string;
   type?: string | string[];
   limit?: number;

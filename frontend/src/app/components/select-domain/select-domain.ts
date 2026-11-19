@@ -1,14 +1,14 @@
-import {Component, inject, model, signal} from '@angular/core';
+import {Component, inject, model} from '@angular/core';
 import {FormValueControl} from '@angular/forms/signals';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, JsonPipe} from '@angular/common';
+import {AsyncPipe} from '@angular/common';
 import {UserService} from '../../services/user.service';
 import {DomainService} from '../../services/domain.service';
 import {BehaviorSubject, combineLatest, map, Observable} from 'rxjs';
 import {Domain} from 'concepts-common/interfaces/domain';
 import {TitlePipe} from '../../pipes/title-pipe';
 import {toObservable} from '@angular/core/rxjs-interop';
-import { isUser } from "concepts-common/functions/user.typeguard";
+import {isUser} from 'concepts-common/functions/user.typeguard';
 import {AppError} from '../../../classes/app-error';
 
 @Component({
@@ -19,8 +19,7 @@ import {AppError} from '../../../classes/app-error';
     NgbDropdownToggle,
     NgbDropdownItem,
     AsyncPipe,
-    TitlePipe,
-    JsonPipe
+    TitlePipe
   ],
   templateUrl: './select-domain.html',
   styleUrl: './select-domain.css'

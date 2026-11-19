@@ -130,11 +130,14 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
       this.lastRateLimitCall = Date.now();
     }
 
-
-    // console.log(sql);
-    // console.log(params);
     let res: QueryResult<T>;
-    res = await this.pool.query<T>(sql, params);
+    try {
+      res = await this.pool.query<T>(sql, params);
+    } catch (e) {
+      console.log(sql);
+      // console.log(params);
+      throw e;
+    }
 
     if (cacheId != null) {
       this.cs.store(

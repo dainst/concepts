@@ -2,8 +2,7 @@ import {ConceptHistoryEventType} from './concept-history';
 
 export const labelTypes = [
   'title',
-  'description',
-  'inverseTitle'
+  'description'
 ] as const;
 
 export type LabelType = typeof labelTypes[number];

@@ -2,11 +2,8 @@ import {Component, effect, inject} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {AbstractControl, FormArray, NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective, NgbAccordionHeader,
-  NgbAccordionItem
+  NgbAccordionBody, NgbAccordionButton, NgbAccordionCollapse,
+  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem
 } from '@ng-bootstrap/ng-bootstrap';
 import {EditLabel} from '../edit-label/edit-label';
 import {BackendService} from '../../services/backend.service';

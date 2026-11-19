@@ -1,9 +1,14 @@
-.search-sidebar {
-  position: sticky;
-  top: 1rem;
-  align-self: flex-start;
+.search-layout {
+  height: calc(100vh - 2rem);
+  overflow: hidden;
 }
 
-input, h4, h5 {
+.search-results,
+.search-sidebar {
+  height: 100%;
+  overflow-y: auto;
+}
+
+input, h4, h5, .section {
   margin-bottom: 0.6em;
 }

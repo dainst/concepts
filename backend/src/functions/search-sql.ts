@@ -1,10 +1,12 @@
 import {ConceptQueryWithSettings, ConceptSelector, SearchShard} from 'common/interfaces/search';
 import {findConceptIdInString} from 'common/functions/concept-id';
 import {SqlCommand, SqlCommandParams} from '../interfaces/sql';
+import {NonEmptyArray} from 'common/types/essentials';
 
-export const joinSqlFragments = (glue: string, fragments: SqlCommand[], braces: boolean = true): SqlCommand => {
+export const joinSqlFragments = (glue: string, fragments: Array<SqlCommand>, braces: boolean = true): SqlCommand | null => {
   const commands: string[] = [];
   const params: SqlCommandParams = [];
+  if (!fragments.length) return null;
   fragments
     .forEach((input: SqlCommand) => {
       const [head, ...rest] = input;
@@ -26,38 +28,44 @@ export const existsCond = (agg: string, where: SqlCommand): SqlCommand => {
 };
 
 export const buildWhere = (selector: ConceptSelector): SqlCommand => {
-  const conditions: SqlCommand[] = Object.entries(selector)
-    .flatMap(([cond, val]): SqlCommand[] => {
+  const conditions: SqlCommand[] = Object.keys(selector)
+    .flatMap((cond): Array<SqlCommand|null> => {
       switch (cond) {
         case 'q':
           return [existsCond('labels', [`label ilike ¿`, `%${selector.q}%`])];
         case 'quickConcept':
-          const id = findConceptIdInString(val);
-          const matchTitleOrId: SqlCommand = joinSqlFragments('or', [
+          const id = findConceptIdInString(selector.quickConcept!);
+          const matchTitleOrId: SqlCommand|null = joinSqlFragments('or', [
             existsCond('labels', [`label ilike ¿`, `%${id[1]}%`]), // TODO auf title beschränken?
             [`app_concepts.id ilike ?`, id[1]]
           ]);
           if (!id[0]) return [matchTitleOrId];
           return [matchTitleOrId, [`type = ¿`, id[0]]];
         case 'id':
-          return [[`app_concepts.id = ¿`, selector.id || null]];
+          return [[`app_concepts.id = ¿`, selector.id!]];
         case 'type':
           if (Array.isArray(selector.type))
             return [
               joinSqlFragments('or', selector.type.map(type => [`app_concepts.type = ¿`, type]))
             ];
           else
-            return [[`app_concepts.type = ¿`, selector.type || null]];
+            return [[`app_concepts.type = ¿`, selector.type!]];
         case 'domain':
-          return [[`app_concepts.domain_id = ¿`, selector.domain || null]];
+          if (Array.isArray(selector.domain))
+            return [
+              joinSqlFragments('or', selector.domain.map(domain => [`app_concepts.domain_id = ¿`, domain]))
+            ];
+          else
+            return [[`app_concepts.domain_id = ¿`, selector.domain!]];
         case 'limit':
         case 'offset':
         default:
           return [];
       }
-    });
+    })
+      .filter(e => e != null);
   if (!selector.includeDeleted) conditions.push([`last_event not in ('replace', 'delete') or last_event is null`]);
-  return conditions.length ? joinSqlFragments('and', conditions) : ['1=1'];
+  return joinSqlFragments('and', conditions) || ['1=1'];
 };
 
 const autoCompleteShards = (selector: ConceptQueryWithSettings): SearchShard[] => {
@@ -174,7 +182,7 @@ export const searchSql = (selector: ConceptQueryWithSettings): SqlCommand => {
     ]
   };
 
-  const [joins, ...joinParams] = joinSqlFragments('\n\t\t\t', shards.map((s: SearchShard) => shardJoinsMap[s]), false);
+  const [joins, ...joinParams] = joinSqlFragments('\n\t\t\t', shards.map((s: SearchShard) => shardJoinsMap[s]), false) || [''];
   const [where, ...whereParams] = buildWhere(selector);
   const sql = `select
       ${(select).join(',\n\t\t')}

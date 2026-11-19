@@ -7,10 +7,16 @@ export const queryParamsToConceptSelector = (queryParams: Record<string,string|s
 
   if (typeof queryParams['q'] === 'string')
     query.q = queryParams['q'];
+
   if (typeof queryParams['quickConcept'] === 'string')
     query.q = queryParams['quickConcept'];
+
   if (typeof queryParams['domain'] === 'string')
     query.domain = queryParams['domain'];
+  if (Array.isArray(queryParams['domain']))
+    query.domain = queryParams['domain']
+      .filter(a => typeof a === 'string');
+
   if (typeof queryParams['id'] === 'string')
     query.id = queryParams['id'];
 
@@ -25,8 +31,11 @@ export const queryParamsToConceptSelector = (queryParams: Record<string,string|s
   if (typeof queryParams['offset'] === 'string')
     query.limit = parseInt(queryParams['offset']);
 
-  if (Array.isArray(queryParams['shards']) && queryParams['shards'].every(isSearchShard))
-    query.shards = queryParams['shards'];
+  if (isSearchShard(queryParams['shards']))
+    query.shards = [queryParams['shards']];
+  if (Array.isArray(queryParams['shards']))
+    query.shards = queryParams['shards']
+      .filter(isSearchShard);
 
   if (typeof queryParams['preferredLanguage'] === 'string')
     query.preferredLanguage = queryParams['preferredLanguage'];
