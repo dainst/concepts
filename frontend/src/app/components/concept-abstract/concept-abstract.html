@@ -21,24 +21,28 @@
     </ngb-alert>
   }
 
-  <h2>Quellen</h2>
-  <ul>
-  @for(s of concept().sources; track s) {
-    <li [innerHTML]="s.reference | markdown"></li>
-  }
-  </ul>
-
-  <h2>Relationen</h2>
-  @for(r of concept().relations; track r.relation.id) {
-    <h3>{{r.relation | title | async}}</h3>
+  @if (concept().sources?.length) {
+    <h2>Quellen</h2>
     <ul>
-      @for(target of r.objects; track target.id) {
-        <li>
-          <a href="concept/{{target.type}}/{{target.id}}">
-            {{target | title | async}}
-          </a>
-        </li>
+      @for (s of concept().sources; track s) {
+        <li [innerHTML]="s.reference | markdown"></li>
       }
     </ul>
+  }
+
+  @if (concept().relations?.length) {
+    <h2>Relationen</h2>
+    @for(r of concept().relations; track r.relation.id) {
+      <h3>{{r.relation | title | async}}</h3>
+      <ul>
+        @for(target of r.objects; track target.id) {
+          <li>
+            <a href="concept/{{target.type}}/{{target.id}}">
+              {{target | title | async}}
+            </a>
+          </li>
+        }
+      </ul>
+    }
   }
 </div>
