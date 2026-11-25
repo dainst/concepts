@@ -14,10 +14,11 @@ import {KeycloakAdminService} from './services/keycloak-admin/keycloak-admin.ser
 import {DomainsController} from './controllers/domains/domains.controller';
 import {SyncService} from './services/sync/sync.service';
 import {SettingsService} from './services/settings/settings.service';
+import { StatisticController } from './controllers/statistic/statistic.controller';
 
 @Module({
   imports: [],
-  controllers: [StatusController, ConceptController, SearchController, HistoryController, UserController, DomainController, DomainsController],
+  controllers: [StatusController, ConceptController, SearchController, HistoryController, UserController, DomainController, DomainsController, StatisticController],
   providers: [DbService, CacheService, EnvironmentService, AuthService, KeycloakAdminService, SyncService, SettingsService]
 })
 export class AppModule {

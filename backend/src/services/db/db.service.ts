@@ -34,6 +34,9 @@ import {Domain} from 'common/interfaces/domain';
 import {isDomain} from 'common/functions/domain.typeguards';
 import {User} from 'common/interfaces/user';
 import {SettingsService} from '../settings/settings.service';
+import {Statistic, StatisticVar} from 'common/interfaces/statistic';
+import {convertStatisticResult} from '../../functions/convert-statistic-result';
+import {statisticSql} from '../../functions/statistic.sql';
 
 @Injectable()
 export class DbService implements OnModuleInit, OnModuleDestroy {
@@ -393,5 +396,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     let mistake = domains.find(row => !isDomain(row));
     if (mistake) throw new ApiError('internal-server-error', ['could not fetch domains', JSON.stringify(mistake)]);
     return domains;
+  }
+
+  async getStatistic(var1: StatisticVar, var2: StatisticVar | undefined): Promise<Statistic> {
+    const sql = statisticSql(var1, var2 ?? null);
+    const res  = await this.query(sql);
+    return convertStatisticResult(var1, var2 ?? null, res);
   }
 }
