@@ -57,10 +57,11 @@ GET http://localhost:3000/search?q=Jamdat&limit=10
 
 
 ###
-GET http://localhost:3000/statistic/status/type
+GET http://localhost:3000/statistic/source/label
 
 
 ###
-GET http://localhost:3000/statistic/domain
+GET http://localhost:3000/statistic/source
+
 
 

@@ -2,7 +2,11 @@ export const statisticVars = [
   'domain',
   'type',
   'lastEvent',
-  'status'
+  'status',
+  'geographicExtend',
+  'temporalExtend',
+  'label',
+  'source'
 ] as const;
 
 export type StatisticVar = typeof statisticVars[number];
