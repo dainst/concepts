@@ -1,7 +1,20 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.statistics-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .chart-container {
   width: 100%;
   height: 350px;
   min-width: 0;
+
 }
 
 .chart-container svg {
@@ -10,12 +23,17 @@
   height: 100%;
 }
 
-.chart-container :global(.domain),
-.chart-container :global(.tick line) {
-  stroke: #ccc;
+.chart-status,
+.chart-error {
+  padding: 8px;
+  font-size: 13px;
 }
 
-.chart-container :global(.tick text) {
+.chart-container .legend text {
   fill: currentColor;
   font-size: 12px;
+}
+
+.chart-container .legend-item {
+  cursor: default;
 }

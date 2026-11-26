@@ -10,6 +10,7 @@ async function bootstrap(): Promise<void> {
   const es = app.get(EnvironmentService);
 
   app.useGlobalFilters(new GlobalExceptionFilter());
+  console.log(es.get())
   if (es.get().cors) app.enableCors();
   await app.listen(es.get().port);
   console.log(`Concepts Backend Version ${packageJson.version}`);

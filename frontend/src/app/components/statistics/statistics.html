@@ -1,23 +1,36 @@
-<div #container id="container" class="chart-container"></div>
 <div ngbDropdown class="d-inline-block">
-  <button type="button" class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>
-    Var1
+  Statistik zeigen:
+  <button type="button" class="btn btn-sm" id="dropdownBasic1" ngbDropdownToggle>
+    {{var1()}}
   </button>
   <div ngbDropdownMenu>
-    @for (opt of statisticOptions; track opt) {
-      <button ngbDropdownItem>{{opt}}</button>
+    @for (opt of statisticOptions; track $index) {
+      <button ngbDropdownItem (click)="select(opt, var2())">{{opt}}</button>
     }
   </div>
 </div>
 <div ngbDropdown class="d-inline-block">
-  <button type="button" class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>
-    Var2
+  <button type="button" class="btn btn-sm" id="dropdownBasic1" ngbDropdownToggle>
+    {{var2() ?? 'Kein'}}
   </button>
   <div ngbDropdownMenu>
-    @for (opt of statisticOptions; track opt) {
-      <button ngbDropdownItem>{{opt}}</button>
+    <button ngbDropdownItem (click)="select(var1(), null)">Kein</button>
+    @for (opt of statisticOptions; track $index) {
+      <button ngbDropdownItem (click)="select(var1(), opt)">{{opt}}</button>
     }
   </div>
+</div>
+
+<div style="position: relative">
+  @if (data.isLoading()) {
+    <ngb-alert type="info" style="position: absolute; width: 100%">Statistik wird geladen</ngb-alert>
+  }
+
+  @if (data.error()) {
+    <ngb-alert type="error" style="position: absolute">Statistik konnte nicht geladen werden.</ngb-alert>
+  }
+
+  <div #container id="container" class="chart-container"></div>
 </div>
 
 

@@ -12,6 +12,7 @@ import {Domain} from 'concepts-common/interfaces/domain';
 import {isDomain} from 'concepts-common/functions/domain.typeguards';
 import {UserService} from './user.service';
 import {isUser} from 'concepts-common/functions/user.typeguard';
+import {Statistic, StatisticVar} from 'concepts-common/interfaces/statistic';
 
 @Service()
 export class BackendService {
@@ -73,5 +74,9 @@ export class BackendService {
   getDomains(): Observable<Domain[]> {
     return this.http.get<Domain[]>(this.api + 'domains')
       .pipe(map(list => list.filter(isDomain))); // TODO error out instead on wrong data
+  }
+
+  getStatistic(var1: StatisticVar, var2: StatisticVar | null): Observable<Statistic> {
+    return this.http.get<Statistic>(this.api + `statistic/${var1}` + (!!var2 ? `/${var2}` : ''));
   }
 }
