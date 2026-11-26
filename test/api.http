@@ -19,12 +19,8 @@ GET http://localhost:3000/search?limit=10&shards=temporal_extends&shards=base&sh
 GET http://localhost:3000/search?domain=relations&q=sameAss&shards=title
 
 ###
-POST http://localhost:3000/domain
-Content-Type: application/json
+GET http://localhost:3000/domain/bib
 
-{
-  "id": "NEXT"
-}
 
 
 ###

@@ -16,7 +16,12 @@ export const getConceptHistorySql =
   order by timestamp`;
 
 export const getDomainSql =
-  `select node from app_domain_tree where id = $1`;
+  `select domain_tree($1) as node`;
 
 export const getAllDomainsSql =
-  `select node from app_domain_tree`;
+  `select
+    domain_tree(domains.id) as node
+  from
+    domains
+  where not exists (select 1 from domain_roots where domain_roots.domain_id = domains.id)`;
+// TODO root nodes sind eigentlich anders definiert.

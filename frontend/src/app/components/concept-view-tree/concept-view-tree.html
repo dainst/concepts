@@ -1,8 +1,7 @@
 <ng-template #treeTemplate let-nodes>
   @for (domain of nodes; track domain) {
     <li>
-      <div [class.protagonist]="domain.protagonist"
-      >
+      <div [class.protagonist]="domain.protagonist">
         {{(domain.root ? (domain.root | title | async) : domain.id)}}
       </div>
 

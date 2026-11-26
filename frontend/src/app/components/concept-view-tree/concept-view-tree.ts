@@ -2,12 +2,20 @@ import {Component, inject, ResourceRef} from '@angular/core';
 import {ConceptViewComponent} from '../concept-view';
 import {rxResource} from '@angular/core/rxjs-interop';
 import {BackendService} from '../../services/backend.service';
-import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, JsonPipe, NgTemplateOutlet} from '@angular/common';
 import {NgbAlert} from '@ng-bootstrap/ng-bootstrap';
 import {map} from 'rxjs';
 import {AnnotatedDomain} from '../../interfaces/domain';
 import {TitlePipe} from '../../pipes/title-pipe';
 import {DomainService} from '../../services/domain.service';
+import {Domain} from 'concepts-common/interfaces/domain';
+
+const annotateDomain = (current: string, domain: Domain|AnnotatedDomain): AnnotatedDomain => ({
+  ...domain,
+  protagonist: domain.id === current,
+  subDomains: (domain.subDomains || []).map(sd => annotateDomain(current, sd))
+});
+
 
 
 @Component({
@@ -27,12 +35,7 @@ export class ConceptViewTree extends ConceptViewComponent {
     params: () => this.concept(),
     stream: ({params}) => this.ds.domains$
       .pipe(
-        map(domainList => domainList
-          .map(domain => ({
-            ...domain,
-            protagonist: domain.id === params.domain
-          })
-        )
+        map(domainList => domainList.map(domain => annotateDomain(params.domain, domain))
       )
     )
   });
